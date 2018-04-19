@@ -21,10 +21,11 @@ Along with the other components in the PurpleTeam solution:
  _Build User_        | The person that: <ul><li>Creates the configuration for PurpleTeam</li><li>Creates test specifications if overriding desired</li></ul> 
  _Purple Team_       | Organisation with _Build Users_ that consume _PurpleTeam_ 
  _Testers_           | The microservices responsible for managing the different types of security testing you require. 
+ _Slaves_            | Containerised tools that do the _Testers_ bidding, ZapAPI, Nikto, sslyze, etc
  _SUT_               | System Under Test (your application / API) 
  _Test Session_      | Defined by the specific _SUT_ user, for example you could have a _Test Session_ for a low privileged user and one for an admin user, both testing the same areas of the _SUT_ 
  _Job_               | Test job defined by the config `POST`ed to the `purpleteam-orchestrator` `/test` route
-
+ 
 
 ## Commands
 
