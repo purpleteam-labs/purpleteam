@@ -3,7 +3,7 @@
 
 ## Currently in heavy development
 
-Along with the other components in the PurpleTeam solution:
+Along with the other components in the PurpleTeam solution, this project is the interface project:
 
 * [purpleteam](https://github.com/binarymist/purpleteam) (node.js CLI, driven from CI / nightly build)
 * [purpleteam-orchestrator](https://github.com/binarymist/purpleteam-orchestrator) (hapi.js orchestrator - SaaS interface, this package)
