@@ -1,22 +1,16 @@
 'use strict';
 
-// Work out if user passed in a command. If no command, then run the screen.
 
-const Cli = require('./cli');
 
+const { processCommands } = require('./cli');
+const { runScreen }  = require('./screen');
 
 exports.start = async function (options) {
   
-  const cli = new Cli({args: options.args})
-
-  const runScreen = () {
-    const screen = require('./screen');
-    // Run it...
-  };
-
-
-  if (cli.runScreen) runScreen();
-
+  
+  debugger;
+  if (!processCommands({argv: options.argv})) runScreen();
+  debugger;
 
 
 };
