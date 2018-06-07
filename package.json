@@ -1,7 +1,7 @@
 {
   "name": "purpleteam",
-  "version": "1.0.0",
-  "description": "purpleteam library and cli utility",
+  "version": "0.1.0-alpha.1",
+  "description": "The CLI for driving purpleteam (the security regression testing SaaS)",
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint .",
@@ -17,22 +17,33 @@
     "url": "git+https://github.com/binarymist/purpleteam.git"
   },
   "keywords": [
+    "cli",
     "security",
-    "regression",
-    "testing"
+    "information security",
+    "tools",
+    "devsecops",
+    "devops",
+    "dev ops",
+    "purpleteam",
+    "security regression testing"
   ],
-  "author": "Kim Carter",
+  "author": {
+    "name": "BinaryMist",
+    "email": "services@binarymist.net"
+  },
   "license": "",
+  "homepage": "https://github.com/binarymist/purpleteam#readme",
   "bugs": {
     "url": "https://github.com/binarymist/purpleteam/issues"
   },
-  "homepage": "https://github.com/binarymist/purpleteam#readme",
   "dependencies": {
+    "app-module-path": "^2.2.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.5",
     "chalk": "^2.4.1",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
+    "yargonaut": "^1.1.2",
     "yargs": "^11.0.0"
   },
   "devDependencies": {

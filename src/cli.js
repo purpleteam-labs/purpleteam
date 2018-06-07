@@ -1,6 +1,9 @@
 'use strict'
 
+require('yargonaut').style('yellow');
 const yargs = require('yargs');
+const pkg = require('../package.json');
+
 
 let argv;
 
@@ -22,17 +25,22 @@ const processCommands = (options) => {
     desc: 'Default command (shows the interactive screen).',
     builder: (yargs) => {
       //return yargs.strict();
+    
     },
     handler: (parsedArgv) => {
       debugger;
-      parsedArgv._handled = true;
-
-      // Add commands so they show up in help.
-      yargs.command(screen).command(test).command(testPlan);
-
-
-      yargs.showHelp();
-      console.log(`Unknown argument: ${parsedArgv._[0]}`);
+      parsedArgv._handled = true;      
+      if (parsedArgv.a) {
+        const { name: projectName, version, description, author: { name, email } } = pkg;
+        console.log(`${projectName} ${version}`);
+        console.log(description);
+        console.log(`Created by ${name}<${email}>`);
+      } else {
+        // Add commands so they show up in help.
+        yargs.command(screen).command(test).command(testPlan);
+        yargs.showHelp();
+        console.log(`Unknown argument: ${parsedArgv._[0]}`);
+      }
     }
   };
 
@@ -69,13 +77,14 @@ const processCommands = (options) => {
   // This overrides the --help and --version and adds their aliases  
   .options({ 
     'h': {alias: 'help', describe: 'Show help'},
-    'v': {alias: 'version', describe: 'Show version number'}
+    'v': {alias: 'version', describe: 'Show version number', type: ''},
+    'a': {alias: 'about', describe: 'Show about screen', type: ''},
   })
   .strict()
-  .help()
-  .epilogue('For more informatiion, find our manual at https://docs.purpleteam-labs.com')
+  .epilogue('For more informatiion, find the manual at https://docs.purpleteam-labs.com')
   .argv;
   debugger;
+
 
 
   if (!cliArgs._handled) {

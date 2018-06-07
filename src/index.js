@@ -1,5 +1,5 @@
 'use strict';
-
+require('app-module-path/register');
 
 
 const { processCommands } = require('./cli');
