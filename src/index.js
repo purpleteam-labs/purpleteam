@@ -1,9 +1,9 @@
 'use strict';
-require('app-module-path/register');
 
 
-const { processCommands } = require('./cli');
-const { runScreen }  = require('./screen');
+debugger;
+const { processCommands } = require('src/cli');
+const { runScreen }  = require('src/screen');
 
 exports.start = async function (options) {
   

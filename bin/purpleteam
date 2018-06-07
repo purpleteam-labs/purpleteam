@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+require('app-module-path/cwd');
+
 async function main () {
     await require('..').start({ argv: process.argv});
 }
