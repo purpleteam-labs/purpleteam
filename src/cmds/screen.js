@@ -8,16 +8,19 @@ exports.desc = 'Default command (shows the interactive screen).';
 exports.builder = (yargs) => {
 
   internals.yargs = yargs;
-  return yargs;
+  debugger;
+  //return yargs;
+
 };
 exports.handler = (parsedArgv) => {
   debugger;
   parsedArgv._handled = true;      
   if (parsedArgv.a) {
-    const { name: projectName, version, description, author: { name, email } } = pkg;
-    console.log(`${projectName} ${version}`);
+    const { name: projectName, version, description, homepage, author: { name, email } } = pkg;
+    console.log(`\n${projectName} ${version}`);
     console.log(description);
-    console.log(`Created by ${name}<${email}>`);
+    console.log(`Homepage: ${homepage}`);
+    console.log(`Created by ${name}<${email}>\n`);
   } else {
     // Add commands so they show up in help.
 
