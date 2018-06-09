@@ -15,7 +15,7 @@ const schema = {
       default: 'notice'
     }
   },
-  purpleteam-api: {
+  purpleteamApi: {
     protocol: {
       doc: 'The protocol of the purpleteam SaaS.',
       format: ['https', 'http'],

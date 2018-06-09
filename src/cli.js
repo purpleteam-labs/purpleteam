@@ -1,8 +1,8 @@
 'use strict'
 debugger;
-const yargs = require('yargs');
-const yargonaut = require('yargonaut').style('magenta.bold', ['Commands:', 'Options:', 'Usage:']);
-const chalk = yargonaut.chalk();
+const sywac = require('sywac');
+const chalk = require('chalk');
+const figlet = require('figlet');
 
 
 
@@ -11,7 +11,7 @@ let argv;
 
 
 
-const processCommands = (options) => {
+const processCommands = async (options) => {
   const cliArgsSuccessfullyHandled = true;
   if (!argv) argv = options.argv
   if (argv.length < 3 || argv[2] === 'screen') return;
@@ -20,24 +20,32 @@ const processCommands = (options) => {
 
 
 
-  const cliArgs = yargs
+  const cliArgs = await sywac
   .usage(`Usage: $0 [command] [option(s)]`)
-  .commandDir('cmds')
-  // This overrides the --help and --version and adds their aliases  
-  .options({ 
-    'h': {alias: 'help', describe: 'Show help'},
-    'v': {alias: 'version', describe: 'Show version number', type: ''},
-    'a': {alias: 'about', describe: 'Show about screen', type: ''},
-  })
-  .strict()
+  .commandDirectory('cmds')
+  // This overrides the --help and --version and adds their aliases
+  .showHelpByDefault()
+  .boolean('-a, --about', {desc: 'Show about screen'})
+  .version('-v, --version', {desc: 'Show version number'})
+  .help('-h, --help')
+  .preface(figlet.textSync('purpleteam', 'Chunky'), chalk.bgHex('#9961ed')('Find & fix your security defects  before someone exploits them'))
   .epilogue('For more informatiion, find the manual at https://docs.purpleteam-labs.com')
-  .argv;
+  .style({
+    //usagePrefix: str => chalk.hex('#9961ed').bold(str),
+    flags: str => chalk.bold(str),
+    group: str => chalk.hex('#9961ed').bold(str),
+    messages: str => chalk.keyword('orange').bold(str)
+  })
+  .parseAndExit()
+
   debugger;
 
 
 
-  if (!cliArgs._handled) {
-    console.log('outer:', argv);
+
+
+  if (!cliArgs.handled) {
+    console.log('No commands were run.');
     return !cliArgsSuccessfullyHandled;
   }
   return cliArgsSuccessfullyHandled;
