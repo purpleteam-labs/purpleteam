@@ -41,8 +41,11 @@
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.5",
     "chalk": "^2.4.1",
+    "convict": "^4.3.0",
+    "purpleteam-logger": "git+ssh://github.com/binarymist/purpleteam-logger.git",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
+    "winston": "^2.4.2",
     "yargonaut": "^1.1.2",
     "yargs": "^11.0.0"
   },

@@ -1,0 +1,10 @@
+{
+  "logger": {
+    "level": "debug"  
+  },
+  "purpleteam-api": {
+    "protocol": "http",
+    "ip": "127.0.0.1"
+  }
+}
+
