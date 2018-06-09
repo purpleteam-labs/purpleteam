@@ -26,7 +26,13 @@ exports.run = async (parsedArgv, context) => {
     debugger;
     console.log(`We have your file ${parsedArgv.c}`)
 
-    // Todo: KC: 
+    // Todo: KC: deserialise configFileContents
+    //    https://github.com/SeyZ/jsonapi-serializer
+
+
+
+
+    // Todo: KC: Validate object graph using Joi. Look at using the same validation in the Orchestrator as well.
 
 
 
