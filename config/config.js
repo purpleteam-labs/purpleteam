@@ -45,6 +45,6 @@ const schema = {
 const config = convict(schema);
 config.loadFile(path.join(__dirname, `config.${process.env.NODE_ENV}.json`));
 config.validate();
-console.log('(*) Local config file loaded');
+console.log('(*) Local config file loaded'); // eslint-disable-line no-console
 
 module.exports = config;
