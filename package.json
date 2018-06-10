@@ -1,7 +1,7 @@
 {
   "name": "purpleteam",
   "version": "0.1.0-alpha.1",
-  "description": "The CLI for driving purpleteam (the security regression testing SaaS)",
+  "description": "CLI for driving purpleteam -- security regression testing SaaS",
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint .",

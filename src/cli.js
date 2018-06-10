@@ -1,6 +1,7 @@
 const sywac = require('sywac');
 const chalk = require('chalk');
 const figlet = require('figlet');
+const pkg = require('package.json');
 
 const internals = {};
 
@@ -20,7 +21,7 @@ const processCommands = async (options) => {
     .boolean('-a, --about', { desc: 'Show about screen' })
     .version('-v, --version', { desc: 'Show version number' })
     .help('-h, --help')
-    .preface(figlet.textSync('purpleteam', 'Chunky'), chalk.bgHex('#9961ed')('Find & fix your security defects  before someone exploits them'))
+    .preface(figlet.textSync(pkg.name, 'Chunky'), chalk.bgHex('#9961ed')(pkg.description))
     .epilogue('For more informatiion, find the manual at https://docs.purpleteam-labs.com')
     .style({
       // usagePrefix: str => chalk.hex('#9961ed').bold(str),
