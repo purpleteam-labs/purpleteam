@@ -2,20 +2,18 @@
 exports.flags = 'testplan';
 exports.desc = 'Retrieve the test plan that will be execute when you run test.';
 exports.setup = (sywac) => {
-  debugger;
-  sywac.usage({optionsPlaceholder: ''})
+  sywac.usage({ optionsPlaceholder: '' });
 };
 exports.run = (parsedArgv, context) => {
-  debugger;
+  const argv = parsedArgv;
+
   if (parsedArgv._.length) {
-    context.cliMessage(`To many arguments provided, testplan requires 0 additional arguments.`);
+    context.cliMessage('To many arguments provided, testplan requires 0 additional arguments.');
   } else {
-    console.log('Executing retrieval of testplan...');  
+    console.log('Executing retrieval of testplan...'); // eslint-disable-line no-console
   }
-  
-  debugger;
-  parsedArgv.handled = true;
+
+  argv.handled = true;
 
   // Todo: KC: Get the testplan.
 };
-
