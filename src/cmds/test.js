@@ -1,50 +1,38 @@
-
-const fs = require('fs');
-const { promisify } = require('util');
-const readFileAsync = promisify(fs.readFile);
+const readFileAsync = require('util').promisify(require('fs').readFile);
 
 exports.flags = 'test';
 exports.description = 'Launch purpleteam to attack your specified target';
 exports.setup = (sywac) => {
-  debugger;
-  sywac.option('-c, --config-file <config-file path>', 
-    {type: 'file', desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.', strinct: true, mustExist: true});
+  sywac.option(
+    '-c, --config-file <config-file path>',
+    {
+      type: 'file', desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.', strinct: true, mustExist: true
+    }
+  );
 };
 exports.run = async (parsedArgv, context) => {
-  debugger;
+  const argv = parsedArgv;
   if (parsedArgv.c) {
     // Get the file and validate it.
     let configFileContents;
     try {
-      configFileContents = await readFileAsync(parsedArgv.c, {encoding: 'utf8'})
-      debugger;
+      configFileContents = await readFileAsync(parsedArgv.c, { encoding: 'utf8' });
+    } catch (err) {
+      console.log(`Could not read file: ${parsedArgv.c}, the error was: ${err}`); // eslint-disable-line no-console
     }
-    catch (err) {
-      console.log(`Could not read file: ${parsedArgv.c}, the error was: ${err}`)
-      debugger;
-    }
-    debugger;
-    console.log(`We have your file ${parsedArgv.c}`)
+    console.log(`We have your file ${parsedArgv.c}`); // eslint-disable-line no-console
 
     // Todo: KC: deserialise configFileContents
-    //    https://github.com/SeyZ/jsonapi-serializer
-
-
-
+    //    https://github.com/danivek/json-api-serializer looks to be well maintained.
+    //    https://github.com/SeyZ/jsonapi-serializer     looks to be a little neglected.
 
     // Todo: KC: Validate object graph using Joi. Look at using the same validation in the Orchestrator as well.
 
-
-
-
-
     // Todo: KC: Start the testing.
-    console.log('Ok, so test is running');
-
+    console.log('Ok, so test is running'); // eslint-disable-line no-console
   } else {
-    context.cliMessage(`You must provide a valid build user configuration file that exists on the local file system.`);
+    context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }
 
-  parsedArgv.handled = true;  
+  argv.handled = true;
 };
-
