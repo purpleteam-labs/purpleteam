@@ -9,8 +9,8 @@
     "update:deps": "npm-check -u",
     "test": "echo \"Todo: Create tests.\" && exit 0",
     "pretest": "npm run lint",
-    "debug": "node --inspect-brk ./index.js",
-    "start": "node ./index.js"
+    "debug": "node --inspect-brk ./bin/purpleteam",
+    "start": "node ./bin/purpleteam"
   },
   "repository": {
     "type": "git",

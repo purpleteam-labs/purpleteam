@@ -27,12 +27,29 @@ Along with the other components in the PurpleTeam solution, this project is the 
  _Job_               | Test job defined by the config `POST`ed to the `purpleteam-orchestrator` `/test` route
  
 
+## Installation
+
+`npm install -g purpleteam`
+
 ## Commands
 
 These are the commands run by a _Build User_:
 
-`test`  
+`purpleteam`  
+This will run purpleteam in dashboard mode.
+
+`purpleteam -h`  
+Will do what you think, show help.
+
+`purpleteam test`  
 Standard test run. Will provide the _Build User_ with a test plan of what is about to be tested, while immediatly starting testing.
 
-`plan`  
+`purpleteam testplan`  
 Same as `test`, but only runs to create test plan and provide back to the _Build User_. The test plan will show you what is going to be tested before you actually run `test`. You can think of it as a `purpleteam test --dry-run`.
+
+If you decide to clone rather than install from NPM, from within the packages root directory, you can run the above commands like:  
+`npm start` instead of `purpleteam`  
+`npm start -- -h` instead of `purpleteam -h`  
+`npm start -- test` instead of `purpleteam test`  
+`npm start -- testplan`instead of `purpleteam testplan`
+
