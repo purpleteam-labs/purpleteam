@@ -19,9 +19,9 @@ exports.run = async (parsedArgv, context) => {
     try {
       configFileContents = await readFileAsync(parsedArgv.c, { encoding: 'utf8' });
     } catch (err) {
-      log.error(`Could not read file: ${parsedArgv.c}, the error was: ${err}`, {tags: ['test']});
+      log.error(`Could not read file: ${parsedArgv.c}, the error was: ${err}`, { tags: ['test'] });
     }
-    log.notice(`We have your file ${parsedArgv.c}`, {tags: ['test']});
+    log.notice(`We have your file ${parsedArgv.c}`, { tags: ['test'] });
 
     // Todo: KC: deserialise configFileContents
     //    https://github.com/danivek/json-api-serializer looks to be well maintained.
@@ -30,7 +30,7 @@ exports.run = async (parsedArgv, context) => {
     // Todo: KC: Validate object graph using Joi. Look at using the same validation in the Orchestrator as well.
 
     // Todo: KC: Start the testing.
-    log.notice('Ok, so test is running', {tags: ['test']});
+    log.notice('Ok, so test is running', { tags: ['test'] });
   } else {
     context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }

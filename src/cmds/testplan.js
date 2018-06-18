@@ -11,7 +11,7 @@ exports.run = (parsedArgv, context) => {
   if (parsedArgv._.length) {
     context.cliMessage('To many arguments provided, testplan requires 0 additional arguments.');
   } else {
-    log.info('Executing retrieval of testplan...', {tags: ['testplan']});
+    log.info('Executing retrieval of testplan...', { tags: ['testplan'] });
     // Todo: KC: Also use https://www.npmjs.com/package/progress
   }
 

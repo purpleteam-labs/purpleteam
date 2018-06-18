@@ -35,7 +35,7 @@ const processCommands = async (options) => {
   cliArgsSuccessfullyHandled = true;
 
   if (!cliArgs.handled) {
-    log('No commands were run.', {tags: ['cli']});
+    log('No commands were run.', { tags: ['cli'] });
     cliArgsSuccessfullyHandled = false;
   }
   return cliArgsSuccessfullyHandled;

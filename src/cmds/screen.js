@@ -13,10 +13,10 @@ exports.run = (parsedArgv, context) => {
       name: projectName, version, description, homepage, author: { name, email }
     } = pkg;
 
-    log.notice(`${projectName} ${version}`, {tags: ['screen']});
-    log.notice(description, {tags: ['screen']});
-    log.notice(`Homepage: ${homepage}`, {tags: ['screen']});
-    log.notice(`Created by ${name}<${email}>\n`, {tags: ['screen']});
+    log.notice(`${projectName} ${version}`, { tags: ['screen'] });
+    log.notice(description, { tags: ['screen'] });
+    log.notice(`Homepage: ${homepage}`, { tags: ['screen'] });
+    log.notice(`Created by ${name}<${email}>\n`, { tags: ['screen'] });
   } else {
     return context.cliMessage(`Unknown argument: ${context.args}`);
   }

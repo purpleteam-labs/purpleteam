@@ -5,7 +5,7 @@ const contrib = require('blessed-contrib');
 let screen = undefined;
 let grid = undefined;
 
-const initScreen = () => { log.info('initialising screen', {tags: ['startup']}) };
+const initScreen = () => { log.info('initialising screen', { tags: ['startup'] }); };
 
 const runScreen = () => {
   initScreen();
