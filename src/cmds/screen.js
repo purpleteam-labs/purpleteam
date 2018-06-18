@@ -1,3 +1,4 @@
+const log = require('purpleteam-logger').logger();
 const pkg = require('package.json');
 
 exports.flags = '*';
@@ -12,10 +13,10 @@ exports.run = (parsedArgv, context) => {
       name: projectName, version, description, homepage, author: { name, email }
     } = pkg;
 
-    console.log(`\n${projectName} ${version}`); // eslint-disable-line no-console
-    console.log(description); // eslint-disable-line no-console
-    console.log(`Homepage: ${homepage}`); // eslint-disable-line no-console
-    console.log(`Created by ${name}<${email}>\n`); // eslint-disable-line no-console
+    log.notice(`${projectName} ${version}`, {tags: ['screen']});
+    log.notice(description, {tags: ['screen']});
+    log.notice(`Homepage: ${homepage}`, {tags: ['screen']});
+    log.notice(`Created by ${name}<${email}>\n`, {tags: ['screen']});
   } else {
     return context.cliMessage(`Unknown argument: ${context.args}`);
   }

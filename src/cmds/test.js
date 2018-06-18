@@ -1,3 +1,4 @@
+const log = require('purpleteam-logger').logger();
 const readFileAsync = require('util').promisify(require('fs').readFile);
 
 exports.flags = 'test';
@@ -18,9 +19,9 @@ exports.run = async (parsedArgv, context) => {
     try {
       configFileContents = await readFileAsync(parsedArgv.c, { encoding: 'utf8' });
     } catch (err) {
-      console.log(`Could not read file: ${parsedArgv.c}, the error was: ${err}`); // eslint-disable-line no-console
+      log.error(`Could not read file: ${parsedArgv.c}, the error was: ${err}`, {tags: ['test']});
     }
-    console.log(`We have your file ${parsedArgv.c}`); // eslint-disable-line no-console
+    log.notice(`We have your file ${parsedArgv.c}`, {tags: ['test']});
 
     // Todo: KC: deserialise configFileContents
     //    https://github.com/danivek/json-api-serializer looks to be well maintained.
@@ -29,7 +30,7 @@ exports.run = async (parsedArgv, context) => {
     // Todo: KC: Validate object graph using Joi. Look at using the same validation in the Orchestrator as well.
 
     // Todo: KC: Start the testing.
-    console.log('Ok, so test is running'); // eslint-disable-line no-console
+    log.notice('Ok, so test is running', {tags: ['test']});
   } else {
     context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }
