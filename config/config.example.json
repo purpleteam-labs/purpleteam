@@ -1,6 +1,8 @@
 {
   "logger": {
-    "level": "debug"  
+    "level": "debug",
+    "transports": ["Console"]
+    }  
   },
   "purpleteamApi": {
     "protocol": "http",

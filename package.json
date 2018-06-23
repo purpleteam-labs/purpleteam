@@ -46,8 +46,7 @@
     "purpleteam-logger": "git+ssh://github.com/binarymist/purpleteam-logger.git",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
-    "sywac": "^1.2.0",
-    "winston": "^2.4.2"
+    "sywac": "^1.2.0"
   },
   "devDependencies": {
     "eslint": "^4.19.1",

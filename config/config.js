@@ -13,6 +13,11 @@ const schema = {
       doc: 'Write all log events with this level and below. Syslog levels used: https://github.com/winstonjs/winston#logging-levels',
       format: ['emerg', 'alert', 'crit', 'error', 'warning', 'notice', 'info', 'debug'],
       default: 'notice'
+    },
+    transports: {
+      doc: 'Transports to send logging events to.',
+      format: Array,
+      default: ['SignaleTransport']
     }
   },
   purpleteamApi: {
