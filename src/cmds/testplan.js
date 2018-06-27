@@ -1,21 +1,50 @@
 const log = require('purpleteam-logger').logger();
+const readFileAsync = require('util').promisify(require('fs').readFile);
+const request = require('request-promise-native');
 
 exports.flags = 'testplan';
 exports.desc = 'Retrieve the test plan that will be execute when you run test.';
 exports.setup = (sywac) => {
-  sywac.usage({ optionsPlaceholder: '' });
+  // To override the help:
+  // sywac.usage({ optionsPlaceholder: '' });
+  sywac.option(
+    '-c, --config-file <config-file path>',
+    {
+      type: 'file', desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.', strinct: true, mustExist: true
+    }
+  );
 };
-exports.run = (parsedArgv, context) => {
+exports.run = async (parsedArgv, context) => {
   const argv = parsedArgv;
-
-  if (parsedArgv._.length) {
-    context.cliMessage('To many arguments provided, testplan requires 0 additional arguments.');
-  } else {
+  if (parsedArgv.c) {
+    // Get the file and validate it.
+    let configFileContents;
+    try {
+      configFileContents = await readFileAsync(parsedArgv.c, { encoding: 'utf8' });
+    } catch (err) {
+      log.error(`Could not read file: ${parsedArgv.c}, the error was: ${err}`, { tags: ['test'] });
+      throw err;
+    }
+    log.notice(`We have your configuration file ${parsedArgv.c}`, { tags: ['testplan'] });
     log.info('Executing retrieval of testplan...', { tags: ['testplan'] });
-    // Todo: KC: Also use https://www.npmjs.com/package/progress
+
+    // Todo: Show the testplan
+
+    request({uri: 'http://127.0.0.1:2000/testplan', method: 'POST', json: true, body: configFileContents}).then((testPlan) => {
+      log.notice(`Your test plan follows:\n${testPlan}`);
+    }).catch((err) => {
+      debugger;
+      log.error(err.message, { tags: ['testplan'] });
+    })
+
+  } else {
+    context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }
 
-  argv.handled = true;
 
-  // Todo: KC: Get the testplan.
+
+
+
+
+  argv.handled = true;
 };

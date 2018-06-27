@@ -20,9 +20,9 @@ exports.run = async (parsedArgv, context) => {
       configFileContents = await readFileAsync(parsedArgv.c, { encoding: 'utf8' });
     } catch (err) {
       log.error(`Could not read file: ${parsedArgv.c}, the error was: ${err}`, { tags: ['test'] });
+      throw err;
     }
-    log.notice(`We have your file ${parsedArgv.c}`, { tags: ['test'] });
-
+    log.notice(`We have your configuration file ${parsedArgv.c}`, { tags: ['test'] });
     // Todo: KC: deserialise configFileContents
     //    https://github.com/danivek/json-api-serializer looks to be well maintained.
     //    https://github.com/SeyZ/jsonapi-serializer     looks to be a little neglected.
