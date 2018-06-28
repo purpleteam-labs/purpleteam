@@ -30,11 +30,17 @@ exports.run = async (parsedArgv, context) => {
 
     // Todo: Show the testplan
 
-    request({uri: 'http://127.0.0.1:2000/testplan', method: 'POST', json: true, body: configFileContents}).then((testPlan) => {
+    await request({uri: 'http://127.0.0.1:2000/testplan', method: 'POST', json: true, body: configFileContents, headers: {'Content-Type': 'application/vnd.api+json', 'Accept': 'text/plain'}}).then((testPlan) => {
       log.notice(`Your test plan follows:\n${testPlan}`);
     }).catch((err) => {
-      debugger;
-      log.error(err.message, { tags: ['testplan'] });
+      const handle = {
+        errorMessageFrame: innerMessage => `Error occured while attempting to retrieve the test plan. Error was: ${innerMessage}`,
+        backendUnreachable: '"The purpleteam backend is currently unreachable"',
+        unknown: '"Unknown"',
+        testPlanFetchFailure: () => (err.message.includes('connect ECONNREFUSED')) ? 'backendUnreachable' : 'unknown'
+      };
+      
+      log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['testplan'] });
     })
 
   } else {
