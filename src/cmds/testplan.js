@@ -27,17 +27,19 @@ exports.run = async (parsedArgv, context) => {
     }
     log.notice(`We have your configuration file ${parsedArgv.c}`, { tags: ['testplan'] });
     log.info('Executing retrieval of testplan...', { tags: ['testplan'] });
-
-    // Todo: Show the testplan
-
     await request({uri: 'http://127.0.0.1:2000/testplan', method: 'POST', json: true, body: configFileContents, headers: {'Content-Type': 'application/vnd.api+json', 'Accept': 'text/plain'}}).then((testPlan) => {
       log.notice(`Your test plan follows:\n${testPlan}`);
     }).catch((err) => {
       const handle = {
-        errorMessageFrame: innerMessage => `Error occured while attempting to retrieve the test plan. Error was: ${innerMessage}`,
+        errorMessageFrame: innerMessage => `Error occured while attempting to retrieve your test plan. Error was: ${innerMessage}`,
         backendUnreachable: '"The purpleteam backend is currently unreachable"',
+        validationError: err.error.message,
         unknown: '"Unknown"',
-        testPlanFetchFailure: () => (err.message.includes('connect ECONNREFUSED')) ? 'backendUnreachable' : 'unknown'
+        testPlanFetchFailure: () => {
+          if (err.message.includes('connect ECONNREFUSED')) return 'backendUnreachable';
+          if (err.error.name === 'ValidationError') return 'validationError';
+          return 'unknown';
+        }
       };
       
       log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['testplan'] });
