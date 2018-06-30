@@ -33,7 +33,7 @@ exports.run = async (parsedArgv, context) => {
       const handle = {
         errorMessageFrame: innerMessage => `Error occured while attempting to retrieve your test plan. Error was: ${innerMessage}`,
         backendUnreachable: '"The purpleteam backend is currently unreachable"',
-        validationError: err.error.message,
+        validationError: `Validation of the supplied build user config failed: ${err.error.message}`,
         unknown: '"Unknown"',
         testPlanFetchFailure: () => {
           if (err.message.includes('connect ECONNREFUSED')) return 'backendUnreachable';
