@@ -27,7 +27,14 @@ exports.run = async (parsedArgv, context) => {
     }
     log.notice(`We have your configuration file ${parsedArgv.c}`, { tags: ['testplan'] });
     log.info('Executing retrieval of testplan...', { tags: ['testplan'] });
-    await request({uri: 'http://127.0.0.1:2000/testplan', method: 'POST', json: true, body: configFileContents, headers: {'Content-Type': 'application/vnd.api+json', 'Accept': 'text/plain'}}).then((testPlan) => {
+
+    await request({
+      uri: 'http://127.0.0.1:2000/testplan',
+      method: 'POST',
+      json: true,
+      body: configFileContents,
+      headers: { 'Content-Type': 'application/vnd.api+json', Accept: 'text/plain' }
+    }).then((testPlan) => {
       log.notice(`Your test plan follows:\n${testPlan}`);
     }).catch((err) => {
       const handle = {
@@ -47,16 +54,10 @@ exports.run = async (parsedArgv, context) => {
       };
 
       log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['testplan'] });
-    })
-
+    });
   } else {
     context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }
-
-
-
-
-
 
   argv.handled = true;
 };
