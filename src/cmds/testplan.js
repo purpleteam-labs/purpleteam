@@ -32,16 +32,20 @@ exports.run = async (parsedArgv, context) => {
     }).catch((err) => {
       const handle = {
         errorMessageFrame: innerMessage => `Error occured while attempting to retrieve your test plan. Error was: ${innerMessage}`,
-        backendUnreachable: '"The purpleteam backend is currently unreachable"',
-        validationError: `Validation of the supplied build user config failed: ${err.error.message}`,
+        backendTookToLong: '"The purpleteam backend took to long to respond"',
+        backendUnreachable: '"The purpleteam backend is currently unreachable".',
+        validationError: `Validation of the supplied build user config failed: ${err.error.message}.`,
+        syntaxError: `SyntaxError: ${err.error.message}.`,
         unknown: '"Unknown"',
         testPlanFetchFailure: () => {
+          if (err.message.includes('socket hang up')) return 'backendTookToLong';
           if (err.message.includes('connect ECONNREFUSED')) return 'backendUnreachable';
           if (err.error.name === 'ValidationError') return 'validationError';
+          if (err.error.name === 'SyntaxError') return 'syntaxError';
           return 'unknown';
         }
       };
-      
+
       log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['testplan'] });
     })
 
