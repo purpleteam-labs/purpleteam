@@ -1,9 +1,10 @@
+const config = require('config/config');
 const log = require('purpleteam-logger').logger();
 const readFileAsync = require('util').promisify(require('fs').readFile);
 const request = require('request-promise-native');
 
 exports.flags = 'testplan';
-exports.desc = 'Retrieve the test plan that will be execute when you run test.';
+exports.desc = 'Retrieve the test plan that will be executed when you run test.';
 exports.setup = (sywac) => {
   // To override the help:
   // sywac.usage({ optionsPlaceholder: '' });
@@ -29,7 +30,7 @@ exports.run = async (parsedArgv, context) => {
     log.info('Executing retrieval of testplan...', { tags: ['testplan'] });
 
     await request({
-      uri: 'http://127.0.0.1:2000/testplan',
+      uri: `${config.get('purpleteamApi.url')}/testplan`,
       method: 'POST',
       json: true,
       body: configFileContents,
