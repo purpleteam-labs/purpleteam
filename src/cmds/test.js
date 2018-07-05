@@ -1,5 +1,8 @@
+const config = require('config/config');
 const log = require('purpleteam-logger').logger();
 const readFileAsync = require('util').promisify(require('fs').readFile);
+const request = require('request-promise-native');
+const api = require('src/apiDecoratingAdapter');
 
 exports.flags = 'test';
 exports.description = 'Launch purpleteam to attack your specified target';
@@ -13,21 +16,36 @@ exports.setup = (sywac) => {
 };
 exports.run = async (parsedArgv, context) => {
   const argv = parsedArgv;
-  if (parsedArgv.c) {
-    // Get the file and validate it.
-    let configFileContents;
-    try {
-      configFileContents = await readFileAsync(parsedArgv.c, { encoding: 'utf8' });
-    } catch (err) {
-      log.error(`Could not read file: ${parsedArgv.c}, the error was: ${err}`, { tags: ['test'] });
-      throw err;
-    }
-    log.notice(`We have your configuration file ${parsedArgv.c}`, { tags: ['test'] });
-    // Todo: KC: deserialise configFileContents
+  if (parsedArgv.c) {    
+    const configFileContents = await api.getBuildUserConfigFile(parsedArgv.c);    
+    // Todo: KC: In the future we could deserialise configFileContents, and possibly validate before sending to the Orchestrator.
     //    https://github.com/danivek/json-api-serializer looks to be well maintained.
     //    https://github.com/SeyZ/jsonapi-serializer     looks to be a little neglected.
 
-    // Todo: KC: Validate object graph using Joi. Look at using the same validation in the Orchestrator as well.
+
+
+    await api.test(configFileContents);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //  stream tester log           Print each tester to a table row, and to log file
+    //  stream slave log            To artifacts dir
+
+
+
 
     // Todo: KC: Start the testing.
     log.notice('Ok, so test is running', { tags: ['test'] });
