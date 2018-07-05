@@ -1,6 +1,7 @@
 const convict = require('convict');
 const path = require('path');
 
+
 const schema = {
   env: {
     doc: 'The application environment.',
@@ -36,6 +37,11 @@ const schema = {
       format: 'port',
       default: 2000,
       env: 'PORT'
+    },
+    url: {
+      doc: 'The URL of the purpleteam API',
+      formate: 'url',
+      default: 'not yet set'
     }
   },
   results: {
@@ -50,5 +56,7 @@ const schema = {
 const config = convict(schema);
 config.loadFile(path.join(__dirname, `config.${process.env.NODE_ENV}.json`));
 config.validate();
+
+config.set('purpleteamApi.url', `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.ip')}:${config.get('purpleteamApi.port')}`);
 
 module.exports = config;
