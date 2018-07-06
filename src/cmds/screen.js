@@ -5,7 +5,6 @@ exports.flags = '*';
 exports.desc = 'Default command (shows the interactive screen).';
 exports.setup = {};
 exports.run = (parsedArgv, context) => {
-
   if (parsedArgv.about) {
     const {
       name: projectName, version, description, homepage, author: { name, email }
@@ -16,7 +15,7 @@ exports.run = (parsedArgv, context) => {
     log.crit('This is what a critical event looks like.', { tags: ['crit-tag'] });
     log.error('This is what an error looks like.', { tags: ['error-tag'] });
     log.warning('This is what a warning looks like.', { tags: ['warning-tag'] });
-    log.notice('This is what a notice looks like.', { tags: ['notice-tag'] }); 
+    log.notice('This is what a notice looks like.', { tags: ['notice-tag'] });
     log.info('This is what an info event looks like.', { tags: ['info-tag'] });
     log.debug('This is what a debug event looks like.', { tags: ['debug-tag'] });
 

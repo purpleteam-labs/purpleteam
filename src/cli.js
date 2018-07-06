@@ -5,6 +5,7 @@ const pkg = require('package.json');
 const log = require('purpleteam-logger').logger();
 
 const processCommands = async (options) => {
+  log.debug('Configuring sywac', { tags: ['cli'] });
   const cliArgs = await sywac
     .usage('Usage: $0 [command] [option(s)]')
     .commandDirectory('cmds')
@@ -22,7 +23,6 @@ const processCommands = async (options) => {
       messages: str => chalk.keyword('orange').bold(str)
     })
     .parseAndExit();
-
 };
 
 module.exports = {

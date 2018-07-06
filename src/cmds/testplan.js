@@ -1,7 +1,5 @@
 const config = require('config/config');
 const log = require('purpleteam-logger').logger();
-const readFileAsync = require('util').promisify(require('fs').readFile);
-const request = require('request-promise-native');
 const api = require('src/apiDecoratingAdapter');
 
 api.init(log);
@@ -22,10 +20,8 @@ exports.run = async (parsedArgv, context) => {
   if (parsedArgv.c) {
     const configFileContents = await api.getBuildUserConfigFile(parsedArgv.c);
     log.info('Executing retrieval of testplan...', { tags: ['testplan'] });
-    debugger;
     await api.getTestPlan(configFileContents);
   } else {
     context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }
-
 };
