@@ -51,17 +51,14 @@ const postToApi = async (configFileContents, route, successMessage) => {
 };
 
 const getTestPlan = async (configFileContents) => {
-  debugger;
   const route = 'testplan';
-  const successMessage = (answer) => {
-    return `Your test plan follows:\n${answer}`;
-  }
+  const successMessage = answer => `Your test plan follows:\n${answer}`;
   await postToApi(configFileContents, route, successMessage);
 };
 
 const test = async (configFileContents) => {
   const route = 'test';
-  const successMessage = (answer) => `Tests are executing...\n${answer}`;
+  const successMessage = answer => `Tests are executing...\n${answer}`;
   await postToApi(configFileContents, route, successMessage);
 };
 
