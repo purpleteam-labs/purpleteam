@@ -5,8 +5,6 @@ exports.flags = '*';
 exports.desc = 'Default command (shows the interactive screen).';
 exports.setup = {};
 exports.run = (parsedArgv, context) => {
-  const argv = parsedArgv;
-  argv.handled = true;
 
   if (parsedArgv.about) {
     const {
@@ -22,9 +20,6 @@ exports.run = (parsedArgv, context) => {
     log.info('This is what an info event looks like.', { tags: ['info-tag'] });
     log.debug('This is what a debug event looks like.', { tags: ['debug-tag'] });
 
-    
-
-
     log.notice(`${projectName} ${version}`, { tags: ['screen'] });
     log.notice(description, { tags: ['screen'] });
     log.notice(`Homepage: ${homepage}`, { tags: ['screen'] });
@@ -32,5 +27,5 @@ exports.run = (parsedArgv, context) => {
   } else {
     return context.cliMessage(`Unknown argument: ${context.args}`);
   }
-  return argv;
+  return parsedArgv;
 };

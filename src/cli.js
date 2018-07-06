@@ -4,16 +4,7 @@ const figlet = require('figlet');
 const pkg = require('package.json');
 const log = require('purpleteam-logger').logger();
 
-const internals = {};
-
 const processCommands = async (options) => {
-  let cliArgsSuccessfullyHandled;
-  internals.argv = options.argv;
-  if (internals.argv.length < 3 || internals.argv[2] === 'screen') {
-    cliArgsSuccessfullyHandled = false;
-    return cliArgsSuccessfullyHandled;
-  }
-
   const cliArgs = await sywac
     .usage('Usage: $0 [command] [option(s)]')
     .commandDirectory('cmds')
@@ -32,13 +23,6 @@ const processCommands = async (options) => {
     })
     .parseAndExit();
 
-  cliArgsSuccessfullyHandled = true;
-
-  if (!cliArgs.handled) {
-    log('No commands were run.', { tags: ['cli'] });
-    cliArgsSuccessfullyHandled = false;
-  }
-  return cliArgsSuccessfullyHandled;
 };
 
 module.exports = {

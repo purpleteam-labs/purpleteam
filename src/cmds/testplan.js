@@ -4,6 +4,8 @@ const readFileAsync = require('util').promisify(require('fs').readFile);
 const request = require('request-promise-native');
 const api = require('src/apiDecoratingAdapter');
 
+api.init(log);
+
 exports.flags = 'testplan';
 exports.desc = 'Retrieve the test plan that will be executed when you run test.';
 exports.setup = (sywac) => {
@@ -17,7 +19,6 @@ exports.setup = (sywac) => {
   );
 };
 exports.run = async (parsedArgv, context) => {
-  const argv = parsedArgv;
   if (parsedArgv.c) {
     const configFileContents = await api.getBuildUserConfigFile(parsedArgv.c);
     log.info('Executing retrieval of testplan...', { tags: ['testplan'] });
@@ -27,5 +28,4 @@ exports.run = async (parsedArgv, context) => {
     context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }
 
-  argv.handled = true;
 };
