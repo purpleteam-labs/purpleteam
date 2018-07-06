@@ -1,7 +1,13 @@
 const config = require('config/config');
-const log = require('purpleteam-logger').logger();
 const readFileAsync = require('util').promisify(require('fs').readFile);
 const request = require('request-promise-native');
+
+let log;
+
+const init = (logger) => {
+  if (log) return;
+  log = logger;
+};
 
 const getBuildUserConfigFile = async (filePath) => {
   try {
@@ -50,17 +56,18 @@ const getTestPlan = async (configFileContents) => {
   const successMessage = (answer) => {
     return `Your test plan follows:\n${answer}`;
   }
-  postToApi(configFileContents, route, successMessage);
+  await postToApi(configFileContents, route, successMessage);
 };
 
 const test = async (configFileContents) => {
   const route = 'test';
   const successMessage = (answer) => `Tests are executing...\n${answer}`;
-  postToApi(configFileContents, route, successMessage);
+  await postToApi(configFileContents, route, successMessage);
 };
 
 
 module.exports = {
+  init,
   getBuildUserConfigFile,
   getTestPlan,
   test
