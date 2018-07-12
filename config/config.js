@@ -44,6 +44,17 @@ const schema = {
       default: 'not yet set'
     }
   },
+  testers: {
+    app: {
+      testerProgressRoute: '/app-tester-progress'
+    },
+    server: {
+      testerProgressRoute: '/server-tester-progress'
+    },
+    tls: {
+      testerProgressRoute: '/tls-tester-progress'
+    }
+  },
   results: {
     uri: {
       doc: 'The location of the results.',

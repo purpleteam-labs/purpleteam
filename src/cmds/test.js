@@ -23,17 +23,7 @@ exports.run = async (parsedArgv, context) => {
     //    https://github.com/SeyZ/jsonapi-serializer     looks to be a little neglected.
 
 
-
     await api.test(configFileContents);
-
-
-    // Use a setInterval or promise to keep the process running.
-
-      setInterval(() => {
-        console.log('This will not run');
-      }, 5000);
-    
-
 
 
 
@@ -50,9 +40,6 @@ exports.run = async (parsedArgv, context) => {
 
 
 
-debugger;
-    // Todo: KC: Start the testing.
-    log.notice('Ok, so test is running', { tags: ['test'] });
   } else {
     context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }
