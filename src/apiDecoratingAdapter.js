@@ -62,7 +62,11 @@ const postToApi = async (configFileContents, route, successMessage) => {
 const subscribeToAppTesterProgress = () => {
   const eventSource = new EventSource(`${apiUrl}${appTesterProgressRoute}`);
   eventSource.addEventListener('testerProgress', (event) => {
-    console.log(JSON.parse(event.data).progress);
+    if (event.origin === apiUrl) {
+      console.log(JSON.parse(event.data).progress);
+    } else {
+      console.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
+    }
   });
 };
 
@@ -70,7 +74,11 @@ const subscribeToAppTesterProgress = () => {
 const subscribeToServerTesterProgress = () => {
   const eventSource = new EventSource(`${apiUrl}${serverTesterProgressRoute}`);
   eventSource.addEventListener('testerProgress', (event) => {
-    console.log(JSON.parse(event.data).progress);
+    if (event.origin === apiUrl) {
+      console.log(JSON.parse(event.data).progress);
+    } else {
+      console.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
+    }
   });
 };
 
@@ -78,7 +86,11 @@ const subscribeToServerTesterProgress = () => {
 const subscribeToTlsTesterProgress = () => {
   const eventSource = new EventSource(`${apiUrl}${tlsTesterProgressRoute}`);
   eventSource.addEventListener('testerProgress', (event) => {
-    console.log(JSON.parse(event.data).progress);
+    if (event.origin === apiUrl) {
+      console.log(JSON.parse(event.data).progress);
+    } else {
+      console.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
+    }
   });
 };
 
@@ -102,6 +114,7 @@ const test = async (configFileContents) => {
   const successMessage = answer => `Tests are executing...\n${answer}`;
   const testersDeployed = await postToApi(configFileContents, route, successMessage);
   if (testersDeployed) subscribeToTestersProgress();
+  // To cancel the event stream: https://www.html5rocks.com/en/tutorials/eventsource/basics/#toc-canceling
 };
 
 
