@@ -3,3 +3,4 @@ config.*.json
 !config.example.json
 
 .vscode
+logs
