@@ -59,13 +59,27 @@ const postToApi = async (configFileContents, route, successMessage) => {
 };
 
 
-const subscribeToAppTesterProgress = () => {
-  const eventSource = new EventSource(`${apiUrl}${appTesterProgressRoute}`);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const subscribeToAppTesterProgress = (logger) => {
+  const eventSource = new EventSource(`${apiUrl}${appTesterProgressRoute}`);  
   eventSource.addEventListener('testerProgress', (event) => {
     if (event.origin === apiUrl) {
-      console.log(JSON.parse(event.data).progress);
+      logger.log(JSON.parse(event.data).progress);
     } else {
-      console.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
+      logger.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
     }
   });
 };
@@ -95,11 +109,11 @@ const subscribeToTlsTesterProgress = () => {
 };
 
 
-const subscribeToTestersProgress = () => {
-  log.debug('Subscribing to progress for all testers')
-  subscribeToAppTesterProgress();
-  subscribeToServerTesterProgress();
-  subscribeToTlsTesterProgress();
+const subscribeToTestersProgress = (logger) => {
+  log.debug('Subscribing to progress for all testers');
+  subscribeToAppTesterProgress(logger);
+  subscribeToServerTesterProgress(logger);
+  subscribeToTlsTesterProgress(logger);
 };
 
 
@@ -109,13 +123,19 @@ const getTestPlan = async (configFileContents) => {
   await postToApi(configFileContents, route, successMessage);
 };
 
-const test = async (configFileContents) => {
-  const route = 'test';
-  const successMessage = answer => `Tests are executing...\n${answer}`;
-  const testersDeployed = await postToApi(configFileContents, route, successMessage);
-  if (testersDeployed) subscribeToTestersProgress();
-  // To cancel the event stream: https://www.html5rocks.com/en/tutorials/eventsource/basics/#toc-canceling
-};
+const test = async configFileContents =>
+  new Promise(async (resolve, reject) => {
+    const route = 'test';
+    const successMessage = answer => `Tests are executing...\n${answer}`;
+    const testersDeployed = await postToApi(configFileContents, route, successMessage);
+    return testersDeployed ? resolve(subscribeToTestersProgress) : reject();
+
+    // To cancel the event stream:
+    //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
+    //    https://www.html5rocks.com/en/tutorials/eventsource/basics/#toc-canceling
+  });
+
+
 
 
 module.exports = {
