@@ -3,7 +3,10 @@ const readFileAsync = require('util').promisify(require('fs').readFile);
 const request = require('request-promise-native');
 const EventSource = require('eventsource');
 
+const { TesterUnavailable, TestPlanUnavailable } = require('src/strings');
+
 let log;
+let apiResponse;
 
 const init = (logger) => {
   if (log) return;
@@ -11,13 +14,12 @@ const init = (logger) => {
 };
 
 const apiUrl = config.get('purpleteamApi.url');
-const { app: { testerProgressRoute: appTesterProgressRoute }, server: { testerProgressRoute: serverTesterProgressRoute }, tls: { testerProgressRoute: tlsTesterProgressRoute } } = config.get('testers');
+const testersConfig = config.get('testers');
 
 
 const getBuildUserConfigFile = async (filePath) => {
   try {
-    const fileContents = await readFileAsync(filePath, { encoding: 'utf8' });
-    log.notice(`File "${filePath}" has been hydrated`, { tags: ['apiDecoratingAdapter'] });
+    const fileContents = await readFileAsync(filePath, { encoding: 'utf8' });    
     return fileContents;
   } catch (err) {
     log.error(`Could not read file: ${filePath}, the error was: ${err}`, { tags: ['apiDecoratingAdapter'] });
@@ -25,8 +27,8 @@ const getBuildUserConfigFile = async (filePath) => {
   }
 };
 
-const postToApi = async (configFileContents, route, successMessage) => {
-  let testersDeployed = false;
+
+const postToApi = async (configFileContents, route) => {  
   await request({
     uri: `${apiUrl}/${route}`,
     method: 'POST',
@@ -34,11 +36,10 @@ const postToApi = async (configFileContents, route, successMessage) => {
     body: configFileContents,
     headers: { 'Content-Type': 'application/vnd.api+json', Accept: 'text/plain' }
   }).then((answer) => {
-    log.notice(successMessage(answer));
-    testersDeployed = true;
+    apiResponse = answer;
   }).catch((err) => {
     const handle = {
-      errorMessageFrame: innerMessage => `Error occured while attempting to retrieve your test plan. Error was: ${innerMessage}`,
+      errorMessageFrame: innerMessage => `Error occured while attempting to communicate with the purpleteam SaaS. Error was: ${innerMessage}`,
       backendTookToLong: '"The purpleteam backend took to long to respond"',
       backendUnreachable: '"The purpleteam backend is currently unreachable".',
       validationError: `Validation of the supplied build user config failed: ${err.error.message}.`,
@@ -52,83 +53,72 @@ const postToApi = async (configFileContents, route, successMessage) => {
         return 'unknown';
       }
     };
-
     log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['apiDecoratingAdapter'] });
   });
-  return testersDeployed;
 };
 
 
+const recieveTestPlan = (logger) => {
+  const loggerName = logger.options.name;
+  const testerRepresentative = apiResponse.find(element => element.name === loggerName);
+
+  if (testerRepresentative) {
+    logger.log(testerRepresentative.message);
+  } else {
+    logger.log(`${loggerName} tester doesn't currently appear to be online`);
+  }
+};
 
 
+const subscribeToTesterProgress = (logger) => {
+  const loggerName = logger.options.name;
+  const testerRepresentative = apiResponse.find(element => element.name === loggerName);
 
-
-
-
-
-
-
-
-
-
-
-
-const subscribeToAppTesterProgress = (logger) => {
-  const eventSource = new EventSource(`${apiUrl}${appTesterProgressRoute}`);  
-  eventSource.addEventListener('testerProgress', (event) => {
-    if (event.origin === apiUrl) {
-      logger.log(JSON.parse(event.data).progress);
-    } else {
-      logger.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
+  if (testerRepresentative) {
+    logger.log(testerRepresentative.message);
+    if (testerRepresentative.message !== TesterUnavailable(loggerName)) {
+      const eventSource = new EventSource(`${apiUrl}${testersConfig[loggerName].testerProgressRoute}`);
+      eventSource.addEventListener('testerProgress', (event) => {
+        if (event.origin === apiUrl) {
+          logger.log(JSON.parse(event.data).progress);
+        } else {
+          logger.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
+        }
+      });
     }
+  } else {
+    logger.log(`${loggerName} tester doesn't currently appear to be online`);
+  }
+};
+
+
+const recieveTestPlans = (loggers) => {
+  loggers.forEach(l => recieveTestPlan(l));
+};
+
+
+const subscribeToTestersProgress = (loggers) => {
+  loggers.forEach(l => subscribeToTesterProgress(l));
+};
+
+
+const getTestPlans = async configFileContents =>
+  new Promise(async (resolve, reject) => {
+    const route = 'testplan';
+
+    await postToApi(configFileContents, route);
+
+    return apiResponse ? resolve(recieveTestPlans) : reject();
   });
-};
 
-
-const subscribeToServerTesterProgress = () => {
-  const eventSource = new EventSource(`${apiUrl}${serverTesterProgressRoute}`);
-  eventSource.addEventListener('testerProgress', (event) => {
-    if (event.origin === apiUrl) {
-      console.log(JSON.parse(event.data).progress);
-    } else {
-      console.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
-    }
-  });
-};
-
-
-const subscribeToTlsTesterProgress = () => {
-  const eventSource = new EventSource(`${apiUrl}${tlsTesterProgressRoute}`);
-  eventSource.addEventListener('testerProgress', (event) => {
-    if (event.origin === apiUrl) {
-      console.log(JSON.parse(event.data).progress);
-    } else {
-      console.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
-    }
-  });
-};
-
-
-const subscribeToTestersProgress = (logger) => {
-  log.debug('Subscribing to progress for all testers');
-  subscribeToAppTesterProgress(logger);
-  subscribeToServerTesterProgress(logger);
-  subscribeToTlsTesterProgress(logger);
-};
-
-
-const getTestPlan = async (configFileContents) => {
-  const route = 'testplan';
-  const successMessage = answer => `Your test plan follows:\n${answer}`;
-  await postToApi(configFileContents, route, successMessage);
-};
 
 const test = async configFileContents =>
   new Promise(async (resolve, reject) => {
     const route = 'test';
-    const successMessage = answer => `Tests are executing...\n${answer}`;
-    const testersDeployed = await postToApi(configFileContents, route, successMessage);
-    return testersDeployed ? resolve(subscribeToTestersProgress) : reject();
+
+    await postToApi(configFileContents, route);
+
+    return apiResponse ? resolve(subscribeToTestersProgress) : reject();
 
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
@@ -136,11 +126,9 @@ const test = async configFileContents =>
   });
 
 
-
-
 module.exports = {
   init,
   getBuildUserConfigFile,
-  getTestPlan,
+  getTestPlans,
   test
 };

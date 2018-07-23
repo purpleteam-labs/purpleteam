@@ -1,6 +1,7 @@
 const config = require('config/config');
 const log = require('purpleteam-logger').logger();
 const api = require('src/apiDecoratingAdapter');
+const dashboard = require('src/dashboard');
 
 api.init(log);
 
@@ -19,8 +20,8 @@ exports.setup = (sywac) => {
 exports.run = async (parsedArgv, context) => {
   if (parsedArgv.c) {
     const configFileContents = await api.getBuildUserConfigFile(parsedArgv.c);
-    log.info('Executing retrieval of testplan...', { tags: ['testplan'] });
-    await api.getTestPlan(configFileContents);
+
+    await api.getTestPlans(configFileContents).then(dashboard.testPlan);
   } else {
     context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }
