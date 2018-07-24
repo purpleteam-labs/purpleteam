@@ -2,13 +2,6 @@ const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 const { name: projectName } = require('package.json');
 
-const screen = blessed.screen({
-  dump: `${process.cwd()}/logs/dashboard/log.log`,
-  smartCSR: true,
-  autoPadding: false,
-  warnings: true,
-  title: projectName
-});
 
 const internals = {
   logTail: {
@@ -217,9 +210,15 @@ const internals = {
 
 
 const initCarousel = (subscribeToTesterProgress) => {
-  // eslint-disable-next-line new-cap
-  const page1 = (screen) => {
-    const appGrid = new contrib.grid({ rows: 12, cols: 12, screen });
+  const screen = blessed.screen({
+    dump: `${process.cwd()}/logs/dashboard/log.log`,
+    smartCSR: true,
+    autoPadding: false,
+    warnings: true,
+    title: projectName
+  });
+  const page1 = (scrn) => {
+    const appGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
     internals.logTail.app.instance = appGrid.set(
       internals.logTail.app.gridCoords.row,
@@ -233,8 +232,8 @@ const initCarousel = (subscribeToTesterProgress) => {
     subscribeToTesterProgress(internals.logTail.app.instance);
   };
 
-  const page2 = (screen) => {
-    const serverGrid = new contrib.grid({ rows: 12, cols: 12, screen });
+  const page2 = (scrn) => {
+    const serverGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
     internals.logTail.server.instance = serverGrid.set(
       internals.logTail.server.gridCoords.row,
@@ -248,8 +247,8 @@ const initCarousel = (subscribeToTesterProgress) => {
     subscribeToTesterProgress(internals.logTail.server.instance);
   };
 
-  const page3 = (screen) => {
-    const tlsGrid = new contrib.grid({ rows: 12, cols: 12, screen });
+  const page3 = (scrn) => {
+    const tlsGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
     internals.logTail.tls.instance = tlsGrid.set(
       internals.logTail.tls.gridCoords.row,
@@ -265,15 +264,21 @@ const initCarousel = (subscribeToTesterProgress) => {
 
   screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0));
 
-  const carousel = new contrib.carousel([page1, page2, page3], { screen, interval: 0, controlKeys: true });
+  const carousel = new contrib.carousel([page1, page2, page3], { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
   carousel.start();
 };
 
 
 const initTPCarousel = (receiveTestPlan) => {
-  // eslint-disable-next-line new-cap
-  const page1 = (screen) => {
-    const appGrid = new contrib.grid({ rows: 12, cols: 12, screen });
+  const screen = blessed.screen({
+    dump: `${process.cwd()}/logs/dashboard/log.log`,
+    smartCSR: true,
+    autoPadding: false,
+    warnings: true,
+    title: projectName
+  });
+  const page1 = (scrn) => {
+    const appGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
     internals.logScroll.app.instance = appGrid.set(
       internals.logScroll.app.gridCoords.row,
@@ -287,8 +292,8 @@ const initTPCarousel = (receiveTestPlan) => {
     receiveTestPlan(internals.logScroll.app.instance);
   };
 
-  const page2 = (screen) => {
-    const serverGrid = new contrib.grid({ rows: 12, cols: 12, screen });
+  const page2 = (scrn) => {
+    const serverGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
     internals.logScroll.server.instance = serverGrid.set(
       internals.logScroll.server.gridCoords.row,
@@ -302,8 +307,8 @@ const initTPCarousel = (receiveTestPlan) => {
     receiveTestPlan(internals.logScroll.server.instance);
   };
 
-  const page3 = (screen) => {
-    const tlsGrid = new contrib.grid({ rows: 12, cols: 12, screen });
+  const page3 = (scrn) => {
+    const tlsGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
     internals.logScroll.tls.instance = tlsGrid.set(
       internals.logScroll.tls.gridCoords.row,
@@ -319,7 +324,7 @@ const initTPCarousel = (receiveTestPlan) => {
 
   screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0));
 
-  const carousel = new contrib.carousel([page1, page2, page3], { screen, interval: 0, controlKeys: true });
+  const carousel = new contrib.carousel([page1, page2, page3], { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
   carousel.start();
 };
 
@@ -330,17 +335,17 @@ const testPlan = receiveTestPlan => new Promise((resolve, reject) => {
   } catch (err) {
     return reject(err);
   }
-  return resolve(screen);
+  return resolve();
 });
 
 
 const test = subscribeToTesterProgress => new Promise((resolve, reject) => {
-  try {    
+  try {
     initCarousel(subscribeToTesterProgress);
   } catch (err) {
     return reject(err);
   }
-  return resolve(screen);
+  return resolve();
 });
 
 

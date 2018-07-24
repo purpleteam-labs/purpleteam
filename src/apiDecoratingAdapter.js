@@ -54,6 +54,7 @@ const postToApi = async (configFileContents, route) => {
       }
     };
     log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['apiDecoratingAdapter'] });
+    throw err;
   });
 };
 
