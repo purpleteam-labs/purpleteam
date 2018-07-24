@@ -86,6 +86,7 @@ const subscribeToTesterProgress = (logger) => {
           logger.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
         }
       });
+      // Todo: KC: Here we'll need to listen for the end event. When it arrives, we need to fetch the testerProgress logs, test results, and reports.
     }
   } else {
     logger.log(`${loggerName} tester doesn't currently appear to be online`);
