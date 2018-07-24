@@ -58,7 +58,7 @@ const postToApi = async (configFileContents, route) => {
 };
 
 
-const recieveTestPlan = (logger) => {
+const receiveTestPlan = (logger) => {
   const loggerName = logger.options.name;
   const testerRepresentative = apiResponse.find(element => element.name === loggerName);
 
@@ -92,23 +92,13 @@ const subscribeToTesterProgress = (logger) => {
 };
 
 
-const recieveTestPlans = (loggers) => {
-  loggers.forEach(l => recieveTestPlan(l));
-};
-
-
-const subscribeToTestersProgress = (loggers) => {
-  loggers.forEach(l => subscribeToTesterProgress(l));
-};
-
-
 const getTestPlans = async configFileContents =>
   new Promise(async (resolve, reject) => {
     const route = 'testplan';
 
     await postToApi(configFileContents, route);
 
-    return apiResponse ? resolve(recieveTestPlans) : reject();
+    return apiResponse ? resolve(receiveTestPlan) : reject();
   });
 
 
@@ -118,7 +108,7 @@ const test = async configFileContents =>
 
     await postToApi(configFileContents, route);
 
-    return apiResponse ? resolve(subscribeToTestersProgress) : reject();
+    return apiResponse ? resolve(subscribeToTesterProgress) : reject();
 
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
