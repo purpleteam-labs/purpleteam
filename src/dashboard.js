@@ -5,17 +5,17 @@ const { app: appView, server: serverView, tls: tlsView, testerPctComplete } = re
 
 const internals = {};
 
+const screen = blessed.screen({
+  dump: `${process.cwd()}/logs/dashboard/log.log`,
+  smartCSR: true,
+  autoPadding: false,
+  warnings: true,
+  title: projectName
+});
 
 const initCarousel = (subscriptions) => {
   const { subscribeToTesterProgress, subscribeToTesterPctComplete } = subscriptions;
 
-  const screen = blessed.screen({
-    dump: `${process.cwd()}/logs/dashboard/log.log`,
-    smartCSR: true,
-    autoPadding: false,
-    warnings: true,
-    title: projectName
-  });
   const appPage = (scrn) => {
     const appGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
@@ -102,13 +102,6 @@ const initCarousel = (subscriptions) => {
 
 
 const initTPCarousel = (receiveTestPlan) => {
-  const screen = blessed.screen({
-    dump: `${process.cwd()}/logs/dashboard/log.log`,
-    smartCSR: true,
-    autoPadding: false,
-    warnings: true,
-    title: projectName
-  });
   const page1 = (scrn) => {
     const appGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
