@@ -67,7 +67,6 @@ let testerPctCompleteIntervalId;
 
 const subscribeToTesterPctComplete = ((update) => {
   // Todo: Do the actual subscription to the SSE
-
   if (!testerPctCompleteIntervalId) {
     testerPctCompleteIntervalId = setInterval(() => {
       appPct = appPct > 0.99 ? 0.00 : appPct + 0.01;
