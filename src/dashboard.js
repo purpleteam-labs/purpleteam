@@ -59,7 +59,7 @@ const initCarousel = (subscriptions) => {
 
     scrn.on('resize', () => {
       appView.testInstance.emit('attach');
-      appView.testInstance.emit('attach');
+      testerPctComplete.instance.emit('attach');
     });
     subscribeToTesterProgress(appView.testInstance);
   };
