@@ -1,7 +1,6 @@
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 const { name: projectName } = require('package.json');
-//const { app: appView, server: serverView, tls: tlsView, testerPctComplete } = require('src/views');
 const { testerViews, testerPctComplete } = require('src/views');
 
 const internals = {};
@@ -15,10 +14,8 @@ const screen = blessed.screen({
 });
 
 
-
 const initCarousel = (subscriptions) => {
   const { subscribeToTesterProgress, subscribeToTesterPctComplete } = subscriptions;
-
 
   const carouselPages = testerViews.map(testerView => (scrn) => {
     const grid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
@@ -70,8 +67,6 @@ const initCarousel = (subscriptions) => {
     });
   });
 
-
-
   screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0));
 
   const carousel = new contrib.carousel(carouselPages, { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
@@ -79,56 +74,27 @@ const initCarousel = (subscriptions) => {
 };
 
 
-const initTPCarousel = (receiveTestPlan) => {/*
-  const page1 = (scrn) => {
-    const appGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
+const initTPCarousel = (receiveTestPlan) => {
+  const carouselPages = testerViews.map(testerView => (scrn) => {
+    const grid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
+    const tView = testerView;
 
-    appView.testPlanInstance = appGrid.set(
-      appView.testPlanOpts.gridCoords.row,
-      appView.testPlanOpts.gridCoords.col,
-      appView.testPlanOpts.gridCoords.rowSpan,
-      appView.testPlanOpts.gridCoords.colSpan,
-      appView.testPlanOpts.type,
-      appView.testPlanOpts.args
+    tView.testPlanInstance = grid.set(
+      tView.testPlanOpts.gridCoords.row,
+      tView.testPlanOpts.gridCoords.col,
+      tView.testPlanOpts.gridCoords.rowSpan,
+      tView.testPlanOpts.gridCoords.colSpan,
+      tView.testPlanOpts.type,
+      tView.testPlanOpts.args
     );
 
-    receiveTestPlan(appView.testPlanInstance);
-  };
-
-  const page2 = (scrn) => {
-    const serverGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
-
-    serverView.testPlanInstance = serverGrid.set(
-      serverView.testPlanOpts.gridCoords.row,
-      serverView.testPlanOpts.gridCoords.col,
-      serverView.testPlanOpts.gridCoords.rowSpan,
-      serverView.testPlanOpts.gridCoords.colSpan,
-      serverView.testPlanOpts.type,
-      serverView.testPlanOpts.args
-    );
-
-    receiveTestPlan(serverView.testPlanInstance);
-  };
-
-  const page3 = (scrn) => {
-    const tlsGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
-
-    tlsView.testPlanInstance = tlsGrid.set(
-      tlsView.testPlanOpts.gridCoords.row,
-      tlsView.testPlanOpts.gridCoords.col,
-      tlsView.testPlanOpts.gridCoords.rowSpan,
-      tlsView.testPlanOpts.gridCoords.colSpan,
-      tlsView.testPlanOpts.type,
-      tlsView.testPlanOpts.args
-    );
-
-    receiveTestPlan(tlsView.testPlanInstance);
-  };
+    receiveTestPlan(tView.testPlanInstance);
+  });
 
   screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0));
 
-  const carousel = new contrib.carousel([page1, page2, page3], { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
-  carousel.start();*/
+  const carousel = new contrib.carousel(carouselPages, { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
+  carousel.start();
 };
 
 
