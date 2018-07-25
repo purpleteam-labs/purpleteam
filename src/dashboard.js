@@ -1,7 +1,8 @@
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 const { name: projectName } = require('package.json');
-const { app: appView, server: serverView, tls: tlsView, testerPctComplete } = require('src/views');
+//const { app: appView, server: serverView, tls: tlsView, testerPctComplete } = require('src/views');
+const { testerViews, testerPctComplete } = require('src/views');
 
 const internals = {};
 
@@ -13,20 +14,24 @@ const screen = blessed.screen({
   title: projectName
 });
 
+
+
 const initCarousel = (subscriptions) => {
   const { subscribeToTesterProgress, subscribeToTesterPctComplete } = subscriptions;
 
-  const appPage = (scrn) => {
-    const grid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
-    // One per test session
-    appView.testInstance = grid.set(
-      appView.testOpts.gridCoords.row,
-      appView.testOpts.gridCoords.col,
-      appView.testOpts.gridCoords.rowSpan,
-      appView.testOpts.gridCoords.colSpan,
-      appView.testOpts.type,
-      appView.testOpts.args
+  const carouselPages = testerViews.map(testerView => (scrn) => {
+    const grid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
+    const tView = testerView;
+
+    // Todo: One per test session
+    tView.testInstance = grid.set(
+      testerView.testOpts.gridCoords.row,
+      testerView.testOpts.gridCoords.col,
+      testerView.testOpts.gridCoords.rowSpan,
+      testerView.testOpts.gridCoords.colSpan,
+      testerView.testOpts.type,
+      testerView.testOpts.args
     );
 
     testerPctComplete.instance = grid.set(
@@ -38,7 +43,7 @@ const initCarousel = (subscriptions) => {
       testerPctComplete.args
     );
 
-    subscribeToTesterProgress(appView.testInstance);
+    subscribeToTesterProgress(testerView.testInstance);
 
     subscribeToTesterPctComplete((pcts) => {
       const { appPct, serverPct, tlsPct } = pcts;
@@ -60,115 +65,21 @@ const initCarousel = (subscriptions) => {
     });
 
     scrn.on('resize', () => {
-      appView.testInstance.emit('attach');
+      testerView.testInstance.emit('attach');
       testerPctComplete.instance.emit('attach');
     });
-  };
+  });
 
-  const serverPage = (scrn) => {
-    const grid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
-    serverView.testInstance = grid.set(
-      serverView.testOpts.gridCoords.row,
-      serverView.testOpts.gridCoords.col,
-      serverView.testOpts.gridCoords.rowSpan,
-      serverView.testOpts.gridCoords.colSpan,
-      serverView.testOpts.type,
-      serverView.testOpts.args
-    );
-
-    testerPctComplete.instance = grid.set(
-      testerPctComplete.gridCoords.row,
-      testerPctComplete.gridCoords.col,
-      testerPctComplete.gridCoords.rowSpan,
-      testerPctComplete.gridCoords.colSpan,
-      testerPctComplete.type,
-      testerPctComplete.args
-    );
-
-    subscribeToTesterProgress(serverView.testInstance);
-
-    subscribeToTesterPctComplete((pcts) => {
-      const { appPct, serverPct, tlsPct } = pcts;
-      
-      const colourOfDonut = (pct) => {
-        let colourToSet;
-        if (pct < 0.2) colourToSet = 'red';
-        else if (pct >= 0.2 && pct < 0.7) colourToSet = 'magenta';
-        else if (pct >= 0.7) colourToSet = 'blue';
-        return colourToSet;
-      };
-      
-      testerPctComplete.instance.update([
-        { percent: parseFloat((appPct + 0.00) % 1).toFixed(2), label: 'app', color: colourOfDonut(appPct) },
-        { percent: parseFloat((serverPct + 0.00) % 1).toFixed(2), label: 'server', color: colourOfDonut(serverPct) },
-        { percent: parseFloat((tlsPct + 0.00) % 1).toFixed(2), label: 'tls', color: colourOfDonut(tlsPct) }
-      ]);
-      scrn.render();
-    });
-
-    scrn.on('resize', () => {
-      serverView.testInstance.emit('attach');
-      testerPctComplete.instance.emit('attach');
-    });
-  };
-
-  const tlsPage = (scrn) => {
-    const grid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
-
-    tlsView.testInstance = grid.set(
-      tlsView.testOpts.gridCoords.row,
-      tlsView.testOpts.gridCoords.col,
-      tlsView.testOpts.gridCoords.rowSpan,
-      tlsView.testOpts.gridCoords.colSpan,
-      tlsView.testOpts.type,
-      tlsView.testOpts.args
-    );
-
-    testerPctComplete.instance = grid.set(
-      testerPctComplete.gridCoords.row,
-      testerPctComplete.gridCoords.col,
-      testerPctComplete.gridCoords.rowSpan,
-      testerPctComplete.gridCoords.colSpan,
-      testerPctComplete.type,
-      testerPctComplete.args
-    );
-
-    subscribeToTesterProgress(tlsView.testInstance);
-
-    subscribeToTesterPctComplete((pcts) => {
-      const { appPct, serverPct, tlsPct } = pcts;
-      
-      const colourOfDonut = (pct) => {
-        let colourToSet;
-        if (pct < 0.2) colourToSet = 'red';
-        else if (pct >= 0.2 && pct < 0.7) colourToSet = 'magenta';
-        else if (pct >= 0.7) colourToSet = 'blue';
-        return colourToSet;
-      };
-      
-      testerPctComplete.instance.update([
-        { percent: parseFloat((appPct + 0.00) % 1).toFixed(2), label: 'app', color: colourOfDonut(appPct) },
-        { percent: parseFloat((serverPct + 0.00) % 1).toFixed(2), label: 'server', color: colourOfDonut(serverPct) },
-        { percent: parseFloat((tlsPct + 0.00) % 1).toFixed(2), label: 'tls', color: colourOfDonut(tlsPct) }
-      ]);
-      scrn.render();
-    });
-
-    scrn.on('resize', () => {
-      tlsView.testInstance.emit('attach');
-      testerPctComplete.instance.emit('attach');
-    });
-  };
 
   screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0));
 
-  const carousel = new contrib.carousel([appPage, serverPage, tlsPage], { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
+  const carousel = new contrib.carousel(carouselPages, { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
   carousel.start();
 };
 
 
-const initTPCarousel = (receiveTestPlan) => {
+const initTPCarousel = (receiveTestPlan) => {/*
   const page1 = (scrn) => {
     const appGrid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
 
@@ -217,7 +128,7 @@ const initTPCarousel = (receiveTestPlan) => {
   screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0));
 
   const carousel = new contrib.carousel([page1, page2, page3], { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
-  carousel.start();
+  carousel.start();*/
 };
 
 

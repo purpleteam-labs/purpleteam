@@ -39,5 +39,6 @@ const testerPctComplete = {
 };
 
 module.exports = {
-  app, server, tls, testerPctComplete
+  testerViews: [app, server, tls],
+  testerPctComplete
 };
