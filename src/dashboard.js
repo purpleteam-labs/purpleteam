@@ -38,10 +38,11 @@ const initCarousel = (subscriptions) => {
       testerPctComplete.args
     );
 
-    debugger;
+    subscribeToTesterProgress(appView.testInstance);
+
     subscribeToTesterPctComplete((pcts) => {
       const { appPct, serverPct, tlsPct } = pcts;
-      debugger;
+      
       const colourOfDonut = (pct) => {
         let colourToSet;
         if (pct < 0.2) colourToSet = 'red';
@@ -55,14 +56,13 @@ const initCarousel = (subscriptions) => {
         { percent: parseFloat((serverPct + 0.00) % 1).toFixed(2), label: 'server', color: colourOfDonut(serverPct) },
         { percent: parseFloat((tlsPct + 0.00) % 1).toFixed(2), label: 'tls', color: colourOfDonut(tlsPct) }
       ]);
+      scrn.render();
     });
 
     scrn.on('resize', () => {
       appView.testInstance.emit('attach');
       testerPctComplete.instance.emit('attach');
     });
-    subscribeToTesterProgress(appView.testInstance);
-    scrn.render();
   };
 
   const serverPage = (scrn) => {
@@ -86,10 +86,11 @@ const initCarousel = (subscriptions) => {
       testerPctComplete.args
     );
 
-    debugger
+    subscribeToTesterProgress(serverView.testInstance);
+
     subscribeToTesterPctComplete((pcts) => {
       const { appPct, serverPct, tlsPct } = pcts;
-      debugger;
+      
       const colourOfDonut = (pct) => {
         let colourToSet;
         if (pct < 0.2) colourToSet = 'red';
@@ -110,8 +111,6 @@ const initCarousel = (subscriptions) => {
       serverView.testInstance.emit('attach');
       testerPctComplete.instance.emit('attach');
     });
-    subscribeToTesterProgress(serverView.testInstance);
-    scrn.render();
   };
 
   const tlsPage = (scrn) => {
@@ -135,10 +134,11 @@ const initCarousel = (subscriptions) => {
       testerPctComplete.args
     );
 
-    debugger;
+    subscribeToTesterProgress(tlsView.testInstance);
+
     subscribeToTesterPctComplete((pcts) => {
       const { appPct, serverPct, tlsPct } = pcts;
-      debugger;
+      
       const colourOfDonut = (pct) => {
         let colourToSet;
         if (pct < 0.2) colourToSet = 'red';
@@ -159,8 +159,6 @@ const initCarousel = (subscriptions) => {
       tlsView.testInstance.emit('attach');
       testerPctComplete.instance.emit('attach');
     });
-    subscribeToTesterProgress(tlsView.testInstance);
-    scrn.render();
   };
 
   screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0));
