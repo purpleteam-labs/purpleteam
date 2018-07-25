@@ -59,6 +59,26 @@ const postToApi = async (configFileContents, route) => {
 };
 
 
+// Temp variables until we've setup the subscription
+let appPct = 0;
+let serverPct = 0;
+let tlsPct = 0;
+let testerPctCompleteIntervalId;
+
+const subscribeToTesterPctComplete = ((update) => {
+  // Todo: Do the actual subscription to the SSE
+
+  if (!testerPctCompleteIntervalId) {
+    testerPctCompleteIntervalId = setInterval(() => {
+      appPct = appPct > 0.99 ? 0.00 : appPct + 0.01;
+      serverPct = serverPct > 0.99 ? 0.00 : serverPct + 0.02;
+      tlsPct = tlsPct > 0.99 ? 0.00 : tlsPct + 0.025;
+      update({ appPct, serverPct, tlsPct });
+    }, 500);
+  }
+});
+
+
 const receiveTestPlan = (logger) => {
   const loggerName = logger.options.name;
   const testerRepresentative = apiResponse.find(element => element.name === loggerName);
@@ -110,7 +130,10 @@ const test = async configFileContents =>
 
     await postToApi(configFileContents, route);
 
-    return apiResponse ? resolve(subscribeToTesterProgress) : reject();
+    return apiResponse ? resolve({
+      subscribeToTesterProgress,
+      subscribeToTesterPctComplete
+    }) : reject();
 
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
