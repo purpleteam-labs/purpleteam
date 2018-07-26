@@ -1,7 +1,7 @@
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 const { name: projectName } = require('package.json');
-const { testerViews, testerPctComplete } = require('src/views');
+const { testerViews, testerPctComplete, statTable } = require('src/views');
 
 const internals = {};
 
@@ -40,6 +40,15 @@ const initCarousel = (subscriptions) => {
       testerPctComplete.args
     );
 
+    statTable.instance = grid.set(
+      statTable.gridCoords.row,
+      statTable.gridCoords.col,
+      statTable.gridCoords.rowSpan,
+      statTable.gridCoords.colSpan,
+      statTable.type,
+      statTable.args
+    );
+
     subscribeToTesterProgress(testerView.testInstance);
 
     subscribeToTesterPctComplete((pcts) => {
@@ -61,9 +70,16 @@ const initCarousel = (subscriptions) => {
       scrn.render();
     });
 
+    statTable.instance.setData({
+      headers: ['Testers', 'Complete (%)', 'Threshhold', 'Bugs'],
+      data: [['app', 1, 2, 3], ['server', 1, 2, 3], ['tls', 1, 2, 3]]
+    });
+    statTable.instance.focus();
+
     scrn.on('resize', () => {
       testerView.testInstance.emit('attach');
       testerPctComplete.instance.emit('attach');
+      statTable.instance.emit('attach');
     });
   });
 
