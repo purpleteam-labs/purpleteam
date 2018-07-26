@@ -70,8 +70,6 @@ const initCarousel = (subscriptions) => {
     subscribeToTesterProgress(testerView.testInstance);
 
     subscribeToTesterPctComplete((pcts) => {
-      const { appPct, serverPct, tlsPct } = pcts;
-      
       const colourOfDonut = (pct) => {
         let colourToSet;
         if (pct < 0.2) colourToSet = 'red';
@@ -79,19 +77,18 @@ const initCarousel = (subscriptions) => {
         else if (pct >= 0.7) colourToSet = 'blue';
         return colourToSet;
       };
-      
-      testerPctComplete.instance.update([
-        { percent: parseFloat((appPct + 0.00) % 1).toFixed(2), label: 'app', color: colourOfDonut(appPct) },
-        { percent: parseFloat((serverPct + 0.00) % 1).toFixed(2), label: 'server', color: colourOfDonut(serverPct) },
-        { percent: parseFloat((tlsPct + 0.00) % 1).toFixed(2), label: 'tls', color: colourOfDonut(tlsPct) }
-      ]);
+
+      testerPctComplete.instance.update(testerViews.map((tv) => {
+        const { name } = tv.testOpts.args;
+        return { percent: parseFloat((pcts[name] + 0.00) % 1).toFixed(2), label: name, color: colourOfDonut(pcts[name]) };
+      }));
       scrn.render();
     });
 
     // statTable
     statTable.instance.setData({
-      headers: ['Testers', 'Complete (%)', 'Threshold', 'Bugs'],
-      data: [['app', 1, 2, 3], ['server', 1, 2, 3], ['tls', 1, 2, 3]]
+      headers: statTable.headers,
+      data: statTable.seedData
     });
     statTable.instance.focus();
 

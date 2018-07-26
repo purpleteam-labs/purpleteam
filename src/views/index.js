@@ -1,7 +1,10 @@
 const contrib = require('blessed-contrib');
+
 const app = require('./app');
 const server = require('./server');
 const tls = require('./tls');
+
+const testerViews = [app, server, tls];
 
 const testerPctComplete = {
   gridCoords: {
@@ -17,11 +20,7 @@ const testerPctComplete = {
     arcWidth: 3,
     remainColor: 'black',
     yPadding: 4,
-    data: [
-      { label: 'app', percent: 0, color: 'red' },
-      { label: 'server', percent: 0, color: 'red' },
-      { label: 'tls', percent: 0, color: 'red' }
-    ],
+    data: testerViews.map(tv => ({ label: tv.testOpts.args.name, percent: 0, color: 'red' })),
     style: {
       fg: 'default',
       bg: 'default',
@@ -52,23 +51,21 @@ const statTable = {
     vi: true,
     interactive: true,
     selectedFg: 'white',
-    selectedBg: 'blue',
+    selectedBg: 'magenta',
     columnSpacing: 1,
     columnWidth: [10, 14, 12, 10],
-    
-    // style: {
-    //   fg: 'default',
-    //   bg: 'default',
-    //   border: {
-    //     fg: 'magenta',
-    //     bg: 'default'
-    //   }
-    // },
-    border: {
-      type: 'line',
-      fg: 'magenta'
+    fg: 'magenta',
+    style: {
+      fg: 'blue',
+      bg: 'default',
+      border: {
+        fg: 'magenta',
+        bg: 'default'
+      }
     }
   },
+  headers: ['Testers', 'Complete (%)', 'Threshold', 'Bugs'],
+  seedData: testerViews.map(tv => [tv.testOpts.args.name, 0, 0, 0]),
   instance: undefined
 };
 
@@ -86,7 +83,7 @@ const newBugs = {
     segmentInterval: 0.1,
     strokeWidth: 0.9,
     elements: 2,
-    display: '02',
+    display: '00',
     elementSpacing: 4,
     elementPadding: 4,
     color: 'blue',
@@ -97,8 +94,7 @@ const newBugs = {
         fg: 'magenta',
         bg: 'default'
       }
-    },
-
+    }
   },
   instance: undefined
 };
@@ -123,16 +119,13 @@ const totalProgress = {
         bg: 'default'
       }
     }
-    
-    
-
   },
   instance: undefined
 };
 
 
 module.exports = {
-  testerViews: [app, server, tls],
+  testerViews, //: [app, server, tls],
   testerPctComplete,
   statTable,
   newBugs,

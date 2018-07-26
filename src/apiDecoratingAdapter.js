@@ -74,7 +74,7 @@ const subscribeToTesterPctComplete = ((update) => {
     appPct = appPct > 0.99 ? 0.00 : appPct + 0.01;
     serverPct = serverPct > 0.99 ? 0.00 : serverPct + 0.02;
     tlsPct = tlsPct > 0.99 ? 0.00 : tlsPct + 0.025;
-    update({ appPct, serverPct, tlsPct });
+    update({ app: appPct, server: serverPct, tls: tlsPct });
   }, 500);
 });
 
