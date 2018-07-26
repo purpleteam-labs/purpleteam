@@ -24,7 +24,7 @@ const testerPctComplete = {
     ],
     style: {
       fg: 'default',
-      gb: 'default',
+      bg: 'default',
       border: {
         fg: 'magenta',
         bg: 'default'
@@ -58,7 +58,7 @@ const statTable = {
     
     // style: {
     //   fg: 'default',
-    //   gb: 'default',
+    //   bg: 'default',
     //   border: {
     //     fg: 'magenta',
     //     bg: 'default'
@@ -66,14 +66,75 @@ const statTable = {
     // },
     border: {
       type: 'line',
-      fg: '#00ff00'
-    },
+      fg: 'magenta'
+    }
   },
   instance: undefined
 };
 
+const newBugs = {
+  gridCoords: {
+    row: 10.5,
+    col: 6.4,
+    rowSpan: 1.6,
+    colSpan: 1.3
+  },
+  type: contrib.lcd,
+  args: {
+    label: 'New Bugs',
+    segmentWidth: 0.06,
+    segmentInterval: 0.1,
+    strokeWidth: 0.9,
+    elements: 2,
+    display: '02',
+    elementSpacing: 4,
+    elementPadding: 4,
+    color: 'blue',
+    style: {
+      fg: 'default',
+      bg: 'default',
+      border: {
+        fg: 'magenta',
+        bg: 'default'
+      }
+    },
+
+  },
+  instance: undefined
+};
+
+const totalProgress = {
+  gridCoords: {
+    row: 10.5,
+    col: 7.7,
+    rowSpan: 1.6,
+    colSpan: 4.3
+  },
+  type: contrib.gauge,
+  args: {
+    label: 'Total Tester Progress',
+    percent: 0,
+    stroke: 'blue',
+    style: {
+      fg: 'default',
+      bg: 'default',
+      border: {
+        fg: 'magenta',
+        bg: 'default'
+      }
+    }
+    
+    
+
+  },
+  instance: undefined
+};
+
+
 module.exports = {
   testerViews: [app, server, tls],
   testerPctComplete,
-  statTable
+  statTable,
+  newBugs,
+  totalProgress
 };
