@@ -14,6 +14,27 @@ const screen = blessed.screen({
 });
 
 
+const updateTesterPctsComplete = (pcts) => {
+  const colourOfDonut = (pct) => {
+    let colourToSet;
+    if (pct < 0.2) colourToSet = 'red';
+    else if (pct >= 0.2 && pct < 0.7) colourToSet = 'magenta';
+    else if (pct >= 0.7) colourToSet = 'blue';
+    return colourToSet;
+  };
+
+  testerPctComplete.instance.update(testerViews.map((tv) => {
+    const { name } = tv.testOpts.args;
+    return { percent: parseFloat((pcts[name] + 0.00) % 1).toFixed(2), label: name, color: colourOfDonut(pcts[name]) };
+  }));
+};
+
+
+const applyTesterPctsComplete = (pcts) => {
+  updateTesterPctsComplete(pcts);
+};
+
+
 const initCarousel = (subscriptions) => {
   const { subscribeToTesterProgress, subscribeToTesterPctComplete } = subscriptions;
 
@@ -70,18 +91,9 @@ const initCarousel = (subscriptions) => {
     subscribeToTesterProgress(testerView.testInstance);
 
     subscribeToTesterPctComplete((pcts) => {
-      const colourOfDonut = (pct) => {
-        let colourToSet;
-        if (pct < 0.2) colourToSet = 'red';
-        else if (pct >= 0.2 && pct < 0.7) colourToSet = 'magenta';
-        else if (pct >= 0.7) colourToSet = 'blue';
-        return colourToSet;
-      };
+      applyTesterPctsComplete(pcts);
 
-      testerPctComplete.instance.update(testerViews.map((tv) => {
-        const { name } = tv.testOpts.args;
-        return { percent: parseFloat((pcts[name] + 0.00) % 1).toFixed(2), label: name, color: colourOfDonut(pcts[name]) };
-      }));
+
       scrn.render();
     });
 
