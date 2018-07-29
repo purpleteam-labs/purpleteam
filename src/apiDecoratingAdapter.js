@@ -2,6 +2,7 @@ const config = require('config/config');
 const readFileAsync = require('util').promisify(require('fs').readFile);
 const request = require('request-promise-native');
 const EventSource = require('eventsource');
+const model = require('src/models/model');
 
 const { TesterUnavailable, TestPlanUnavailable } = require('src/strings');
 
@@ -59,7 +60,7 @@ const postToApi = async (configFileContents, route) => {
 };
 
 
-// Temp variables until we've setup the subscription
+// Temp variables until we've setup the subscription.
 let appPct = 0;
 let serverPct = 0;
 let tlsPct = 0;
@@ -67,14 +68,34 @@ let testerPctCompleteIntervalId;
 
 const subscribeToTesterPctComplete = ((update) => {
   // Todo: Do the actual subscription to the SSE
-
+  // We'll need a function to handle pct events from the testers, and another (probably use this one) to update the view.
   clearInterval(testerPctCompleteIntervalId);
 
   testerPctCompleteIntervalId = setInterval(() => {
     appPct = appPct > 0.99 ? 0.00 : appPct + 0.01;
     serverPct = serverPct > 0.99 ? 0.00 : serverPct + 0.02;
     tlsPct = tlsPct > 0.99 ? 0.00 : tlsPct + 0.025;
-    update({ app: appPct, server: serverPct, tls: tlsPct });
+
+    const pctsComplete = [{ id: 'lowPrivUser', pct: appPct }, { id: 'adminUser', pct: appPct }];
+    
+    model.setAppPctsComplete(pctsComplete);
+
+    let patch = {
+      runningStats: [{
+        testerType: 'app', sessionId: 'lowPrivUser', threshold: 12, bugs: 0, pctComplete: appPct
+      }, {
+        testerType: 'app', sessionId: 'adminUser', threshold: 0, bugs: 0, pctComplete: appPct
+      }, {
+        testerType: 'server', sessionId: 'N/A', threshold: 0, bugs: 0, pctComplete: 0
+      }, {
+        testerType: 'tls', sessionId: 'N/A', threshold: 0, bugs: 0, pctComplete: 0
+      }]
+    };
+    
+    // ........... Now deal with the update function parameters .....
+
+    //update({ app: appPct, server: serverPct, tls: tlsPct });
+    update(patch);
   }, 500);
 });
 
@@ -114,6 +135,11 @@ const subscribeToTesterProgress = (logger) => {
 };
 
 
+const initModel = (configFileContents) => {
+  model.init(configFileContents);
+};
+
+
 const getTestPlans = async configFileContents =>
   new Promise(async (resolve, reject) => {
     const route = 'testplan';
@@ -126,6 +152,7 @@ const getTestPlans = async configFileContents =>
 
 const test = async configFileContents =>
   new Promise(async (resolve, reject) => {
+    initModel(configFileContents);
     const route = 'test';
 
     await postToApi(configFileContents, route);

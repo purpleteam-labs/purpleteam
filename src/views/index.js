@@ -42,7 +42,7 @@ const statTable = {
     row: 10.5,
     col: 3,
     rowSpan: 1.6,
-    colSpan: 3.4
+    colSpan: 4.0
   },
   type: contrib.table,
   args: {
@@ -53,7 +53,7 @@ const statTable = {
     selectedFg: 'white',
     selectedBg: 'magenta',
     columnSpacing: 1,
-    columnWidth: [10, 14, 12, 10],
+    columnWidth: [10, 12, 12, 6, 12],
     fg: 'magenta',
     style: {
       fg: 'blue',
@@ -64,15 +64,15 @@ const statTable = {
       }
     }
   },
-  headers: ['Testers', 'Complete (%)', 'Threshold', 'Bugs'],
-  seedData: testerViews.map(tv => [tv.testOpts.args.name, 0, 0, 0]),
+  headers: ['Testers', 'SessionId', 'Threshold', 'Bugs', 'Complete (%)'],
+  seedData: testerViews.map(tv => [tv.testOpts.args.name, '-', 0, 0, 0]),
   instance: undefined
 };
 
 const newBugs = {
   gridCoords: {
     row: 10.5,
-    col: 6.4,
+    col: 7.0,
     rowSpan: 1.6,
     colSpan: 1.3
   },
@@ -102,9 +102,9 @@ const newBugs = {
 const totalProgress = {
   gridCoords: {
     row: 10.5,
-    col: 7.7,
+    col: 8.3,
     rowSpan: 1.6,
-    colSpan: 4.3
+    colSpan: 3.7
   },
   type: contrib.gauge,
   args: {

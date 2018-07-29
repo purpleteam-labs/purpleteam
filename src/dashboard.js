@@ -3,6 +3,8 @@ const contrib = require('blessed-contrib');
 const { name: projectName } = require('package.json');
 const { testerViews, testerPctComplete, statTable, newBugs, totalProgress } = require('src/views');
 
+const testerNames = testerViews.map(tv => tv.testOpts.args.name);
+
 const internals = {};
 
 const screen = blessed.screen({
@@ -14,7 +16,7 @@ const screen = blessed.screen({
 });
 
 
-const updateTesterPctsComplete = (pcts) => {
+const updateTesterPctsComplete = (patch) => {
   const colourOfDonut = (pct) => {
     let colourToSet;
     if (pct < 0.2) colourToSet = 'red';
@@ -23,15 +25,27 @@ const updateTesterPctsComplete = (pcts) => {
     return colourToSet;
   };
 
-  testerPctComplete.instance.update(testerViews.map((tv) => {
-    const { name } = tv.testOpts.args;
-    return { percent: parseFloat((pcts[name] + 0.00) % 1).toFixed(2), label: name, color: colourOfDonut(pcts[name]) };
+  const { runningStats } = patch;
+  testerPctComplete.instance.update(testerNames.map((tn) => {
+    const record = runningStats.find(r => r.testerType === tn);
+    return { percent: parseFloat((record[tn] + 0.00) % 1).toFixed(2), label: tn, color: colourOfDonut(record[tn]) };
   }));
 };
 
 
-const applyTesterPctsComplete = (pcts) => {
-  updateTesterPctsComplete(pcts);
+const updateStatTablePctsComplete = (patch) => {
+  const { runningStats } = patch;
+  statTable.instance.setData({
+    headers: statTable.headers,
+    data: runningStats.map(row => Object.values(row))
+  });
+  statTable.instance.focus();
+};
+
+
+const applyTesterPctsComplete = (patch) => {
+  updateTesterPctsComplete(patch);
+  updateStatTablePctsComplete(patch);
 };
 
 
@@ -90,8 +104,8 @@ const initCarousel = (subscriptions) => {
 
     subscribeToTesterProgress(testerView.testInstance);
 
-    subscribeToTesterPctComplete((pcts) => {
-      applyTesterPctsComplete(pcts);
+    subscribeToTesterPctComplete((patch) => {
+      applyTesterPctsComplete(patch);
 
 
       scrn.render();
