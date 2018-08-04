@@ -4,9 +4,9 @@ const app = require('./app');
 const server = require('./server');
 const tls = require('./tls');
 
-const testerViews = [app, server, tls];
+const testerViewTypes = [app, server, tls];
 
-const testerPctComplete = {
+const testerPctCompleteType = {
   gridCoords: {
     row: 10.5,
     col: 0,
@@ -20,7 +20,7 @@ const testerPctComplete = {
     arcWidth: 3,
     remainColor: 'black',
     yPadding: 4,
-    data: testerViews.map(tv => ({ label: tv.testOpts.args.name, percent: 0, color: 'red' })),
+    data: testerViewTypes.map(tv => ({ label: tv.testOpts.args.name, percent: 0, color: 'red' })),
     style: {
       fg: 'default',
       bg: 'default',
@@ -34,10 +34,11 @@ const testerPctComplete = {
       fg: '#00ff00'
     },
   },
+  // Todo: Shouldn't need instance
   instance: undefined
 };
 
-const statTable = {
+const statTableType = {
   gridCoords: {
     row: 10.5,
     col: 3,
@@ -65,11 +66,12 @@ const statTable = {
     }
   },
   headers: ['Testers', 'SessionId', 'Threshold', 'Bugs', 'Complete (%)'],
-  seedData: testerViews.map(tv => [tv.testOpts.args.name, '-', 0, 0, 0]),
+  seedData: testerViewTypes.map(tv => [tv.testOpts.args.name, '-', 0, 0, 0]),
+  // Todo: Shouldn't need instance
   instance: undefined
 };
 
-const newBugs = {
+const newBugsType = {
   gridCoords: {
     row: 10.5,
     col: 7.0,
@@ -96,10 +98,11 @@ const newBugs = {
       }
     }
   },
+  // Todo: Shouldn't need instance
   instance: undefined
 };
 
-const totalProgress = {
+const totalProgressType = {
   gridCoords: {
     row: 10.5,
     col: 8.3,
@@ -120,14 +123,15 @@ const totalProgress = {
       }
     }
   },
+  // Todo: Shouldn't need instance
   instance: undefined
 };
 
 
 module.exports = {
-  testerViews, //: [app, server, tls],
-  testerPctComplete,
-  statTable,
-  newBugs,
-  totalProgress
+  testerViewTypes, //: [app, server, tls],
+  testerPctCompleteType,
+  statTableType,
+  newBugsType,
+  totalProgressType
 };

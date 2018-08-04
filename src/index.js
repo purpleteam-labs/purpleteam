@@ -5,5 +5,5 @@ const { processCommands } = require('src/cli');
 
 exports.start = async (options) => {
   log.debug('Starting the CLI', { tags: ['index'] });
-  processCommands({ argv: options.argv });
+  await processCommands({ argv: options.argv });  
 };

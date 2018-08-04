@@ -1,7 +1,6 @@
 const config = require('config/config');
 const log = require('purpleteam-logger').logger();
-const api = require('src/apiDecoratingAdapter');
-const dashboard = require('src/dashboard');
+const api = require('src/presenter/apiDecoratingAdapter');
 
 api.init(log);
 
@@ -21,9 +20,9 @@ exports.run = async (parsedArgv, context) => {
     // Todo: KC: In the future we could deserialise configFileContents, and possibly validate before sending to the Orchestrator.
     //    https://github.com/danivek/json-api-serializer looks to be well maintained.
     //    https://github.com/SeyZ/jsonapi-serializer     looks to be a little neglected.
-
-    await api.test(configFileContents).then(dashboard.test);
-
+    
+    await api.test(configFileContents);
+    
     //  stream tester log           Print each tester to a table row, and to log file
     //  stream slave log            To artifacts dir
   } else {

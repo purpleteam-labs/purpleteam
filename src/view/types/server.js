@@ -2,6 +2,7 @@ const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 
 const testOpts = {
+  // Todo: Shouldn't need gridCoords
   gridCoords: {
     row: 0,
     col: 0,
@@ -24,6 +25,7 @@ const testOpts = {
     name: 'server'
   }
 };
+// Todo: Shouldn't need testInstance
 let testInstance;
 
 const testPlanOpts = {
@@ -68,6 +70,7 @@ const testPlanOpts = {
     name: 'server'
   }
 };
+// Todo: Shouldn't need testInstance
 let testPlanInstance;
 
 module.exports = {

@@ -1,7 +1,6 @@
 const convict = require('convict');
 const path = require('path');
 
-
 const schema = {
   env: {
     doc: 'The application environment.',
@@ -42,17 +41,6 @@ const schema = {
       doc: 'The URL of the purpleteam API',
       formate: 'url',
       default: 'not yet set'
-    }
-  },
-  testers: {
-    app: {
-      testerProgressRoute: '/app-tester-progress'
-    },
-    server: {
-      testerProgressRoute: '/server-tester-progress'
-    },
-    tls: {
-      testerProgressRoute: '/tls-tester-progress'
     }
   },
   results: {

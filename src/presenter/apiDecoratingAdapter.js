@@ -2,12 +2,13 @@ const config = require('config/config');
 const readFileAsync = require('util').promisify(require('fs').readFile);
 const request = require('request-promise-native');
 const EventSource = require('eventsource');
-const model = require('src/models/model');
-
-const { TesterUnavailable, TestPlanUnavailable } = require('src/strings');
+const Model = require('src/models/model');
+const dashboard = require('src/view/dashboard');
+const { TesterUnavailable, TestPlanUnavailable, TesterProgressRouteSuffix } = require('src/strings');
 
 let log;
 let apiResponse;
+let model;
 
 const init = (logger) => {
   if (log) return;
@@ -15,7 +16,7 @@ const init = (logger) => {
 };
 
 const apiUrl = config.get('purpleteamApi.url');
-const testersConfig = config.get('testers');
+//const testersConfig = config.get('testers');
 
 
 const getBuildUserConfigFile = async (filePath) => {
@@ -55,7 +56,6 @@ const postToApi = async (configFileContents, route) => {
       }
     };
     log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['apiDecoratingAdapter'] });
-    throw err;
   });
 };
 
@@ -86,9 +86,9 @@ const subscribeToTesterPctComplete = ((update) => {
       }, {
         testerType: 'app', sessionId: 'adminUser', threshold: 0, bugs: 0, pctComplete: appPct
       }, {
-        testerType: 'server', sessionId: 'N/A', threshold: 0, bugs: 0, pctComplete: 0
+        testerType: 'server', sessionId: 'NA', threshold: 0, bugs: 0, pctComplete: 0
       }, {
-        testerType: 'tls', sessionId: 'N/A', threshold: 0, bugs: 0, pctComplete: 0
+        testerType: 'tls', sessionId: 'NA', threshold: 0, bugs: 0, pctComplete: 0
       }]
     };
     
@@ -112,33 +112,41 @@ const receiveTestPlan = (logger) => {
 };
 
 
-const subscribeToTesterProgress = (logger) => {
-  const loggerName = logger.options.name;
-  const testerRepresentative = apiResponse.find(element => element.name === loggerName);
+const subscribeToTesterProgress = () => {
+  const { testerNamesAndSessions } = model;
 
-  if (testerRepresentative) {
-    logger.log(testerRepresentative.message);
-    if (testerRepresentative.message !== TesterUnavailable(loggerName)) {
-      const eventSource = new EventSource(`${apiUrl}${testersConfig[loggerName].testerProgressRoute}`);
-      eventSource.addEventListener('testerProgress', (event) => {
-        if (event.origin === apiUrl) {
-          logger.log(JSON.parse(event.data).progress);
-        } else {
-          logger.log(`Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`);
-        }
+  testerNamesAndSessions().forEach((testerNameAndSession) => {
+    const testerRepresentative = apiResponse.find(element => element.name === testerNameAndSession.testerType);
+    if (testerRepresentative) {
+      model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: testerRepresentative.message });
+      if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
+        const eventSource = new EventSource(`${apiUrl}/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
+        // Todo: KC: Will need to handle events depending on sessionId.
+        eventSource.addEventListener('testerProgress', (event) => {
+          if (event.origin === apiUrl) {
+            // Todo: KC: Will need to handle different types of messages besides .progress
+            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).progress });
+          } else {
+            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
+          }
+        });
+        // Todo: KC: Here we'll need to listen for the end event. When it arrives, we need to fetch the testerProgress logs, test results, and reports.
+      }
+    } else {
+      model.propagateTesterMessage({
+        testerType: testerNameAndSession.testerType,
+        sessionId: testerNameAndSession.testerType,
+        message: `"${testerNameAndSession.testerType}" tester for session with Id "${testerNameAndSession.sessionId}" doesn't currently appear to be online`
       });
-      // Todo: KC: Here we'll need to listen for the end event. When it arrives, we need to fetch the testerProgress logs, test results, and reports.
     }
-  } else {
-    logger.log(`${loggerName} tester doesn't currently appear to be online`);
-  }
+  });
 };
 
-
+/*
 const initModel = (configFileContents) => {
   model.init(configFileContents);
 };
-
+*/
 
 const getTestPlans = async configFileContents =>
   new Promise(async (resolve, reject) => {
@@ -149,7 +157,7 @@ const getTestPlans = async configFileContents =>
     return apiResponse ? resolve(receiveTestPlan) : reject();
   });
 
-
+/*
 const test = async configFileContents =>
   new Promise(async (resolve, reject) => {
     initModel(configFileContents);
@@ -166,6 +174,28 @@ const test = async configFileContents =>
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
     //    https://www.html5rocks.com/en/tutorials/eventsource/basics/#toc-canceling
   });
+*/
+
+const test = async (configFileContents) => {
+  debugger;  
+  model = new Model(configFileContents);  
+  const route = 'test';  
+  await postToApi(configFileContents, route);
+  
+debugger;
+  if (apiResponse) {
+    dashboard.test(model.sessionIds());
+    model.on('testerMessage', (testerType, sessionId, message) => {
+      dashboard.printTesterMessage(testerType, sessionId, message);
+    });
+    subscribeToTesterProgress();
+  } else {
+    log.crit('There didn\'t appear to be a response from the purpleteam API', { tags: ['apiDecoratingAdapter'] });
+  }
+  
+  
+};
+
 
 
 module.exports = {

@@ -1,7 +1,7 @@
 const config = require('config/config');
 const log = require('purpleteam-logger').logger();
-const api = require('src/apiDecoratingAdapter');
-const dashboard = require('src/dashboard');
+const api = require('src/presenter/apiDecoratingAdapter');
+const dashboard = require('src/view/dashboard');
 
 api.init(log);
 
