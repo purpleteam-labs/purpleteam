@@ -178,11 +178,10 @@ const test = async configFileContents =>
 
 const test = async (configFileContents) => {
   debugger;  
-  model = new Model(configFileContents);  
+  model = new Model(configFileContents);
   const route = 'test';  
   await postToApi(configFileContents, route);
-  
-debugger;
+
   if (apiResponse) {
     dashboard.test(model.sessionIds());
     model.on('testerMessage', (testerType, sessionId, message) => {

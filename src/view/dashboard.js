@@ -410,7 +410,7 @@ const initCarousel = () => {
       totalProgressType.type,
       totalProgressType.args
     );
-    debugger;
+
 
 /*
     subscribeToTesterProgress(testerViewType.testInstance);
@@ -455,17 +455,15 @@ const initCarousel = () => {
     
 
 
-    // There is a bug with blessed. The loggers of the first page (and only the first page) are always in scope.
-    //   Todo: submit issue.
+    // There is a bug with the contrib.lcd where if the user makes the screen too small, the characters loose shape.
     // There is another bug with blessed, where there is no parent of the below instances, this exhibits itself in blessed/lib/widgets/element at https://github.com/chjj/blessed/blob/eab243fc7ad27f1d2932db6134f7382825ee3488/lib/widgets/element.js#L1060
     //   https://github.com/chjj/blessed/issues/350
-    scrn.on('resize', function () {
-      debugger;
+    scrn.on('resize', function () {      
       loggers.forEach(logger => logger.instance.emit('attach'));
       testerPctComplete.instance.parent = this;
       testerPctComplete.instance.emit('attach');
-      statTable.instance.emit('attach');
-      //newBugs.instance.emit('attach');
+      statTable.instance.emit('attach');      
+      // newBugs.instance.emit('attach');
       totalProgress.instance.parent = this;
       totalProgress.instance.emit('attach');
     });
