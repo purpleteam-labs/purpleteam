@@ -523,6 +523,22 @@ const initTPCarousel = (receiveTestPlan) => {
 };
 
 
+const setupInfoOuts = (testerSessions) => {
+  testerNames.forEach((tn) => {
+    const sessionsPerTester = testerSessions.filter(t => t.testerType === tn);
+    const loggerGridCoordsPetTester = calculateGridCoordsForLoggers(sessionsPerTester.map(row => row.sessionId));
+
+    internals.infoOuts[tn].loggers = sessionsPerTester.map(t => ({
+      sessionId: t.sessionId, instance: 'To be assigned', gridCoords: loggerGridCoordsPetTester[t.sessionId]
+    }));
+
+    internals.infoOuts[tn].statTable.thresholds = sessionsPerTester.map(t => ({
+      sessionId: t.sessionId, threshold: t.threshold, bugs: 0, pctComplete: 0
+    }));
+  });
+};
+
+
 const testPlan = receiveTestPlan => new Promise((resolve, reject) => {
   try {
     initTPCarousel(receiveTestPlan);
@@ -533,25 +549,8 @@ const testPlan = receiveTestPlan => new Promise((resolve, reject) => {
 });
 
 
-const test = (thresholds) => {
-  
-  // testerNames = ['app', 'server', 'tls']
-  
-
-  testerNames.forEach((tn) => {
-    const thresholdRowsPerTester = thresholds.filter(t => t.testerType === tn);
-    const loggerGridCoordsPetTester = calculateGridCoordsForLoggers(thresholdRowsPerTester.map(row => row.sessionId));
-    // Setup loggers
-    internals.infoOuts[tn].loggers = thresholdRowsPerTester.map(t => ({
-      sessionId: t.sessionId, instance: 'To be assigned', gridCoords: loggerGridCoordsPetTester[t.sessionId]
-    }));
-    // Setup statTable
-    internals.infoOuts[tn].statTable.thresholds = thresholdRowsPerTester.map(t => ({
-      sessionId: t.sessionId, threshold: t.threshold, bugs: 0, pctComplete: 0
-    }));
-  });
-
-
+const test = (testerSessions) => {
+  setupInfoOuts(testerSessions);
   initCarousel();
 };
 

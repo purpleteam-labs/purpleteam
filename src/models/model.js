@@ -62,8 +62,8 @@ class Model extends EventEmitter {
   }
 
 
-  thresholds() {
-    const thresholds = job.included.filter(resourceObj =>
+  testerSessions() {
+    const testerSessions = job.included.filter(resourceObj =>
       resourceObj.type === 'testSession').map((testSessionResObj) => {
         let alertThreshold;
         if (testSessionResObj.attributes) {
@@ -73,9 +73,9 @@ class Model extends EventEmitter {
         }
         return { testerType: 'app', sessionId: testSessionResObj.id, threshold: alertThreshold };
       });
-    thresholds.push({ testerType: 'server', sessionId: 'NA', threshold: 0 });
-    thresholds.push({ testerType: 'tls', sessionId: 'NA', threshold: 0 });
-    return thresholds;
+    testerSessions.push({ testerType: 'server', sessionId: 'NA', threshold: 0 });
+    testerSessions.push({ testerType: 'tls', sessionId: 'NA', threshold: 0 });
+    return testerSessions;
   }
 
 
