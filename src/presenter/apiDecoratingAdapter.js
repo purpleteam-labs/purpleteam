@@ -142,11 +142,6 @@ const subscribeToTesterProgress = () => {
   });
 };
 
-/*
-const initModel = (configFileContents) => {
-  model.init(configFileContents);
-};
-*/
 
 const getTestPlans = async configFileContents =>
   new Promise(async (resolve, reject) => {
@@ -157,24 +152,6 @@ const getTestPlans = async configFileContents =>
     return apiResponse ? resolve(receiveTestPlan) : reject();
   });
 
-/*
-const test = async configFileContents =>
-  new Promise(async (resolve, reject) => {
-    initModel(configFileContents);
-    const route = 'test';
-
-    await postToApi(configFileContents, route);
-
-    return apiResponse ? resolve({
-      subscribeToTesterProgress,
-      subscribeToTesterPctComplete
-    }) : reject();
-
-    // To cancel the event stream:
-    //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
-    //    https://www.html5rocks.com/en/tutorials/eventsource/basics/#toc-canceling
-  });
-*/
 
 const test = async (configFileContents) => {
   debugger;  
@@ -183,11 +160,14 @@ const test = async (configFileContents) => {
   await postToApi(configFileContents, route);
 
   if (apiResponse) {
-    dashboard.test({ sessionIds: model.sessionIds(), thresholds: model.thresholds() });
+    dashboard.test(model.thresholds());
     model.on('testerMessage', (testerType, sessionId, message) => {
       dashboard.printTesterMessage(testerType, sessionId, message);
     });
     subscribeToTesterProgress();
+    // To cancel the event stream:
+    //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
+    //    https://www.html5rocks.com/en/tutorials/eventsource/basics/#toc-canceling
   } else {
     log.crit('There didn\'t appear to be a response from the purpleteam API', { tags: ['apiDecoratingAdapter'] });
   }

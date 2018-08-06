@@ -62,12 +62,6 @@ class Model extends EventEmitter {
   }
 
 
-  sessionIds() {
-    return job.included.filter(resourceObj => resourceObj.type === 'testSession')
-      .map(testSessionResObj => testSessionResObj.id);
-  }
-
-
   thresholds() {
     const thresholds = job.included.filter(resourceObj =>
       resourceObj.type === 'testSession').map((testSessionResObj) => {
