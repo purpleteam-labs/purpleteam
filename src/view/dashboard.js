@@ -14,21 +14,34 @@ const internals = {
         sessionId: '<sessionId>', instance: testerViewType.testInstance, gridCoords: { row: , col: , rowSpan: , colSpan: }
       }*/],
       testerPctComplete: { instance: 'To be assigned' },
-      statTable: { instance: 'To be assigned' },
+      statTable: {
+        instance: 'To be assigned',
+        thresholds: [/*{
+          sessionId: '<sessionId>', threshold: <threshold>, bugs: 0, pctComplete: 0
+        }, {
+          sessionId: '<sessionId>', threshold: <threshold>, bugs: 0, pctComplete: 0
+        }*/]
+      },
       newBugs: { instance: 'To be assigned' },
       totalProgress: { instance: 'To be assigned' }
     },
     server: {
       loggers: [],
       testerPctComplete: { instance: 'To be assigned' },
-      statTable: { instance: 'To be assigned' },
+      statTable: {
+        instance: 'To be assigned',
+        thresholds: []
+      },
       newBugs: { instance: 'To be assigned' },
       totalProgress: { instance: 'To be assigned' }
     },
     tls: {
       loggers: [],
       testerPctComplete: { instance: 'To be assigned' },
-      statTable: { instance: 'To be assigned' },
+      statTable: {
+        instance: 'To be assigned',
+        thresholds: []
+      },
       newBugs: { instance: 'To be assigned' },
       totalProgress: { instance: 'To be assigned' }
     }
@@ -363,14 +376,14 @@ const initCarousel = () => {
 
     // One per test session, per tester.
     loggers.forEach((logger) => {
-      const { buggerLength, label, name, style, tags } = testerViewType.testOpts.args;
+      const { bufferLength, label, name, style, tags } = testerViewType.testOpts.args;
       logger.instance = grid.set(
         logger.gridCoords.row,
         logger.gridCoords.col,
         logger.gridCoords.rowSpan,
         logger.gridCoords.colSpan,
         testerViewType.testOpts.type,
-        { buggerLength, label: `${label} - Session: ${logger.sessionId}`, name, style, tags }
+        { bufferLength, label: `${label} - Session: ${logger.sessionId}`, name, style, tags }
       );
     });
 
@@ -422,10 +435,18 @@ const initCarousel = () => {
       scrn.render();
     });
 */
+    debugger;
+
     // statTable
     statTable.instance.setData({
       headers: statTableType.headers,
-      data: statTableType.seedData
+      data: (() => {
+        const statTableDataRows = [];
+        testerNames.forEach((tn) => {        
+          statTableDataRows.push(...internals.infoOuts[tn].statTable.thresholds.map(thresholdRow => [tn, thresholdRow.sessionId, thresholdRow.threshold, thresholdRow.bugs, thresholdRow.pctComplete]));
+        });
+        return statTableDataRows;
+      })()
     });
     statTable.instance.focus();
 
@@ -512,13 +533,26 @@ const testPlan = receiveTestPlan => new Promise((resolve, reject) => {
 });
 
 
-const test = (sessionIds) => {
+const test = (options) => {
+  const { sessionIds, thresholds } = options;
+
+  // Setup loggers
   const appGridCoords = calculateGridCoordsForLoggers(sessionIds);
   internals.infoOuts.app.loggers = sessionIds.map(iD => ({ sessionId: iD, instance: 'To be assigned', gridCoords: appGridCoords[iD] }));
-  debugger;
+
   const naGridCoords = calculateGridCoordsForLoggers(['NA']);
   internals.infoOuts.server.loggers = [{ sessionId: 'NA', instance: 'To be assigned', gridCoords: naGridCoords.NA }];
   internals.infoOuts.tls.loggers = [{ sessionId: 'NA', instance: 'To be assigned', gridCoords: naGridCoords.NA }];
+
+  // Setup statTable
+  debugger;
+  thresholds.forEach((threshold) => {
+    internals.infoOuts[threshold.testerType].statTable.thresholds.push({
+      sessionId: threshold.sessionId, threshold: threshold.threshold, bugs: 0, pctComplete: 0
+    });
+  });
+
+
   initCarousel();
 };
 

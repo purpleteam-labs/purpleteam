@@ -35,8 +35,7 @@ class Model extends EventEmitter {
     debugger;
     super();
     job = JSON.parse(options);
-    this.initTesterMessages(options);
-
+    this.initTesterMessages();
   }
 
 
@@ -58,7 +57,8 @@ class Model extends EventEmitter {
       record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId
     );
     messages.messages.push(msgOpts.message);
-    this.emit('testerMessage', msgOpts.testerType, msgOpts.sessionId, msgOpts.message);
+    // Setup as placeholder for proper queue if needed.
+    this.emit('testerMessage', messages.testerType, messages.sessionId, messages.messages.shift());
   }
 
 
@@ -66,6 +66,24 @@ class Model extends EventEmitter {
     return job.included.filter(resourceObj => resourceObj.type === 'testSession')
       .map(testSessionResObj => testSessionResObj.id);
   }
+
+
+  thresholds() {
+    const thresholds = job.included.filter(resourceObj =>
+      resourceObj.type === 'testSession').map((testSessionResObj) => {
+        let alertThreshold;
+        if (testSessionResObj.attributes) {
+          alertThreshold = testSessionResObj.attributes.alertThreshold ? testSessionResObj.attributes.alertThreshold : 0;
+        } else {
+          alertThreshold = 0;
+        }
+        return { testerType: 'app', sessionId: testSessionResObj.id, threshold: alertThreshold };
+      });
+    thresholds.push({ testerType: 'server', sessionId: 'NA', threshold: 0 });
+    thresholds.push({ testerType: 'tls', sessionId: 'NA', threshold: 0 });
+    return thresholds;
+  }
+
 
 }
 

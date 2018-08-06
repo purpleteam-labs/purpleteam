@@ -13,6 +13,7 @@ const testOpts = {
   type: contrib.log,
   args: {
     label: 'App Tester',
+    bufferLength: 1000,
     style: {
       fg: 'default',
       bg: 'default',
@@ -20,8 +21,7 @@ const testOpts = {
         fg: 'magenta',
         bg: 'default'
       }
-    },
-    bufferLength: 1000,
+    },    
     tags: 'true',
     name: 'app'
   }

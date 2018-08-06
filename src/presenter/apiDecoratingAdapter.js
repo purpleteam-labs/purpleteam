@@ -183,7 +183,7 @@ const test = async (configFileContents) => {
   await postToApi(configFileContents, route);
 
   if (apiResponse) {
-    dashboard.test(model.sessionIds());
+    dashboard.test({ sessionIds: model.sessionIds(), thresholds: model.thresholds() });
     model.on('testerMessage', (testerType, sessionId, message) => {
       dashboard.printTesterMessage(testerType, sessionId, message);
     });
