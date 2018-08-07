@@ -123,7 +123,7 @@ const subscribeToTesterProgress = () => {
         const eventSource = new EventSource(`${apiUrl}/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
         eventSource.addEventListener('testerProgress', (event) => {
           if (event.origin === apiUrl) {
-            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).progress });
+            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).progress, event: 'testerProgress' });
           } else {
             model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
           }
@@ -131,7 +131,7 @@ const subscribeToTesterProgress = () => {
 
         eventSource.addEventListener('testerPctComplete', (event) => {
           if (event.origin === apiUrl) {
-            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).pctComplete });
+            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).pctComplete, event: 'testerPctComplete' });
           } else {
             model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
           }
@@ -139,7 +139,7 @@ const subscribeToTesterProgress = () => {
 
         eventSource.addEventListener('testerBugCount', (event) => {
           if (event.origin === apiUrl) {
-            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).bugCount });
+            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).bugCount, event: 'testerBugCount' });
           } else {
             model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
           }
@@ -175,9 +175,12 @@ const test = async (configFileContents) => {
 
   if (apiResponse) {
     dashboard.test(model.testerSessions());
-    model.on('testerMessage', (testerType, sessionId, message) => {
-      dashboard.printTesterMessage(testerType, sessionId, message);
+    model.eventNames().forEach((eN) => {
+      model.on(eN, (testerType, sessionId, message) => {
+        dashboard[`handle${eN.charAt(0).toUpperCase()}${eN.substring(1)}`](testerType, sessionId, message);
+      });
     });
+    
     subscribeToTesterProgress();
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good

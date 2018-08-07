@@ -1,7 +1,8 @@
 const EventEmitter = require('events');
-
 let job;
-let testerMessages;
+const events = { testerProgress: [], testerPctComplete: [], testerBugCount: [] };
+
+
 
 /*
 const setAppPctsComplete = (pctsComplete) => {
@@ -13,19 +14,9 @@ const setAppPctsComplete = (pctsComplete) => {
     });
   });
 };
-
-
-const init = (buildUserConfig) => {
-  job = JSON.parse(buildUserConfig);
-
-  // initTesterPctsPerTestSession();
-};
-
-module.exports = {
-  init,
-  setAppPctsComplete
-};
 */
+
+
 
 
 
@@ -35,29 +26,36 @@ class Model extends EventEmitter {
     debugger;
     super();
     job = JSON.parse(options);
-    this.initTesterMessages();
+    this.eventNames().forEach(e => this.initTesterMessages(e));
   }
 
   // eslint-disable-next-line class-methods-use-this
-  initTesterMessages() {
-    testerMessages = job.included.filter(resourceObj =>
+  eventNames() {
+    return Object.keys(events);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  initTesterMessages(eventName) {
+    events[eventName] = job.included.filter(resourceObj =>
       resourceObj.type === 'testSession').map(testSessionResObj =>
       ({ testerType: 'app', sessionId: testSessionResObj.id, messages: [] }));
-    testerMessages.push({ testerType: 'server', sessionId: 'NA', messages: [] });
-    testerMessages.push({ testerType: 'tls', sessionId: 'NA', messages: [] });
+    events[eventName].push({ testerType: 'server', sessionId: 'NA', messages: [] });
+    events[eventName].push({ testerType: 'tls', sessionId: 'NA', messages: [] });
   }
 
   // eslint-disable-next-line class-methods-use-this
   testerNamesAndSessions() {
-    return testerMessages.map(tNAS => ({ testerType: tNAS.testerType, sessionId: tNAS.sessionId }));
+    return events.testerProgress.map(tNAS => ({ testerType: tNAS.testerType, sessionId: tNAS.sessionId }));
   }
 
 
   propagateTesterMessage(msgOpts) {
-    const messages = testerMessages.find(record => record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId);
-    messages.messages.push(msgOpts.message);
-    // Setup as placeholder for proper queue if needed.
-    this.emit('testerMessage', messages.testerType, messages.sessionId, messages.messages.shift());
+    debugger;
+    const defaultEvent = 'testerProgress';
+    const msgEvents = events[msgOpts.event || defaultEvent].find(record => record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId);
+    msgEvents.messages.push(msgOpts.message);
+    // (push/shift) Setup as placeholder for proper queue if needed.
+    this.emit(msgOpts.event, msgEvents.testerType, msgEvents.sessionId, msgEvents.messages.shift());
   }
 
   // eslint-disable-next-line class-methods-use-this

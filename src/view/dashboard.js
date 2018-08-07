@@ -57,9 +57,19 @@ const screen = blessed.screen({
 });
 
 
-const printTesterMessage = (testerType, sessionId, message) => {
+const handleTesterProgress = (testerType, sessionId, message) => {
   const logger = internals.infoOuts[testerType].loggers.find(l => l.sessionId === sessionId);
   if (logger.instance !== 'To be assigned') logger.instance.log(message);
+};
+
+
+const handleTesterPctComplete = () => {
+
+};
+
+
+const handleTesterBugCount = () => {
+
 };
 
 
@@ -391,5 +401,7 @@ const test = (testerSessions) => {
 module.exports = {
   testPlan,
   test,
-  printTesterMessage
+  handleTesterProgress,
+  handleTesterPctComplete,
+  handleTesterBugCount
 };
