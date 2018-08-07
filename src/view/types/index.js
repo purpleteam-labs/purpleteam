@@ -33,9 +33,7 @@ const testerPctCompleteType = {
       type: 'line',
       fg: '#00ff00'
     },
-  },
-  // Todo: Shouldn't need instance
-  instance: undefined
+  }
 };
 
 const statTableType = {
@@ -66,9 +64,7 @@ const statTableType = {
     }
   },
   headers: ['Testers', 'SessionId', 'Threshold', 'Bugs', 'Complete (%)'],
-  seedData: testerViewTypes.map(tv => [tv.testOpts.args.name, '-', 0, 0, 0]),
-  // Todo: Shouldn't need instance
-  instance: undefined
+  seedData: testerViewTypes.map(tv => [tv.testOpts.args.name, '-', 0, 0, 0])
 };
 
 const newBugsType = {
@@ -97,9 +93,7 @@ const newBugsType = {
         bg: 'default'
       }
     }
-  },
-  // Todo: Shouldn't need instance
-  instance: undefined
+  }
 };
 
 const totalProgressType = {
@@ -122,9 +116,7 @@ const totalProgressType = {
         bg: 'default'
       }
     }
-  },
-  // Todo: Shouldn't need instance
-  instance: undefined
+  }
 };
 
 
