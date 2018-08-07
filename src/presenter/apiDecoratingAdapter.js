@@ -176,7 +176,6 @@ const test = async (configFileContents) => {
 };
 
 
-
 module.exports = {
   init,
   getBuildUserConfigFile,

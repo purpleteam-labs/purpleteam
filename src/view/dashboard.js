@@ -8,19 +8,19 @@ const testerNames = testerViewTypes.map(tv => tv.testOpts.args.name);
 const internals = {
   infoOuts: {
     app: {
-      loggers: [/*{
+      loggers: [/* {
         sessionId: '<sessionId>', instance: testerViewType.testInstance, gridCoords: { row: , col: , rowSpan: , colSpan: }
       }, {
         sessionId: '<sessionId>', instance: testerViewType.testInstance, gridCoords: { row: , col: , rowSpan: , colSpan: }
-      }*/],
+      } */],
       testerPctComplete: { instance: 'To be assigned' },
       statTable: {
         instance: 'To be assigned',
-        thresholds: [/*{
+        thresholds: [/* {
           sessionId: '<sessionId>', threshold: <threshold>, bugs: 0, pctComplete: 0
         }, {
           sessionId: '<sessionId>', threshold: <threshold>, bugs: 0, pctComplete: 0
-        }*/]
+        } */]
       },
       newBugs: { instance: 'To be assigned' },
       totalProgress: { instance: 'To be assigned' }
@@ -58,9 +58,7 @@ const screen = blessed.screen({
 
 
 const printTesterMessage = (testerType, sessionId, message) => {
-  const logger = internals.infoOuts[testerType].loggers.find(
-    l => l.sessionId === sessionId
-  );
+  const logger = internals.infoOuts[testerType].loggers.find(l => l.sessionId === sessionId);
   if (logger.instance !== 'To be assigned') logger.instance.log(message);
 };
 
@@ -102,269 +100,110 @@ const calculateGridCoordsForLoggers = (sessionIds) => {
   const loggerCount = sessionIds.length;
 
   const layout = {
-    1: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 10.5, colSpan: 12
-      }
-    },
+    1: { [sessionIds[0]]: { row: 0, col: 0, rowSpan: 10.5, colSpan: 12 } },
     2: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 5.25, colSpan: 12
-      },
-      [sessionIds[1]]: {
-        row: 5.25, col: 0, rowSpan: 5.25, colSpan: 12
-      }
-    }, 
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 5.25, colSpan: 12 },
+      [sessionIds[1]]: { row: 5.25, col: 0, rowSpan: 5.25, colSpan: 12 }
+    },
     3: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 3.5, colSpan: 12
-      },
-      [sessionIds[1]]: {
-        row: 3.5, col: 0, rowSpan: 3.5, colSpan: 12
-      },
-      [sessionIds[2]]: {
-        row: 7, col: 0, rowSpan: 3.5, colSpan: 12
-      }
-    }, 
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 3.5, colSpan: 12 },
+      [sessionIds[1]]: { row: 3.5, col: 0, rowSpan: 3.5, colSpan: 12 },
+      [sessionIds[2]]: { row: 7, col: 0, rowSpan: 3.5, colSpan: 12 }
+    },
     4: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 3.5, colSpan: 12
-      },
-      [sessionIds[1]]: {
-        row: 3.5, col: 0, rowSpan: 3.5, colSpan: 12
-      },
-      [sessionIds[2]]: {
-        row: 7, col: 0, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[3]]: {
-        row: 7, col: 6, rowSpan: 3.5, colSpan: 6
-      }
-    }, 
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 3.5, colSpan: 12 },
+      [sessionIds[1]]: { row: 3.5, col: 0, rowSpan: 3.5, colSpan: 12 },
+      [sessionIds[2]]: { row: 7, col: 0, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[3]]: { row: 7, col: 6, rowSpan: 3.5, colSpan: 6 }
+    },
     5: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 3.5, colSpan: 12
-      },
-      [sessionIds[1]]: {
-        row: 3.5, col: 0, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[2]]: {
-        row: 3.5, col: 6, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[3]]: {
-        row: 7, col: 0, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[4]]: {
-        row: 7, col: 6, rowSpan: 3.5, colSpan: 6
-      }
-    }, 
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 3.5, colSpan: 12 },
+      [sessionIds[1]]: { row: 3.5, col: 0, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[2]]: { row: 3.5, col: 6, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[3]]: { row: 7, col: 0, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[4]]: { row: 7, col: 6, rowSpan: 3.5, colSpan: 6 }
+    },
     6: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[1]]: {
-        row: 0, col: 6, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[2]]: {
-        row: 3.5, col: 0, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[3]]: {
-        row: 3.5, col: 6, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[4]]: {
-        row: 7, col: 0, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[5]]: {
-        row: 7, col: 6, rowSpan: 3.5, colSpan: 6
-      }
-    }, 
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[1]]: { row: 0, col: 6, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[2]]: { row: 3.5, col: 0, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[3]]: { row: 3.5, col: 6, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[4]]: { row: 7, col: 0, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[5]]: { row: 7, col: 6, rowSpan: 3.5, colSpan: 6 }
+    },
     7: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[1]]: {
-        row: 0, col: 6, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[2]]: {
-        row: 3.5, col: 0, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[3]]: {
-        row: 3.5, col: 6, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[4]]: {
-        row: 7, col: 0, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[5]]: {
-        row: 7, col: 4, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[6]]: {
-        row: 7, col: 8, rowSpan: 3.5, colSpan: 4
-      }
-    }, 
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[1]]: { row: 0, col: 6, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[2]]: { row: 3.5, col: 0, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[3]]: { row: 3.5, col: 6, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[4]]: { row: 7, col: 0, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[5]]: { row: 7, col: 4, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[6]]: { row: 7, col: 8, rowSpan: 3.5, colSpan: 4 }
+    },
     8: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[1]]: {
-        row: 0, col: 6, rowSpan: 3.5, colSpan: 6
-      },
-      [sessionIds[2]]: {
-        row: 3.5, col: 0, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[3]]: {
-        row: 3.5, col: 4, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[4]]: {
-        row: 3.5, col: 8, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[5]]: {
-        row: 7, col: 0, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[6]]: {
-        row: 7, col: 4, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[7]]: {
-        row: 7, col: 8, rowSpan: 3.5, colSpan: 4
-      }
-    }, 
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[1]]: { row: 0, col: 6, rowSpan: 3.5, colSpan: 6 },
+      [sessionIds[2]]: { row: 3.5, col: 0, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[3]]: { row: 3.5, col: 4, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[4]]: { row: 3.5, col: 8, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[5]]: { row: 7, col: 0, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[6]]: { row: 7, col: 4, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[7]]: { row: 7, col: 8, rowSpan: 3.5, colSpan: 4 }
+    },
     9: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[1]]: {
-        row: 0, col: 4, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[2]]: {
-        row: 0, col: 8, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[3]]: {
-        row: 3.5, col: 0, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[4]]: {
-        row: 3.5, col: 4, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[5]]: {
-        row: 3.5, col: 8, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[6]]: {
-        row: 7, col: 0, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[7]]: {
-        row: 7, col: 4, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[8]]: {
-        row: 7, col: 8, rowSpan: 3.5, colSpan: 4
-      }
-    }, 
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[1]]: { row: 0, col: 4, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[2]]: { row: 0, col: 8, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[3]]: { row: 3.5, col: 0, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[4]]: { row: 3.5, col: 4, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[5]]: { row: 3.5, col: 8, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[6]]: { row: 7, col: 0, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[7]]: { row: 7, col: 4, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[8]]: { row: 7, col: 8, rowSpan: 3.5, colSpan: 4 }
+    },
     10: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[1]]: {
-        row: 0, col: 4, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[2]]: {
-        row: 0, col: 8, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[3]]: {
-        row: 3.5, col: 0, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[4]]: {
-        row: 3.5, col: 4, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[5]]: {
-        row: 3.5, col: 8, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[6]]: {
-        row: 7, col: 0, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[7]]: {
-        row: 7, col: 3, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[8]]: {
-        row: 7, col: 6, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[9]]: {
-        row: 7, col: 9, rowSpan: 3.5, colSpan: 3
-      }
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[1]]: { row: 0, col: 4, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[2]]: { row: 0, col: 8, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[3]]: { row: 3.5, col: 0, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[4]]: { row: 3.5, col: 4, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[5]]: { row: 3.5, col: 8, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[6]]: { row: 7, col: 0, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[7]]: { row: 7, col: 3, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[8]]: { row: 7, col: 6, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[9]]: { row: 7, col: 9, rowSpan: 3.5, colSpan: 3 }
     },
     11: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[1]]: {
-        row: 0, col: 4, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[2]]: {
-        row: 0, col: 8, rowSpan: 3.5, colSpan: 4
-      },
-      [sessionIds[3]]: {
-        row: 3.5, col: 0, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[4]]: {
-        row: 3.5, col: 3, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[5]]: {
-        row: 3.5, col: 6, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[6]]: {
-        row: 3.5, col: 9, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[7]]: {
-        row: 7, col: 0, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[8]]: {
-        row: 7, col: 3, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[9]]: {
-        row: 7, col: 6, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[10]]: {
-        row: 7, col: 9, rowSpan: 3.5, colSpan: 3
-      }
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[1]]: { row: 0, col: 4, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[2]]: { row: 0, col: 8, rowSpan: 3.5, colSpan: 4 },
+      [sessionIds[3]]: { row: 3.5, col: 0, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[4]]: { row: 3.5, col: 3, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[5]]: { row: 3.5, col: 6, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[6]]: { row: 3.5, col: 9, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[7]]: { row: 7, col: 0, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[8]]: { row: 7, col: 3, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[9]]: { row: 7, col: 6, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[10]]: { row: 7, col: 9, rowSpan: 3.5, colSpan: 3 }
     },
     12: {
-      [sessionIds[0]]: {
-        row: 0, col: 0, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[1]]: {
-        row: 0, col: 3, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[2]]: {
-        row: 0, col: 6, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[3]]: {
-        row: 0, col: 9, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[4]]: {
-        row: 3.5, col: 0, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[5]]: {
-        row: 3.5, col: 3, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[6]]: {
-        row: 3.5, col: 6, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[7]]: {
-        row: 3.5, col: 9, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[8]]: {
-        row: 7, col: 0, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[9]]: {
-        row: 7, col: 3, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[10]]: {
-        row: 7, col: 6, rowSpan: 3.5, colSpan: 3
-      },
-      [sessionIds[0]]: {
-        row: 7, col: 9, rowSpan: 10.5, colSpan: 3
-      }
+      [sessionIds[0]]: { row: 0, col: 0, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[1]]: { row: 0, col: 3, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[2]]: { row: 0, col: 6, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[3]]: { row: 0, col: 9, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[4]]: { row: 3.5, col: 0, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[5]]: { row: 3.5, col: 3, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[6]]: { row: 3.5, col: 6, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[7]]: { row: 3.5, col: 9, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[8]]: { row: 7, col: 0, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[9]]: { row: 7, col: 3, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[10]]: { row: 7, col: 6, rowSpan: 3.5, colSpan: 3 },
+      [sessionIds[11]]: { row: 7, col: 9, rowSpan: 10.5, colSpan: 3 }
     }
   };
 
   return layout[`${loggerCount}`];
 };
-
 
 
 const initCarousel = () => {
@@ -377,7 +216,7 @@ const initCarousel = () => {
     // One per test session, per tester.
     loggers.forEach((logger) => {
       const { bufferLength, label, name, style, tags } = testerViewType.testOpts.args;
-      logger.instance = grid.set(
+      logger.instance = grid.set( // eslint-disable-line no-param-reassign
         logger.gridCoords.row,
         logger.gridCoords.col,
         logger.gridCoords.rowSpan,
@@ -527,14 +366,8 @@ const setupInfoOuts = (testerSessions) => {
   testerNames.forEach((tn) => {
     const sessionsPerTester = testerSessions.filter(t => t.testerType === tn);
     const loggerGridCoordsPetTester = calculateGridCoordsForLoggers(sessionsPerTester.map(row => row.sessionId));
-
-    internals.infoOuts[tn].loggers = sessionsPerTester.map(t => ({
-      sessionId: t.sessionId, instance: 'To be assigned', gridCoords: loggerGridCoordsPetTester[t.sessionId]
-    }));
-
-    internals.infoOuts[tn].statTable.thresholds = sessionsPerTester.map(t => ({
-      sessionId: t.sessionId, threshold: t.threshold, bugs: 0, pctComplete: 0
-    }));
+    internals.infoOuts[tn].loggers = sessionsPerTester.map(t => ({ sessionId: t.sessionId, instance: 'To be assigned', gridCoords: loggerGridCoordsPetTester[t.sessionId] }));
+    internals.infoOuts[tn].statTable.thresholds = sessionsPerTester.map(t => ({ sessionId: t.sessionId, threshold: t.threshold, bugs: 0, pctComplete: 0 }));
   });
 };
 
