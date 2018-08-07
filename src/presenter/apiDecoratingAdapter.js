@@ -121,11 +121,25 @@ const subscribeToTesterProgress = () => {
       model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: testerRepresentative.message });
       if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
         const eventSource = new EventSource(`${apiUrl}/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
-        // Todo: KC: Will need to handle events depending on sessionId.
         eventSource.addEventListener('testerProgress', (event) => {
           if (event.origin === apiUrl) {
-            // Todo: KC: Will need to handle different types of messages besides .progress
             model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).progress });
+          } else {
+            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
+          }
+        });
+
+        eventSource.addEventListener('testerPctComplete', (event) => {
+          if (event.origin === apiUrl) {
+            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).pctComplete });
+          } else {
+            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
+          }
+        });
+
+        eventSource.addEventListener('testerBugCount', (event) => {
+          if (event.origin === apiUrl) {
+            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).bugCount });
           } else {
             model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
           }
