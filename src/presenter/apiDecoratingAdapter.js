@@ -60,46 +60,6 @@ const postToApi = async (configFileContents, route) => {
 };
 
 
-// Temp variables until we've setup the subscription.
-let appPct = 0;
-let serverPct = 0;
-let tlsPct = 0;
-let testerPctCompleteIntervalId;
-
-const subscribeToTesterPctComplete = ((update) => {
-  // Todo: Do the actual subscription to the SSE
-  // We'll need a function to handle pct events from the testers, and another (probably use this one) to update the view.
-  clearInterval(testerPctCompleteIntervalId);
-
-  testerPctCompleteIntervalId = setInterval(() => {
-    appPct = appPct > 0.99 ? 0.00 : appPct + 0.01;
-    serverPct = serverPct > 0.99 ? 0.00 : serverPct + 0.02;
-    tlsPct = tlsPct > 0.99 ? 0.00 : tlsPct + 0.025;
-
-    const pctsComplete = [{ id: 'lowPrivUser', pct: appPct }, { id: 'adminUser', pct: appPct }];
-    
-    model.setAppPctsComplete(pctsComplete);
-
-    let patch = {
-      runningStats: [{
-        testerType: 'app', sessionId: 'lowPrivUser', threshold: 12, bugs: 0, pctComplete: appPct
-      }, {
-        testerType: 'app', sessionId: 'adminUser', threshold: 0, bugs: 0, pctComplete: appPct
-      }, {
-        testerType: 'server', sessionId: 'NA', threshold: 0, bugs: 0, pctComplete: 0
-      }, {
-        testerType: 'tls', sessionId: 'NA', threshold: 0, bugs: 0, pctComplete: 0
-      }]
-    };
-    
-    // ........... Now deal with the update function parameters .....
-
-    //update({ app: appPct, server: serverPct, tls: tlsPct });
-    update(patch);
-  }, 500);
-});
-
-
 const receiveTestPlan = (logger) => {
   const loggerName = logger.options.name;
   const testerRepresentative = apiResponse.find(element => element.name === loggerName);
@@ -121,9 +81,12 @@ const subscribeToTesterProgress = () => {
       model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: testerRepresentative.message });
       if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
         const eventSource = new EventSource(`${apiUrl}/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
+
         eventSource.addEventListener('testerProgress', (event) => {
           if (event.origin === apiUrl) {
-            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).progress, event: 'testerProgress' });
+            const message = JSON.parse(event.data).progress;
+            if (message != null) model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message, event: 'testerProgress' });
+            else log.warning('A falsy testerProgress event message was received from the orchestrator', { tags: ['apiDecoratingAdapter'] });
           } else {
             model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
           }
@@ -131,7 +94,9 @@ const subscribeToTesterProgress = () => {
 
         eventSource.addEventListener('testerPctComplete', (event) => {
           if (event.origin === apiUrl) {
-            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).pctComplete, event: 'testerPctComplete' });
+            const message = JSON.parse(event.data).pctComplete;
+            if (message != null) model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message, event: 'testerPctComplete' });
+            else log.warning('A falsy testerPctComplete event message was received from the orchestrator', { tags: ['apiDecoratingAdapter'] });
           } else {
             model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
           }
@@ -139,7 +104,9 @@ const subscribeToTesterProgress = () => {
 
         eventSource.addEventListener('testerBugCount', (event) => {
           if (event.origin === apiUrl) {
-            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: JSON.parse(event.data).bugCount, event: 'testerBugCount' });
+            const message = JSON.parse(event.data).bugCount;
+            if (message != null) model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message, event: 'testerBugCount' });
+            else log.warning('A falsy testerBugCount event message was received from the orchestrator', { tags: ['apiDecoratingAdapter'] });
           } else {
             model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
           }
