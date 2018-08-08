@@ -114,7 +114,6 @@ const handleTesterPctComplete = (testerType, sessionId, message) => {
   internals.infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId).pctComplete = message;
   // testerPctComplete
   internals.infoOuts[testerType].testerPctComplete.percent = internals.infoOuts[testerType].statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / internals.infoOuts[testerType].statTable.records.length;
-  console.log(internals.infoOuts[testerType].testerPctComplete.percent);
   internals.infoOuts[testerType].testerPctComplete.color = colourOfDonut(internals.infoOuts[testerType].testerPctComplete.percent);
   // totalProgress
   const pctsComplete = [];
@@ -394,12 +393,13 @@ const initTPCarousel = (receiveTestPlan) => {
 
 const setupInfoOuts = (testerSessions) => {
   testerNames.forEach((tN) => {
+    const { infoOuts } = internals;
     const sessionsPerTester = testerSessions.filter(t => t.testerType === tN);
     const loggerGridCoordsPetTester = calculateGridCoordsForLoggers(sessionsPerTester.map(row => row.sessionId));
-    internals.infoOuts[tN].loggers = sessionsPerTester.map(t => ({ sessionId: t.sessionId, instance: 'To be assigned', gridCoords: loggerGridCoordsPetTester[t.sessionId] }));
-    internals.infoOuts[tN].statTable.records = sessionsPerTester.map(t => ({ sessionId: t.sessionId, threshold: t.threshold, bugs: 0, pctComplete: 0 }));
+    infoOuts[tN].loggers = sessionsPerTester.map(t => ({ sessionId: t.sessionId, instance: 'To be assigned', gridCoords: loggerGridCoordsPetTester[t.sessionId] }));
+    infoOuts[tN].statTable.records = sessionsPerTester.map(t => ({ sessionId: t.sessionId, threshold: t.threshold, bugs: 0, pctComplete: 0 }));
     const testerPctCompleteTypeData = testerPctCompleteType.args.data.find(record => record.label === tN);
-    internals.infoOuts[tN].testerPctComplete = { instance: 'To be assigned', percent: testerPctCompleteTypeData.percent, color: testerPctCompleteTypeData.color };
+    infoOuts[tN].testerPctComplete = { instance: 'To be assigned', percent: testerPctCompleteTypeData.percent, color: testerPctCompleteTypeData.color };    
   });
 };
 
