@@ -75,7 +75,7 @@ const receiveTestPlan = (logger) => {
 const subscribeToTesterProgress = () => {
   const { testerNamesAndSessions } = model;
 
-  testerNamesAndSessions().forEach((testerNameAndSession) => {
+  testerNamesAndSessions.forEach((testerNameAndSession) => {
     const testerRepresentative = apiResponse.find(element => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
       model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: testerRepresentative.message });
@@ -118,14 +118,13 @@ const getTestPlans = async configFileContents =>
 
 
 const test = async (configFileContents) => {
-  debugger;  
   model = new Model(configFileContents);
   const route = 'test';  
   await postToApi(configFileContents, route);
 
   if (apiResponse) {
     dashboard.test(model.testerSessions());
-    model.eventNames().forEach((eN) => {
+    model.eventNames.forEach((eN) => {
       model.on(eN, (testerType, sessionId, message) => {
         dashboard[`handle${eN.charAt(0).toUpperCase()}${eN.substring(1)}`](testerType, sessionId, message);
       });
@@ -138,8 +137,6 @@ const test = async (configFileContents) => {
   } else {
     log.crit('There didn\'t appear to be a response from the purpleteam API', { tags: ['apiDecoratingAdapter'] });
   }
-  
-  
 };
 
 

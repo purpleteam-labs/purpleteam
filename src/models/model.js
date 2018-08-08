@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+
 let job;
 const events = { testerProgress: [], testerPctComplete: [], testerBugCount: [] };
 
@@ -7,11 +8,11 @@ class Model extends EventEmitter {
   constructor(options) {
     super();
     job = JSON.parse(options);
-    this.eventNames().forEach(e => this.initTesterMessages(e));
+    this.eventNames.forEach(e => this.initTesterMessages(e));
   }
 
   // eslint-disable-next-line class-methods-use-this
-  eventNames() {
+  get eventNames() {
     return Object.keys(events);
   }
 
@@ -25,14 +26,15 @@ class Model extends EventEmitter {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  testerNamesAndSessions() {
+  get testerNamesAndSessions() {
     return events.testerProgress.map(tNAS => ({ testerType: tNAS.testerType, sessionId: tNAS.sessionId }));
   }
 
 
-  propagateTesterMessage(msgOpts) {    
+  propagateTesterMessage(msgOpts) {
     const defaultEvent = 'testerProgress';
-    const msgEvents = events[msgOpts.event || defaultEvent].find(record => record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId);
+    const msgEvents = events[msgOpts.event || defaultEvent]
+      .find(record => record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId);
     msgEvents.messages.push(msgOpts.message);
     // (push/shift) Setup as placeholder for proper queue if needed.
     this.emit(msgOpts.event, msgEvents.testerType, msgEvents.sessionId, msgEvents.messages.shift());
