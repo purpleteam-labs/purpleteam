@@ -92,14 +92,21 @@ const setDataOnTesterPctCompleteWidget = () => {
   testerPctCompleteInstance.update(testerNames.map((tN) => {
     const record = infoOuts[tN].testerPctComplete;
     return { percent: record.percent, label: tN, color: record.color };
-  }));  
+  }));
 };
 
 
 const setDataOnTotalProgressWidget = () => {
   const { infoOuts } = internals;
-  const totalProgress = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)].totalProgress;
+  const totalProgress = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)].totalProgress; // eslint-disable-line prefer-destructuring
   totalProgress.instance.setStack([{ percent: totalProgress.percent, stroke: 'blue' }, { percent: 100 - totalProgress.percent, stroke: 'red' }]);
+};
+
+// Assign the infoOut values to the view components
+const setDataOnWidgets = () => {
+  setDataOnStatTableWidget();
+  setDataOnTesterPctCompleteWidget();
+  setDataOnTotalProgressWidget();
 };
 
 
@@ -125,11 +132,7 @@ const handleTesterPctComplete = (testerType, sessionId, message) => {
     internals.infoOuts[tN].totalProgress.percent = totalProgress;
   });
   
-  // ............ Assign the infoOut values to the view components
-  setDataOnStatTableWidget();
-  setDataOnTesterPctCompleteWidget();
-  setDataOnTotalProgressWidget();
-  screen.render();
+  setDataOnWidgets();
 };
 
 
@@ -310,12 +313,7 @@ const initCarousel = () => {
       totalProgressType.args
     );
 
-
-    // statTable
-    setDataOnStatTableWidget();
-    setDataOnTesterPctCompleteWidget();
-    setDataOnTotalProgressWidget();
-
+    setDataOnWidgets();
 
     // newBugs
     setInterval(() => {
@@ -330,18 +328,6 @@ const initCarousel = () => {
       });
       scrn.render();
     }, 1500);
-
-
-    //scrn.render();
-/*
-    // totalProgress
-    let gauge_percent = 0;
-    setInterval(() => {
-      totalProgress.instance.setStack([{ percent: gauge_percent, stroke: 'blue' }, { percent: 100-gauge_percent, stroke: 'red' }]);
-      gauge_percent++;
-      if (gauge_percent>=100) gauge_percent = 0;
-    }, 200);
-  */  
 
 
     // There is a bug with the contrib.lcd where if the user makes the screen too small, the characters loose shape.
