@@ -3,27 +3,8 @@ let job;
 const events = { testerProgress: [], testerPctComplete: [], testerBugCount: [] };
 
 
-
-/*
-const setAppPctsComplete = (pctsComplete) => {
-  // [{ id: 'lowPrivUser', pct: appPct }, { id: 'adminUser', pct: appPct }]
-  job.included.forEach((resourceObj) => {
-    pctsComplete.forEach((pctObj) => {
-      if (resourceObj.type === 'testSession' && resourceObj.id === pctObj.id)
-        resourceObj.attributes.appPct = pctObj.pct;
-    });
-  });
-};
-*/
-
-
-
-
-
-
 class Model extends EventEmitter {
   constructor(options) {
-    debugger;
     super();
     job = JSON.parse(options);
     this.eventNames().forEach(e => this.initTesterMessages(e));
@@ -49,8 +30,7 @@ class Model extends EventEmitter {
   }
 
 
-  propagateTesterMessage(msgOpts) {
-    
+  propagateTesterMessage(msgOpts) {    
     const defaultEvent = 'testerProgress';
     const msgEvents = events[msgOpts.event || defaultEvent].find(record => record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId);
     msgEvents.messages.push(msgOpts.message);
