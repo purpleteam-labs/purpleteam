@@ -81,37 +81,20 @@ const subscribeToTesterProgress = () => {
       model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: testerRepresentative.message });
       if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
         const eventSource = new EventSource(`${apiUrl}/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
-
-        eventSource.addEventListener('testerProgress', (event) => {
+        const listenerCallback = (event) => {
           if (event.origin === apiUrl) {
-            const message = JSON.parse(event.data).progress;
-            if (message != null) model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message, event: 'testerProgress' });
-            else log.warning('A falsy testerProgress event message was received from the orchestrator', { tags: ['apiDecoratingAdapter'] });
+            const eventDataPropPascalCase = event.type.replace('tester', '');
+            const eventDataProp = `${eventDataPropPascalCase.charAt(0).toLowerCase()}${eventDataPropPascalCase.substring(1)}`;
+            const message = JSON.parse(event.data)[eventDataProp];
+            if (message != null) model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message, event: event.type });
+            else log.warning(`A falsy ${event.type} event message was received from the orchestrator`, { tags: ['apiDecoratingAdapter'] });
           } else {
             model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
           }
-        });
-
-        eventSource.addEventListener('testerPctComplete', (event) => {
-          if (event.origin === apiUrl) {
-            const message = JSON.parse(event.data).pctComplete;
-            if (message != null) model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message, event: 'testerPctComplete' });
-            else log.warning('A falsy testerPctComplete event message was received from the orchestrator', { tags: ['apiDecoratingAdapter'] });
-          } else {
-            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
-          }
-        });
-
-        eventSource.addEventListener('testerBugCount', (event) => {
-          if (event.origin === apiUrl) {
-            const message = JSON.parse(event.data).bugCount;
-            if (message != null) model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message, event: 'testerBugCount' });
-            else log.warning('A falsy testerBugCount event message was received from the orchestrator', { tags: ['apiDecoratingAdapter'] });
-          } else {
-            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
-          }
-        });
-        // Todo: KC: Here we'll need to listen for the end event. When it arrives, we need to fetch the testerProgress logs, test results, and reports.
+        };
+        eventSource.addEventListener('testerProgress', listenerCallback);
+        eventSource.addEventListener('testerPctComplete', listenerCallback);
+        eventSource.addEventListener('testerBugCount', listenerCallback);
       }
     } else {
       model.propagateTesterMessage({
