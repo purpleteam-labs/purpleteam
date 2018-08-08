@@ -13,37 +13,40 @@ const internals = {
       }, {
         sessionId: '<sessionId>', instance: testerViewType.testInstance, gridCoords: { row: , col: , rowSpan: , colSpan: }
       } */],
-      testerPctComplete: { instance: 'To be assigned' },
+      testerPctComplete: { instance: 'To be assigned', percent: 'To be assigned', color: 'To be assigned' },
       statTable: {
         instance: 'To be assigned',
-        thresholds: [/* {
+        records: [/* {
           sessionId: '<sessionId>', threshold: <threshold>, bugs: 0, pctComplete: 0
         }, {
           sessionId: '<sessionId>', threshold: <threshold>, bugs: 0, pctComplete: 0
         } */]
       },
-      newBugs: { instance: 'To be assigned' },
-      totalProgress: { instance: 'To be assigned' }
+      newBugs: { instance: 'To be assigned', value: 'To be assigned', color: 'To be assigned', elementPadding: 'To be assigned' },
+      totalProgress: { instance: 'To be assigned', percent: 'To be assigned' },
+      focussedPage: false
     },
     server: {
       loggers: [],
-      testerPctComplete: { instance: 'To be assigned' },
+      testerPctComplete: { instance: 'To be assigned', percent: 'To be assigned', color: 'To be assigned' },
       statTable: {
         instance: 'To be assigned',
-        thresholds: []
+        records: []
       },
-      newBugs: { instance: 'To be assigned' },
-      totalProgress: { instance: 'To be assigned' }
+      newBugs: { instance: 'To be assigned', value: 'To be assigned', color: 'To be assigned', elementPadding: 'To be assigned' },
+      totalProgress: { instance: 'To be assigned', percent: 'To be assigned' },
+      focussedPage: false
     },
     tls: {
       loggers: [],
-      testerPctComplete: { instance: 'To be assigned' },
+      testerPctComplete: { instance: 'To be assigned', percent: 'To be assigned', color: 'To be assigned' },
       statTable: {
         instance: 'To be assigned',
-        thresholds: []
+        records: []
       },
-      newBugs: { instance: 'To be assigned' },
-      totalProgress: { instance: 'To be assigned' }
+      newBugs: { instance: 'To be assigned', value: 'To be assigned', color: 'To be assigned', elementPadding: 'To be assigned' },
+      totalProgress: { instance: 'To be assigned', percent: 'To be assigned' },
+      focussedPage: false
     }
   }
 };
@@ -57,52 +60,85 @@ const screen = blessed.screen({
 });
 
 
+const colourOfDonut = (pct) => {
+  let colourToSet;
+  if (pct < 20) colourToSet = 'red';
+  else if (pct >= 20 && pct < 70) colourToSet = 'magenta';
+  else if (pct >= 70) colourToSet = 'blue';
+  return colourToSet;
+};
+
+
+const setDataOnStatTableWidget = () => {
+  const { infoOuts } = internals;
+  const statTableInstance = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)].statTable.instance;
+  statTableInstance.setData({
+    headers: statTableType.headers,
+    data: (() => {
+      const statTableDataRows = [];
+      testerNames.forEach((tn) => {
+        statTableDataRows.push(...infoOuts[tn].statTable.records.map(row => [tn, row.sessionId, row.threshold, row.bugs, row.pctComplete]));
+      });
+      return statTableDataRows;
+    })()
+  });
+  statTableInstance.focus();
+};
+
+
+const setDataOnTesterPctCompleteWidget = () => {
+  const { infoOuts } = internals;
+  const testerPctCompleteInstance = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)].testerPctComplete.instance;
+  testerPctCompleteInstance.update(testerNames.map((tN) => {
+    const record = infoOuts[tN].testerPctComplete;
+    return { percent: record.percent, label: tN, color: record.color };
+  }));  
+};
+
+
+const setDataOnTotalProgressWidget = () => {
+  const { infoOuts } = internals;
+  const totalProgress = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)].totalProgress;
+  totalProgress.instance.setStack([{ percent: totalProgress.percent, stroke: 'blue' }, { percent: 100 - totalProgress.percent, stroke: 'red' }]);
+};
+
+
 const handleTesterProgress = (testerType, sessionId, message) => {
   const logger = internals.infoOuts[testerType].loggers.find(l => l.sessionId === sessionId);
   if (logger.instance !== 'To be assigned') logger.instance.log(message);
 };
 
 
-const handleTesterPctComplete = () => {
-
-};
-
-
-const handleTesterBugCount = () => {
-
-};
-
-
-const updateTesterPctsComplete = (patch) => {
-  const colourOfDonut = (pct) => {
-    let colourToSet;
-    if (pct < 0.2) colourToSet = 'red';
-    else if (pct >= 0.2 && pct < 0.7) colourToSet = 'magenta';
-    else if (pct >= 0.7) colourToSet = 'blue';
-    return colourToSet;
-  };
-
-  const { runningStats } = patch;
-  testerPctComplete.instance.update(testerNames.map((tn) => {
-    const record = runningStats.find(r => r.testerType === tn);
-    return { percent: parseFloat((record[tn] + 0.00) % 1).toFixed(2), label: tn, color: colourOfDonut(record[tn]) };
-  }));
-};
-
-
-const updateStatTablePctsComplete = (patch) => {
-  const { runningStats } = patch;
-  statTable.instance.setData({
-    headers: statTable.headers,
-    data: runningStats.map(row => Object.values(row))
+const handleTesterPctComplete = (testerType, sessionId, message) => {
+  // statTable
+  internals.infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId).pctComplete = message;
+  // testerPctComplete
+  internals.infoOuts[testerType].testerPctComplete.percent = internals.infoOuts[testerType].statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / internals.infoOuts[testerType].statTable.records.length;
+  console.log(internals.infoOuts[testerType].testerPctComplete.percent);
+  internals.infoOuts[testerType].testerPctComplete.color = colourOfDonut(internals.infoOuts[testerType].testerPctComplete.percent);
+  // totalProgress
+  const pctsComplete = [];
+  testerNames.forEach((tN) => {
+    pctsComplete.push(...internals.infoOuts[tN].statTable.records.map(r => r.pctComplete));
   });
-  statTable.instance.focus();
+  const totalProgress = pctsComplete.reduce((accum, curr) => accum + curr) / pctsComplete.length;
+  testerNames.forEach((tN) => {
+    internals.infoOuts[tN].totalProgress.percent = totalProgress;
+  });
+  
+  // ............ Assign the infoOut values to the view components
+  setDataOnStatTableWidget();
+  setDataOnTesterPctCompleteWidget();
+  setDataOnTotalProgressWidget();
+  screen.render();
 };
 
 
-const applyTesterPctsComplete = (patch) => {
-  updateTesterPctsComplete(patch);
-  updateStatTablePctsComplete(patch);
+const handleTesterBugCount = (testerType, sessionId, message) => {
+  internals.infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId).bugs = message;
+  // ............ Carry on setting up the rest of the infoOuts
+
+  // ............ Assign the infoOut values to the view components
 };
 
 
@@ -222,6 +258,8 @@ const initCarousel = () => {
     const testerType = testerViewType.testOpts.args.name;
 
     const { loggers, testerPctComplete, statTable, newBugs, totalProgress } = internals.infoOuts[testerType];
+    
+    testerNames.forEach((tN) => { internals.infoOuts[tN].focussedPage = testerType === tN; });
 
     // One per test session, per tester.
     loggers.forEach((logger) => {
@@ -274,30 +312,10 @@ const initCarousel = () => {
     );
 
 
-/*
-    subscribeToTesterProgress(testerViewType.testInstance);
-
-    subscribeToTesterPctComplete((patch) => {
-      applyTesterPctsComplete(patch);
-
-
-      scrn.render();
-    });
-*/
-    debugger;
-
     // statTable
-    statTable.instance.setData({
-      headers: statTableType.headers,
-      data: (() => {
-        const statTableDataRows = [];
-        testerNames.forEach((tn) => {        
-          statTableDataRows.push(...internals.infoOuts[tn].statTable.thresholds.map(thresholdRow => [tn, thresholdRow.sessionId, thresholdRow.threshold, thresholdRow.bugs, thresholdRow.pctComplete]));
-        });
-        return statTableDataRows;
-      })()
-    });
-    statTable.instance.focus();
+    setDataOnStatTableWidget();
+    setDataOnTesterPctCompleteWidget();
+    setDataOnTotalProgressWidget();
 
 
     // newBugs
@@ -315,6 +333,8 @@ const initCarousel = () => {
     }, 1500);
 
 
+    //scrn.render();
+/*
     // totalProgress
     let gauge_percent = 0;
     setInterval(() => {
@@ -322,7 +342,7 @@ const initCarousel = () => {
       gauge_percent++;
       if (gauge_percent>=100) gauge_percent = 0;
     }, 200);
-    
+  */  
 
 
     // There is a bug with the contrib.lcd where if the user makes the screen too small, the characters loose shape.
@@ -373,11 +393,13 @@ const initTPCarousel = (receiveTestPlan) => {
 
 
 const setupInfoOuts = (testerSessions) => {
-  testerNames.forEach((tn) => {
-    const sessionsPerTester = testerSessions.filter(t => t.testerType === tn);
+  testerNames.forEach((tN) => {
+    const sessionsPerTester = testerSessions.filter(t => t.testerType === tN);
     const loggerGridCoordsPetTester = calculateGridCoordsForLoggers(sessionsPerTester.map(row => row.sessionId));
-    internals.infoOuts[tn].loggers = sessionsPerTester.map(t => ({ sessionId: t.sessionId, instance: 'To be assigned', gridCoords: loggerGridCoordsPetTester[t.sessionId] }));
-    internals.infoOuts[tn].statTable.thresholds = sessionsPerTester.map(t => ({ sessionId: t.sessionId, threshold: t.threshold, bugs: 0, pctComplete: 0 }));
+    internals.infoOuts[tN].loggers = sessionsPerTester.map(t => ({ sessionId: t.sessionId, instance: 'To be assigned', gridCoords: loggerGridCoordsPetTester[t.sessionId] }));
+    internals.infoOuts[tN].statTable.records = sessionsPerTester.map(t => ({ sessionId: t.sessionId, threshold: t.threshold, bugs: 0, pctComplete: 0 }));
+    const testerPctCompleteTypeData = testerPctCompleteType.args.data.find(record => record.label === tN);
+    internals.infoOuts[tN].testerPctComplete = { instance: 'To be assigned', percent: testerPctCompleteTypeData.percent, color: testerPctCompleteTypeData.color };
   });
 };
 

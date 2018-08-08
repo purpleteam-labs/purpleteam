@@ -50,7 +50,7 @@ class Model extends EventEmitter {
 
 
   propagateTesterMessage(msgOpts) {
-    debugger;
+    
     const defaultEvent = 'testerProgress';
     const msgEvents = events[msgOpts.event || defaultEvent].find(record => record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId);
     msgEvents.messages.push(msgOpts.message);
