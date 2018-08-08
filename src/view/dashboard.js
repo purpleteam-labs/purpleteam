@@ -117,21 +117,22 @@ const handleTesterProgress = (testerType, sessionId, message) => {
 
 
 const handleTesterPctComplete = (testerType, sessionId, message) => {
+  const { infoOuts } = internals;
   // statTable
-  internals.infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId).pctComplete = message;
+  infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId).pctComplete = message;
   // testerPctComplete
-  internals.infoOuts[testerType].testerPctComplete.percent = internals.infoOuts[testerType].statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / internals.infoOuts[testerType].statTable.records.length;
-  internals.infoOuts[testerType].testerPctComplete.color = colourOfDonut(internals.infoOuts[testerType].testerPctComplete.percent);
+  infoOuts[testerType].testerPctComplete.percent = infoOuts[testerType].statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / infoOuts[testerType].statTable.records.length;
+  infoOuts[testerType].testerPctComplete.color = colourOfDonut(infoOuts[testerType].testerPctComplete.percent);
   // totalProgress
   const pctsComplete = [];
   testerNames.forEach((tN) => {
-    pctsComplete.push(...internals.infoOuts[tN].statTable.records.map(r => r.pctComplete));
+    pctsComplete.push(...infoOuts[tN].statTable.records.map(r => r.pctComplete));
   });
   const totalProgress = pctsComplete.reduce((accum, curr) => accum + curr) / pctsComplete.length;
   testerNames.forEach((tN) => {
-    internals.infoOuts[tN].totalProgress.percent = totalProgress;
+    infoOuts[tN].totalProgress.percent = totalProgress;
   });
-  
+
   setDataOnWidgets();
 };
 
