@@ -107,19 +107,22 @@ const subscribeToTesterProgress = () => {
 };
 
 
-const getTestPlans = async configFileContents =>
-  new Promise(async (resolve, reject) => {
-    const route = 'testplan';
+const getTestPlans = async (configFileContents) => {
+  const route = 'testplan';
+  await postToApi(configFileContents, route);
 
-    await postToApi(configFileContents, route);
-
-    return apiResponse ? resolve(receiveTestPlan) : reject();
-  });
+  if (apiResponse) {
+    debugger;
+    dashboard.testPlans(apiResponse);
+  } else {
+    log.crit('There didn\'t appear to be a response from the purpleteam API', { tags: ['apiDecoratingAdapter'] });
+  }
+};
 
 
 const test = async (configFileContents) => {
   model = new Model(configFileContents);
-  const route = 'test';  
+  const route = 'test';
   await postToApi(configFileContents, route);
 
   if (apiResponse) {

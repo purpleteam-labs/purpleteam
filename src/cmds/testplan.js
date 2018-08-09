@@ -11,17 +11,17 @@ exports.setup = (sywac) => {
   // To override the help:
   // sywac.usage({ optionsPlaceholder: '' });
   sywac.option(
-    '-c, --config-file <config-file path>',
-    {
-      type: 'file', desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.', strinct: true, mustExist: true
-    }
-  );
+    '-c, --config-file <config-file path>', {
+      type: 'file',
+      desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.',
+      strict: true,
+      mustExist: true
+    });
 };
 exports.run = async (parsedArgv, context) => {
   if (parsedArgv.c) {
     const configFileContents = await api.getBuildUserConfigFile(parsedArgv.c);
-
-    await api.getTestPlans(configFileContents).then(dashboard.testPlan);
+    await api.getTestPlans(configFileContents);
   } else {
     context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }

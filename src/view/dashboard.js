@@ -152,7 +152,7 @@ const handleTesterBugCount = (testerType, sessionId, message) => {
   // statTable
   const statTableRecord = infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId);
   statTableRecord.bugs = message;
-    // Collect
+  // Collect
   const statTableRecords = (() => {
     const rows = [];
     testerNames.forEach((tN) => { rows.push(...infoOuts[tN].statTable.records); });
@@ -372,21 +372,34 @@ const initCarousel = () => {
 };
 
 
-const initTPCarousel = (receiveTestPlan) => {
+const setDataOnLogWidget = (testPlans) => {
+  const { infoOuts } = internals;
+  const testerName = testerNames.find(tN => infoOuts[tN].focussedPage);
+  const logger = infoOuts[testerName].loggers;
+  logger.instance.log(testPlans.find(plan => plan.name === testerName).message);
+};
+
+
+const initTPCarousel = (testPlans) => {
+  
   const carouselPages = testerViewTypes.map(testerViewType => (scrn) => {
     const grid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
-    const tView = testerViewType;
+    const testerType = testerViewType.testPlanOpts.args.name;
 
-    tView.testPlanInstance = grid.set(
-      tView.testPlanOpts.gridCoords.row,
-      tView.testPlanOpts.gridCoords.col,
-      tView.testPlanOpts.gridCoords.rowSpan,
-      tView.testPlanOpts.gridCoords.colSpan,
-      tView.testPlanOpts.type,
-      tView.testPlanOpts.args
-    );
+    testerNames.forEach((tN) => { internals.infoOuts[tN].focussedPage = testerType === tN; });
+    
+    internals.infoOuts[testerType].loggers = {
+      instance: grid.set(
+        testerViewType.testPlanOpts.gridCoords.row,
+        testerViewType.testPlanOpts.gridCoords.col,
+        testerViewType.testPlanOpts.gridCoords.rowSpan,
+        testerViewType.testPlanOpts.gridCoords.colSpan,
+        testerViewType.testPlanOpts.type,
+        testerViewType.testPlanOpts.args
+      )
+    };
 
-    receiveTestPlan(tView.testPlanInstance);
+    setDataOnLogWidget(testPlans);
   });
 
   screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0));
@@ -396,7 +409,7 @@ const initTPCarousel = (receiveTestPlan) => {
 };
 
 
-const setupInfoOuts = (testerSessions) => {
+const setupInfoOutsForTest = (testerSessions) => {
   testerNames.forEach((tN) => {
     const { infoOuts } = internals;
     const sessionsPerTester = testerSessions.filter(t => t.testerType === tN);
@@ -411,24 +424,19 @@ const setupInfoOuts = (testerSessions) => {
 };
 
 
-const testPlan = receiveTestPlan => new Promise((resolve, reject) => {
-  try {
-    initTPCarousel(receiveTestPlan);
-  } catch (err) {
-    return reject(err);
-  }
-  return resolve();
-});
+const testPlans = (testPlans) => {
+  initTPCarousel(testPlans);
+};
 
 
 const test = (testerSessions) => {
-  setupInfoOuts(testerSessions);
+  setupInfoOutsForTest(testerSessions);
   initCarousel();
 };
 
 
 module.exports = {
-  testPlan,
+  testPlans,
   test,
   handleTesterProgress,
   handleTesterPctComplete,
