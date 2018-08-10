@@ -25,8 +25,7 @@ const testOpts = {
     name: 'tls'
   }
 };
-// Todo: Shouldn't need testInstance
-let testInstance;
+
 
 const testPlanOpts = {
   gridCoords: {
@@ -70,12 +69,9 @@ const testPlanOpts = {
     name: 'tls'
   }
 };
-// Todo: Shouldn't need testInstance
-let testPlanInstance;
+
 
 module.exports = {
   testOpts,
-  testInstance,
-  testPlanOpts,
-  testPlanInstance
+  testPlanOpts
 };

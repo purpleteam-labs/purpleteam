@@ -26,8 +26,6 @@ const testOpts = {
     name: 'app'
   }
 };
-// Todo: Shouldn't need testInstance
-let testInstance;
 
 
 const testPlanOpts = {
@@ -72,12 +70,9 @@ const testPlanOpts = {
     name: 'app'
   }
 };
-// Todo: Shouldn't need testInstance
-let testPlanInstance;
+
 
 module.exports = {
-  testOpts,
-  testInstance,
-  testPlanOpts,
-  testPlanInstance
+  testOpts,  
+  testPlanOpts
 };

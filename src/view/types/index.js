@@ -121,7 +121,7 @@ const totalProgressType = {
 
 
 module.exports = {
-  testerViewTypes, //: [app, server, tls],
+  testerViewTypes, // [app, server, tls],
   testerPctCompleteType,
   statTableType,
   newBugsType,
