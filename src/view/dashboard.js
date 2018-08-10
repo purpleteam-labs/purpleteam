@@ -132,8 +132,11 @@ const handleTesterPctComplete = (testerType, sessionId, message) => {
   // statTable
   infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId).pctComplete = message;
   // testerPctComplete
-  infoOuts[testerType].testerPctComplete.percent = infoOuts[testerType].statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / infoOuts[testerType].statTable.records.length;
-  infoOuts[testerType].testerPctComplete.color = colourOfDonut(infoOuts[testerType].testerPctComplete.percent);
+  infoOuts[testerType].testerPctComplete.percent =
+    infoOuts[testerType]
+      .statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / infoOuts[testerType].statTable.records.length;
+  infoOuts[testerType].testerPctComplete.color =
+    colourOfDonut(infoOuts[testerType].testerPctComplete.percent);
   // totalProgress
   const pctsComplete = [];
   testerNames.forEach((tN) => {
@@ -290,7 +293,7 @@ const initCarousel = () => {
     const testerType = testerViewType.testOpts.args.name;
 
     const { loggers, testerPctComplete, statTable, newBugs, totalProgress } = internals.infoOuts[testerType];
-    
+
     testerNames.forEach((tN) => { internals.infoOuts[tN].focussedPage = testerType === tN; });
 
     // One per test session, per tester.
@@ -305,7 +308,6 @@ const initCarousel = () => {
         { bufferLength, label: `${label} - Session: ${logger.sessionId}`, name, style, tags }
       );
     });
-
 
     testerPctComplete.instance = grid.set(
       testerPctCompleteType.gridCoords.row,
@@ -348,7 +350,6 @@ const initCarousel = () => {
 
     setDataOnAllPageWidgets();
 
-
     // There is a bug with the contrib.lcd where if the user makes the screen too small, the characters loose shape.
     // There is another bug with blessed, where there is no parent of the below instances, this exhibits itself in blessed/lib/widgets/element at https://github.com/chjj/blessed/blob/eab243fc7ad27f1d2932db6134f7382825ee3488/lib/widgets/element.js#L1060
     //   https://github.com/chjj/blessed/issues/350
@@ -356,13 +357,11 @@ const initCarousel = () => {
       loggers.forEach(logger => logger.instance.emit('attach'));
       testerPctComplete.instance.parent = this;
       testerPctComplete.instance.emit('attach');
-      statTable.instance.emit('attach');      
+      statTable.instance.emit('attach');
       // newBugs.instance.emit('attach'); // Doesn't work, buggy blessed.
       totalProgress.instance.parent = this;
       totalProgress.instance.emit('attach');
     });
-    
-
   });
 
   screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0)); // eslint-disable-line no-unused-vars
@@ -386,7 +385,7 @@ const initTPCarousel = (testPlans) => {
     const testerType = testerViewType.testPlanOpts.args.name;
 
     testerNames.forEach((tN) => { internals.infoOuts[tN].focussedPage = testerType === tN; });
-    
+
     internals.infoOuts[testerType].loggers = {
       instance: grid.set(
         testerViewType.testPlanOpts.gridCoords.row,
