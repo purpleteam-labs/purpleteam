@@ -1,7 +1,7 @@
 module.exports = {
   'extends': 'airbnb-base',
   rules: {
-    'comma-dangle': ['off'],
+    'comma-dangle': ['error', 'never'],
 
     // specify the maximum length of a line in your program
     // http://eslint.org/docs/rules/max-len
