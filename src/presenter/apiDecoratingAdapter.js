@@ -19,7 +19,7 @@ const apiUrl = config.get('purpleteamApi.url');
 
 const getBuildUserConfigFile = async (filePath) => {
   try {
-    const fileContents = await readFileAsync(filePath, { encoding: 'utf8' });    
+    const fileContents = await readFileAsync(filePath, { encoding: 'utf8' });
     return fileContents;
   } catch (err) {
     log.error(`Could not read file: ${filePath}, the error was: ${err}`, { tags: ['apiDecoratingAdapter'] });
@@ -28,7 +28,7 @@ const getBuildUserConfigFile = async (filePath) => {
 };
 
 
-const postToApi = async (configFileContents, route) => {  
+const postToApi = async (configFileContents, route) => {
   await request({
     uri: `${apiUrl}/${route}`,
     method: 'POST',
@@ -64,7 +64,11 @@ const subscribeToTesterProgress = () => {
   testerNamesAndSessions.forEach((testerNameAndSession) => {
     const testerRepresentative = apiResponse.find(element => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
-      model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: testerRepresentative.message });
+      model.propagateTesterMessage({
+        testerType: testerNameAndSession.testerType,
+        sessionId: testerNameAndSession.sessionId,
+        message: testerRepresentative.message
+      });
       if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
         const eventSource = new EventSource(`${apiUrl}/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
         const listenerCallback = (event) => {
@@ -72,10 +76,22 @@ const subscribeToTesterProgress = () => {
             const eventDataPropPascalCase = event.type.replace('tester', '');
             const eventDataProp = `${eventDataPropPascalCase.charAt(0).toLowerCase()}${eventDataPropPascalCase.substring(1)}`;
             const message = JSON.parse(event.data)[eventDataProp];
-            if (message != null) model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message, event: event.type });
-            else log.warning(`A falsy ${event.type} event message was received from the orchestrator`, { tags: ['apiDecoratingAdapter'] });
+            if (message != null) {
+              model.propagateTesterMessage({
+                testerType: testerNameAndSession.testerType,
+                sessionId: testerNameAndSession.sessionId,
+                message,
+                event: event.type
+              });
+            } else {
+              log.warning(`A falsy ${event.type} event message was received from the orchestrator`, { tags: ['apiDecoratingAdapter'] });
+            }
           } else {
-            model.propagateTesterMessage({ testerType: testerNameAndSession.testerType, sessionId: testerNameAndSession.sessionId, message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"` });
+            model.propagateTesterMessage({
+              testerType: testerNameAndSession.testerType,
+              sessionId: testerNameAndSession.sessionId,
+              message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`
+            });
           }
         };
         eventSource.addEventListener('testerProgress', listenerCallback);
@@ -117,7 +133,7 @@ const test = async (configFileContents) => {
         dashboard[`handle${eN.charAt(0).toUpperCase()}${eN.substring(1)}`](testerType, sessionId, message);
       });
     });
-    
+
     subscribeToTesterProgress();
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
