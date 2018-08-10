@@ -21,18 +21,8 @@ const testerPctCompleteType = {
     remainColor: 'black',
     yPadding: 4,
     data: testerViewTypes.map(tv => ({ label: tv.testOpts.args.name, percent: 0, color: 'red' })),
-    style: {
-      fg: 'default',
-      bg: 'default',
-      border: {
-        fg: 'magenta',
-        bg: 'default'
-      }
-    },
-    border: {
-      type: 'line',
-      fg: '#00ff00'
-    },
+    style: { fg: 'default', bg: 'default', border: { fg: 'magenta', bg: 'default' } },
+    border: { type: 'line', fg: '#00ff00' }
   }
 };
 
@@ -54,14 +44,7 @@ const statTableType = {
     columnSpacing: 1,
     columnWidth: [10, 12, 12, 6, 12],
     fg: 'magenta',
-    style: {
-      fg: 'blue',
-      bg: 'default',
-      border: {
-        fg: 'magenta',
-        bg: 'default'
-      }
-    }
+    style: { fg: 'blue', bg: 'default', border: { fg: 'magenta', bg: 'default' } }
   },
   headers: ['Testers', 'SessionId', 'Threshold', 'Bugs', 'Complete (%)'],
   seedData: testerViewTypes.map(tv => [tv.testOpts.args.name, '-', 0, 0, 0])
@@ -85,14 +68,7 @@ const newBugsType = {
     elementSpacing: 4,
     elementPadding: 4,
     color: 'blue',
-    style: {
-      fg: 'default',
-      bg: 'default',
-      border: {
-        fg: 'magenta',
-        bg: 'default'
-      }
-    }
+    style: { fg: 'default', bg: 'default', border: { fg: 'magenta', bg: 'default' } }
   }
 };
 
@@ -108,14 +84,7 @@ const totalProgressType = {
     label: 'Total Tester Progress',
     percent: 0,
     stroke: 'blue',
-    style: {
-      fg: 'default',
-      bg: 'default',
-      border: {
-        fg: 'magenta',
-        bg: 'default'
-      }
-    }
+    style: { fg: 'default', bg: 'default', border: { fg: 'magenta', bg: 'default' } }
   }
 };
 
