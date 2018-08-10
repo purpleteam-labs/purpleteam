@@ -4,7 +4,7 @@ const request = require('request-promise-native');
 const EventSource = require('eventsource');
 const Model = require('src/models/model');
 const dashboard = require('src/view/dashboard');
-const { TesterUnavailable, TestPlanUnavailable, TesterProgressRouteSuffix } = require('src/strings');
+const { TesterUnavailable, TesterProgressRouteSuffix } = require('src/strings');
 
 let log;
 let apiResponse;
@@ -16,8 +16,6 @@ const init = (logger) => {
 };
 
 const apiUrl = config.get('purpleteamApi.url');
-//const testersConfig = config.get('testers');
-
 
 const getBuildUserConfigFile = async (filePath) => {
   try {
@@ -57,18 +55,6 @@ const postToApi = async (configFileContents, route) => {
     };
     log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['apiDecoratingAdapter'] });
   });
-};
-
-
-const receiveTestPlan = (logger) => {
-  const loggerName = logger.options.name;
-  const testerRepresentative = apiResponse.find(element => element.name === loggerName);
-
-  if (testerRepresentative) {
-    logger.log(testerRepresentative.message);
-  } else {
-    logger.log(`${loggerName} tester doesn't currently appear to be online`);
-  }
 };
 
 
@@ -112,8 +98,7 @@ const getTestPlans = async (configFileContents) => {
   await postToApi(configFileContents, route);
 
   if (apiResponse) {
-    debugger;
-    dashboard.testPlans(apiResponse);
+    dashboard.testPlan(apiResponse);
   } else {
     log.crit('There didn\'t appear to be a response from the purpleteam API', { tags: ['apiDecoratingAdapter'] });
   }

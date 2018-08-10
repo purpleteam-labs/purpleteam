@@ -352,12 +352,12 @@ const initCarousel = () => {
     // There is a bug with the contrib.lcd where if the user makes the screen too small, the characters loose shape.
     // There is another bug with blessed, where there is no parent of the below instances, this exhibits itself in blessed/lib/widgets/element at https://github.com/chjj/blessed/blob/eab243fc7ad27f1d2932db6134f7382825ee3488/lib/widgets/element.js#L1060
     //   https://github.com/chjj/blessed/issues/350
-    scrn.on('resize', function () {      
+    scrn.on('resize', function resizeHandler() {
       loggers.forEach(logger => logger.instance.emit('attach'));
       testerPctComplete.instance.parent = this;
       testerPctComplete.instance.emit('attach');
       statTable.instance.emit('attach');      
-      // newBugs.instance.emit('attach');
+      // newBugs.instance.emit('attach'); // Doesn't work, buggy blessed.
       totalProgress.instance.parent = this;
       totalProgress.instance.emit('attach');
     });
@@ -365,7 +365,7 @@ const initCarousel = () => {
 
   });
 
-  screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0));
+  screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0)); // eslint-disable-line no-unused-vars
 
   const carousel = new contrib.carousel(carouselPages, { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
   carousel.start();
@@ -381,7 +381,6 @@ const setDataOnLogWidget = (testPlans) => {
 
 
 const initTPCarousel = (testPlans) => {
-  
   const carouselPages = testerViewTypes.map(testerViewType => (scrn) => {
     const grid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
     const testerType = testerViewType.testPlanOpts.args.name;
@@ -402,7 +401,7 @@ const initTPCarousel = (testPlans) => {
     setDataOnLogWidget(testPlans);
   });
 
-  screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0));
+  screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0)); // eslint-disable-line no-unused-vars
 
   const carousel = new contrib.carousel(carouselPages, { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
   carousel.start();
@@ -424,7 +423,7 @@ const setupInfoOutsForTest = (testerSessions) => {
 };
 
 
-const testPlans = (testPlans) => {
+const testPlan = (testPlans) => {
   initTPCarousel(testPlans);
 };
 
@@ -436,7 +435,7 @@ const test = (testerSessions) => {
 
 
 module.exports = {
-  testPlans,
+  testPlan,
   test,
   handleTesterProgress,
   handleTesterPctComplete,
