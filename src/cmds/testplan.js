@@ -1,7 +1,6 @@
-const config = require('config/config');
+const config = require('config/config'); // eslint-disable-line no-unused-vars
 const log = require('purpleteam-logger').logger();
 const api = require('src/presenter/apiDecoratingAdapter');
-const dashboard = require('src/view/dashboard');
 
 api.init(log);
 
@@ -10,13 +9,12 @@ exports.desc = 'Retrieve the test plan that will be executed when you run test.'
 exports.setup = (sywac) => {
   // To override the help:
   // sywac.usage({ optionsPlaceholder: '' });
-  sywac.option(
-    '-c, --config-file <config-file path>', {
-      type: 'file',
-      desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.',
-      strict: true,
-      mustExist: true
-    });
+  sywac.option('-c, --config-file <config-file path>', {
+    type: 'file',
+    desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.',
+    strict: true,
+    mustExist: true
+  });
 };
 exports.run = async (parsedArgv, context) => {
   if (parsedArgv.c) {

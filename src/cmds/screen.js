@@ -6,9 +6,7 @@ exports.desc = 'Default command (shows the interactive screen).';
 exports.setup = {};
 exports.run = (parsedArgv, context) => {
   if (parsedArgv.about) {
-    const {
-      name: projectName, version, description, homepage, author: { name, email }
-    } = pkg;
+    const { name: projectName, version, description, homepage, author: { name, email } } = pkg;
 
     log.emerg('This is what an emergency looks like.', { tags: ['emerg-tag'] });
     log.alert('This is what an alert looks like.', { tags: ['alert-tag'] });
