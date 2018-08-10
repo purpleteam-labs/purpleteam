@@ -4,9 +4,9 @@ const figlet = require('figlet');
 const pkg = require('package.json');
 const log = require('purpleteam-logger').logger();
 
-const processCommands = async (options) => {
+const processCommands = async (options) => { // eslint-disable-line no-unused-vars
   log.debug('Configuring sywac', { tags: ['cli'] });
-  const cliArgs = await sywac
+  const cliArgs = await sywac // eslint-disable-line no-unused-vars
     .usage('Usage: $0 [command] [option(s)]')
     .commandDirectory('cmds')
     // This overrides the --help and --version and adds their aliases
@@ -25,6 +25,4 @@ const processCommands = async (options) => {
     .parseAndExit();
 };
 
-module.exports = {
-  processCommands
-};
+module.exports = { processCommands };
