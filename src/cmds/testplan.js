@@ -12,8 +12,8 @@ exports.setup = (sywac) => {
   sywac.option('-c, --config-file <config-file path>', {
     type: 'file',
     desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.',
-    strict: true,
-    mustExist: true
+    mustExist: true,
+    defaultValue: config.get('buildUserConfig.fileUri')
   });
 };
 exports.run = async (parsedArgv, context) => {

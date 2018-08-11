@@ -7,10 +7,12 @@ api.init(log);
 exports.flags = 'test';
 exports.description = 'Launch purpleteam to attack your specified target';
 exports.setup = (sywac) => {
-  sywac.option(
-    '-c, --config-file <config-file path>',
-    { type: 'file', desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.', strinct: true, mustExist: true }
-  );
+  sywac.option('-c, --config-file <config-file path>', {
+    type: 'file',
+    desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.',
+    mustExist: true,
+    defaultValue: config.get('buildUserConfig.fileUri')
+  });
 };
 exports.run = async (parsedArgv, context) => {
   if (parsedArgv.c) {

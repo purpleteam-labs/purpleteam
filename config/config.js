@@ -49,6 +49,13 @@ const schema = {
       format: String,
       default: `${process.cwd()}/outcomes/results.txt`
     }
+  },
+  buildUserConfig: {
+    fileUri: {
+      doc: 'The location of the build user config file',
+      format: String,
+      default: '/testing/buildUserConfigFile'
+    }
   }
 };
 
