@@ -7,7 +7,8 @@
     "lint": "eslint .",
     "deps": "npm-check",
     "update:deps": "npm-check -u",
-    "test": "echo \"Todo: Create tests.\" && exit 0",
+    "test": "lab --assert code",
+    "test:debug": "node --inspect-brk ./node_modules/.bin/lab --assert code --timeout 0",
     "pretest": "npm run lint",
     "debug": "node --inspect-brk ./bin/purpleteam",
     "start": "node ./bin/purpleteam"

@@ -43,7 +43,4 @@ const testPlanOpts = {
 };
 
 
-module.exports = {
-  testOpts,
-  testPlanOpts
-};
+module.exports = { testOpts, testPlanOpts };
