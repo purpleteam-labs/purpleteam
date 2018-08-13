@@ -8,14 +8,14 @@ const { expect, fail } = require('code');
 // const sinon = require('sinon');
 // const rewire = require('rewire');
 
-// const config = require('config/config');
+const config = require('config/config');
 
 const Model = require('src/models/model');
 const readFileAsync = require('util').promisify(require('fs').readFile);
 
 
 const newModel = async () => {
-  const configFileContents = await readFileAsync(`${cwd}/test/jobs/job_0.1.0-alpha.1`, { encoding: 'utf8' });
+  const configFileContents = await readFileAsync(config.get('buildUserConfig.fileUri'), { encoding: 'utf8' });
   const model = new Model(configFileContents);
   return model;
 };
