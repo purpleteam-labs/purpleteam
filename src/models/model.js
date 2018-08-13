@@ -33,11 +33,15 @@ class Model extends EventEmitter {
 
   propagateTesterMessage(msgOpts) {
     const defaultEvent = 'testerProgress';
-    const msgEvents = events[msgOpts.event || defaultEvent]
-      .find(record => record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId);
-    msgEvents.messages.push(msgOpts.message);
-    // (push/shift) Setup as placeholder for proper queue if needed.
-    this.emit(msgOpts.event, msgEvents.testerType, msgEvents.sessionId, msgEvents.messages.shift());
+    const eventType = msgOpts.event || defaultEvent;
+    if (this.eventNames.includes(eventType)) {
+      const msgEvents = events[eventType].find(record => record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId);
+      msgEvents.messages.push(msgOpts.message);
+      // (push/shift) Setup as placeholder for proper queue if needed.
+      this.emit(msgOpts.event || defaultEvent, msgEvents.testerType, msgEvents.sessionId, msgEvents.messages.shift());
+    } else {
+      throw new Error(`Invalid event of type "${eventType}" was received. The known events are [${this.eventNames}]`);
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this
