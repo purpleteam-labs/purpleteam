@@ -101,7 +101,7 @@ const subscribeToTesterProgress = () => {
     } else {
       model.propagateTesterMessage({
         testerType: testerNameAndSession.testerType,
-        sessionId: testerNameAndSession.testerType,
+        sessionId: testerNameAndSession.sessionId,
         message: `"${testerNameAndSession.testerType}" tester for session with Id "${testerNameAndSession.sessionId}" doesn't currently appear to be online`
       });
     }
