@@ -45,7 +45,7 @@ describe('model', async () => {
 
       const testerSessions = model.testerSessions();
 
-      expect(testerSessions).to.equal(expectedTesterSessions);
+      expect(testerSessions).to.once.include(expectedTesterSessions);
     });
   });
 
@@ -108,7 +108,6 @@ describe('model', async () => {
       };
 
       model.on('testerProgress', (testerType, sessionId, message) => {
-        debugger; // eslint-disable-line
         expect(testerType).to.equal(appTesterLowPrivUserSessionIdMessage.testerType);
         expect(sessionId).to.equal(appTesterLowPrivUserSessionIdMessage.sessionId);
         expect(message).to.equal(appTesterLowPrivUserSessionIdMessage.message);
