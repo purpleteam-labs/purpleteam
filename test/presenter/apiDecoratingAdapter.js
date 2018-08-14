@@ -11,68 +11,152 @@ const log = require('purpleteam-logger').init(config.get('logger'));
 
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
 
-const readFileAsync = require('util').promisify(require('fs').readFile);
-
-const buildUserConfigFileContent = (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
-
 
 describe('apiDecoratingAdapter', async () => {
   describe('getTestPlans', async () => {
-    it('- should provide the dashboard with the test plan to display', async () => { // eslint-disable-line
-
+    before(async ({ context }) => {
+      const readFileAsync = require('util').promisify(require('fs').readFile);
+      context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
+    });
+    it('- should provide the dashboard with the test plan to display', async ({ context }) => { // eslint-disable-line
+      const { buildUserConfigFileContent } = context;
 
       const api = rewire('src/presenter/apiDecoratingAdapter');
       const configFileContents = await buildUserConfigFileContent;
       api.init(log);
-
-      // const configFileContents = await api.getBuildUserConfigFile(buildUserConfigFilePath);
-
-      // const configFileContentsss = await readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' })
-
-
       const dashboard = require('src/view/dashboard'); // eslint-disable-line no-param-reassign, global-require
+      const apiResponse = [{
+        name: 'app',
+        message: `@app_scan
+        Feature: Web application free of security vulnerabilities known to Zap
+        
+        # Before hooks are run befroe Background
+        
+        Background:
+          Given a new test session based on each build user supplied testSession
+          And each build user supplied route of each testSession is navigated
+          And a new scanning session based on each build user supplied testSession
+          And the application is spidered for each testSession
+          And all active scanners are disabled
+        
+        Scenario: The application should not contain vulnerabilities known to Zap that exceed the build user defined threshold
+          Given all active scanners are enabled 
+          When the active scan is run
+          Then the vulnerability count should not exceed the build user defined threshold of vulnerabilities known to Zap
+        
+          
+        
+        @simple_math
+        Feature: Simple maths
+          In order to do maths
+          As a developer
+          I want to increment variables
+        
+          Scenario: easy maths
+            Given a variable set to 1
+            When I increment the variable by 1
+            Then the variable should contain 2
+        
+          Scenario Outline: much more complex stuff
+            Given a variable set to <var>
+            When I increment the variable by <increment>
+            Then the variable should contain <result>
+        
+            Examples:
+              | var | increment | result |
+              | 100 |         5 |    105 |
+              |  99 |      1234 |   1333 |
+              |  12 |         5 |     17 |`
+      }, {
+        name: 'server',
+        message: 'No test plan available for the server tester. The server tester is currently in-active.'
+      }, {
+        name: 'tls',
+        message: 'No test plan available for the tls tester. The tls tester is currently in-active.'
+      }];
 
-
-      // debugger; // eslint-disable-line
+      const expectedArgPasssedToTestPlan = [{
+        name: 'app',
+        message: `@app_scan
+        Feature: Web application free of security vulnerabilities known to Zap
+        
+        # Before hooks are run befroe Background
+        
+        Background:
+          Given a new test session based on each build user supplied testSession
+          And each build user supplied route of each testSession is navigated
+          And a new scanning session based on each build user supplied testSession
+          And the application is spidered for each testSession
+          And all active scanners are disabled
+        
+        Scenario: The application should not contain vulnerabilities known to Zap that exceed the build user defined threshold
+          Given all active scanners are enabled 
+          When the active scan is run
+          Then the vulnerability count should not exceed the build user defined threshold of vulnerabilities known to Zap
+        
+          
+        
+        @simple_math
+        Feature: Simple maths
+          In order to do maths
+          As a developer
+          I want to increment variables
+        
+          Scenario: easy maths
+            Given a variable set to 1
+            When I increment the variable by 1
+            Then the variable should contain 2
+        
+          Scenario Outline: much more complex stuff
+            Given a variable set to <var>
+            When I increment the variable by <increment>
+            Then the variable should contain <result>
+        
+            Examples:
+              | var | increment | result |
+              | 100 |         5 |    105 |
+              |  99 |      1234 |   1333 |
+              |  12 |         5 |     17 |`
+      }, {
+        name: 'server',
+        message: 'No test plan available for the server tester. The server tester is currently in-active.'
+      }, {
+        name: 'tls',
+        message: 'No test plan available for the tls tester. The tls tester is currently in-active.'
+      }];
 
       const rewiredRequest = api.__get__('request');
       const requestStub = sinon.stub(rewiredRequest, 'post');
-      requestStub.returns(Promise.resolve('too many cats'));
+      requestStub.returns(Promise.resolve(apiResponse));
       api.__set__('request', requestStub);
-
 
       const testPlanStub = sinon.stub(dashboard, 'testPlan');
       dashboard.testPlan = testPlanStub;
       api.__set__('dashboard', dashboard);
 
+      await api.getTestPlans(configFileContents);      
 
-      await api.getTestPlans(configFileContents);
-
-      expect(testPlanStub.calledWith('too many cats')).to.be.true();
+      expect(testPlanStub.getCall(0).args[0]).to.equal(expectedArgPasssedToTestPlan);
     });
+  });
 
 
-    // afterEach(({ context }) => {
-    //   const { dashboard } = context;
-    //   dashboard.testPlan.restore();
+
+
+  describe('test', async () => {
+    // it('- should', async () => {
+    //   expect(true).to.equal(true);
     // });
   });
-
-
-  // describe('test', async () => {
-  //   it('- should', async () => {
-  //     expect(true).to.equal(true);
-  //   });
+  // it('should return the build user config file contents', () => {
+  //   const cwd = process.cwd();
+  //   //require('app-module-path').addPath(cwd);
+  //   let apii = require(`${cwd}/src/presenter/apiDecoratingAdapter`);
+  //   expect(1 + 1).to.equal(2);    
   // });
-  it('should return the build user config file contents', () => {
-    const cwd = process.cwd();
-    //require('app-module-path').addPath(cwd);
-    let api = require(`${cwd}/src/presenter/apiDecoratingAdapter`);
-    expect(1 + 1).to.equal(2);
-  });
   describe('getBuildUserConfigFile', () => {
     
-    //test('should return the build user config file contents', () => {
+    //it('should return the build user config file contents', () => {
       //const apii = require('src/presenter/apiDecoratingAdapter');
       //api.init(log);
       //const buildUserConfigFileContents = api.getBuildUserConfigFile(buildUserConfigFilePath);
