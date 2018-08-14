@@ -1,5 +1,3 @@
-const cwd = process.cwd();
-require('app-module-path').addPath(cwd);
 exports.lab = require('lab').script();
 
 const { describe, it } = exports.lab;
