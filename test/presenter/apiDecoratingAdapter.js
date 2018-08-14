@@ -1,4 +1,3 @@
-/* eslint-disable */
 exports.lab = require('lab').script();
 
 const { describe, it, test, before, beforeEach /* , afterEach */ } = exports.lab; // eslint-disable-line
@@ -6,25 +5,23 @@ const { describe, it, test, before, beforeEach /* , afterEach */ } = exports.lab
 const { expect } = require('code');
 const sinon = require('sinon');
 const rewire = require('rewire');
+const readFileAsync = require('util').promisify(require('fs').readFile);
 const config = require('config/config');
 const log = require('purpleteam-logger').init(config.get('logger'));
 
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
-
+const dashboard = require('src/view/dashboard');
 
 describe('apiDecoratingAdapter', async () => {
   describe('getTestPlans', async () => {
     before(async ({ context }) => {
-      const readFileAsync = require('util').promisify(require('fs').readFile);
-      context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
+      context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))(); // eslint-disable-line no-param-reassign
     });
-    it('- should provide the dashboard with the test plan to display', async ({ context }) => { // eslint-disable-line
+    it('- should provide the dashboard with the test plan to display', async ({ context }) => {
       const { buildUserConfigFileContent } = context;
-
       const api = rewire('src/presenter/apiDecoratingAdapter');
       const configFileContents = await buildUserConfigFileContent;
       api.init(log);
-      const dashboard = require('src/view/dashboard'); // eslint-disable-line no-param-reassign, global-require
       const apiResponse = [{
         name: 'app',
         message: `@app_scan
@@ -134,35 +131,34 @@ describe('apiDecoratingAdapter', async () => {
       dashboard.testPlan = testPlanStub;
       api.__set__('dashboard', dashboard);
 
-      await api.getTestPlans(configFileContents);      
+      await api.getTestPlans(configFileContents);
 
       expect(testPlanStub.getCall(0).args[0]).to.equal(expectedArgPasssedToTestPlan);
     });
   });
 
 
-
-
-  describe('test', async () => {
-    // it('- should', async () => {
-    //   expect(true).to.equal(true);
-    // });
-  });
+  //  describe('test', async () => {
+  //    it('- should', async () => {
+  //      expect(true).to.equal(true);
+  //    });
+  //  });
   // it('should return the build user config file contents', () => {
   //   const cwd = process.cwd();
   //   //require('app-module-path').addPath(cwd);
   //   let apii = require(`${cwd}/src/presenter/apiDecoratingAdapter`);
-  //   expect(1 + 1).to.equal(2);    
+  //   expect(1 + 1).to.equal(2);
   // });
-  describe('getBuildUserConfigFile', () => {
-    
-    //it('should return the build user config file contents', () => {
-      //const apii = require('src/presenter/apiDecoratingAdapter');
-      //api.init(log);
-      //const buildUserConfigFileContents = api.getBuildUserConfigFile(buildUserConfigFilePath);
-      //expect(buildUserConfigFileContents).to.match(buildUserConfigFileContent);
-      //console.log('testing');
-      //expect(1 + 1).to.equal(2);
-    //});
+  describe('getBuildUserConfigFile', async () => {
+    before(async ({ context }) => {
+      context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))(); // eslint-disable-line no-param-reassign
+      context.api = require('src/presenter/apiDecoratingAdapter'); // eslint-disable-line no-param-reassign, global-require
+    });
+    it('- should return the build user config file contents', async ({ context }) => {
+      const { buildUserConfigFileContent, api } = context;
+      api.init(log);
+      const buildUserConfigFileContents = await api.getBuildUserConfigFile(buildUserConfigFilePath);
+      expect(buildUserConfigFileContents).to.equal(buildUserConfigFileContent);
+    });
   });
 });
