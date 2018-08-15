@@ -162,6 +162,16 @@ describe('apiDecoratingAdapter', () => {
         Accept: 'text/plain'
       }
     };
+    const requestMissingComma = {
+      uri: 'https://240.0.0.0:2000/testplan',
+      method: 'POST',
+      json: true,
+      body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession"\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'text/plain'
+      }
+    };
 
 
     before(async (flags) => {
@@ -327,8 +337,92 @@ describe('apiDecoratingAdapter', () => {
     });
 
 
-    it('- on - SyntaxError - should throw error - syntaxError', () => {
+    it('- on - SyntaxError - should throw error - syntaxError', async (flags) => {
+      const { context: { rewiredApi } } = flags;
+      const critStub = sinon.stub(log, 'crit');
+      log.crit = critStub;
+      rewiredApi.init(log);
+      const configFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_0.1.0-alpha.1_missing_comma`, { encoding: 'utf8' }))();
 
+      const rewiredRequest = rewiredApi.__get__('request');
+      const requestStub = sinon.stub(rewiredRequest, 'post');
+
+      const error = {
+        name: 'StatusCodeError',
+        statusCode: 400,
+        message: '400 - {"statusCode":400,"error":"Bad Request","message":"Unexpected string in JSON at position 810","name":"SyntaxError"}',
+        error: {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Unexpected string in JSON at position 810',
+          name: 'SyntaxError'
+        },
+        options: {
+          uri: 'http://127.0.0.1:2000/testplan',
+          method: 'POST',
+          json: true,
+          body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession"\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
+          headers: {
+            'Content-Type': 'application/vnd.api+json',
+            Accept: 'text/plain'
+          },
+          simple: true,
+          resolveWithFullResponse: false,
+          transform2xxOnly: false
+        },
+        response: {
+          statusCode: 400,
+          body: {
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'Unexpected string in JSON at position 810',
+            name: 'SyntaxError'
+          },
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'cache-control': 'no-cache',
+            'content-length': '115',
+            date: 'Wed, 15 Aug 2018 06:39:11 GMT',
+            connection: 'close'
+          },
+          request: {
+            uri: {
+              protocol: 'http:',
+              slashes: true,
+              auth: null,
+              host: '127.0.0.1:2000',
+              port: '2000',
+              hostname: '127.0.0.1',
+              hash: null,
+              search: null,
+              query: null,
+              pathname: '/testplan',
+              path: '/testplan',
+              href: 'http://127.0.0.1:2000/testplan'
+            },
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/vnd.api+json',
+              Accept: 'text/plain',
+              'content-length': 2900
+            }
+          }
+        }
+      };
+      requestStub.returns(Promise.reject(error));
+      rewiredApi.__set__('request', requestStub);
+
+      flags.onCleanup = () => {
+        log.crit.restore();
+        rewiredRequest.post.restore();
+      };
+
+      await rewiredApi.getTestPlans(configFileContents);
+
+      expect(requestStub.getCall(0).args[0]).to.equal(requestMissingComma);
+      expect(critStub.getCall(0).args[0]).to.equal('Error occured while attempting to communicate with the purpleteam SaaS. Error was: SyntaxError: Unexpected string in JSON at position 810.');
+      expect(critStub.getCall(0).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
+      expect(critStub.getCall(1)).to.equal(null);
     });
 
 

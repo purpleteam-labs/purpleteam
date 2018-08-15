@@ -1,0 +1,96 @@
+{
+  "data": {
+    "type": "testRun",
+    "attributes": {      
+      "version": "0.1.0-alpha.1",
+      "sutAuthentication": {
+        "route": "/login",
+        "usernameFieldLocater": "userName",
+        "passwordFieldLocater": "password",
+        "submit": "btn btn-danger"
+      },
+      "sutIp": "172.17.0.1",
+      "sutPort": "4000",
+      "sutProtocol": "http",
+      "browser": "chrome",
+      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\"\/dashboard\">\/dashboard<\/a><\/p>",
+      "reportFormats": ["html", "json", "md"]
+    },
+    "relationships": {
+      "data": [{
+        "type": "testSession",
+        "id": "lowPrivUser"
+      },
+      {
+        "type": "testSession",
+        "id": "adminUser"
+      }]
+    }
+  },
+  "included": [
+    {
+      "type": "testSession"
+      "id": "lowPrivUser",
+      "attributes": {
+        "username": "user1",
+        "password": "User1_123",
+        "aScannerAttackStrength": "HIGH",
+        "aScannerAlertThreshold": "LOW",
+        "alertThreshold": 12
+      },
+      "relationships": {
+        "data": [{
+          "type": "route",
+          "id": "/profile"
+        }]
+      }
+    },
+    {
+      "type": "testSession",
+      "id": "adminUser",
+      "attributes": {
+        "username": "admin",
+        "password": "Admin_123"
+      },
+      "relationships": {
+        "data": [{
+          "type": "route",
+          "id": "/memos"
+        },
+        {
+          "type": "route",
+          "id": "/profile"
+        }]
+      }
+    },
+    {
+      "type": "route",
+      "id": "/profile",
+      "attributes": {
+        "attackFields": [
+          {"name": "firstName", "value": "PurpleJohn", "visible": true},
+          {"name": "lastName", "value": "PurpleDoe", "visible": true},
+          {"name": "ssn", "value": "PurpleSSN", "visible": true},
+          {"name": "dob", "value": "12/23/5678", "visible": true},
+          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},
+          {"name": "bankRouting", "value": "0198212#", "visible": true},
+          {"name": "address", "value": "PurpleAddress", "visible": true},
+          {"name": "_csrf", "value": ""},
+          {"name": "submit", "value": ""}
+        ],
+        "method": "POST",
+        "submit": "submit"
+      }
+    },
+    {
+      "type": "route",
+      "id": "/memos",
+      "attributes": {
+        "attackFields": [
+          {"name": "memo", "value": "PurpleMemo", "visible": true}
+        ],
+        "submit": "btn btn-primary"
+      }
+    }
+  ]
+}
