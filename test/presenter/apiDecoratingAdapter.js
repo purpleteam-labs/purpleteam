@@ -142,11 +142,43 @@ describe('apiDecoratingAdapter', () => {
 
 
   describe('postToApi', () => {
-    beforeEach(async (flags) => {
+    const request = {
+      uri: 'https://240.0.0.0:2000/testplan',
+      method: 'POST',
+      json: true,
+      body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession",\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'text/plain'
+      }
+    };
+    const requestMissingTypeOfTestSession = {
+      uri: 'https://240.0.0.0:2000/testplan',
+      method: 'POST',
+      json: true,
+      body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        Accept: 'text/plain'
+      }
+    };
+
+
+    before(async (flags) => {
       flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
+    });
+
+
+    beforeEach(async (flags) => {
       flags.context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
     });
-    it(() => {});
+
+
+    it('- on - socket hang up - should throw error - backendTookToLong', () => {
+      // Todo: KC: Need to reproduce error state.
+    });
+
+
     it('- on - connect ECONNREFUSED - should throw error - backendUnreachable', async (flags) => {
       const { context: { buildUserConfigFileContent, rewiredApi } } = flags;
       const critStub = sinon.stub(log, 'crit');
@@ -198,20 +230,192 @@ describe('apiDecoratingAdapter', () => {
 
       await rewiredApi.getTestPlans(configFileContents);
 
-      expect(requestStub.getCall(0).args[0]).to.equal({
-        uri: 'https://240.0.0.0:2000/testplan',
-        method: 'POST',
-        json: true,
-        body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession",\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
-        headers: {
-          'Content-Type': 'application/vnd.api+json',
-          Accept: 'text/plain'
-        }
-      });
+      expect(requestStub.getCall(0).args[0]).to.equal(request);
       expect(critStub.getCall(0).args[0]).to.equal('Error occured while attempting to communicate with the purpleteam SaaS. Error was: "The purpleteam backend is currently unreachable".');
       expect(critStub.getCall(0).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
-      expect(critStub.getCall(1).args[0]).to.equal('There didn\'t appear to be a response from the purpleteam API');
-      expect(critStub.getCall(1).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
+      expect(critStub.getCall(1)).to.equal(null);
+    });
+
+
+    it('- on - ValidationError - should throw error - validationError', async (flags) => {
+      // Lots of checking around the validation on the server side will be required.
+      const { context: { rewiredApi } } = flags;
+      const critStub = sinon.stub(log, 'crit');
+      log.crit = critStub;
+      rewiredApi.init(log);
+      const configFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_0.1.0-alpha.1_missing_type_of_testSession`, { encoding: 'utf8' }))();
+
+      const rewiredRequest = rewiredApi.__get__('request');
+      const requestStub = sinon.stub(rewiredRequest, 'post');
+
+      const error = {
+        name: 'StatusCodeError',
+        statusCode: 400,
+        message: '400 - {"statusCode":400,"error":"Bad Request","message":"child \\"included\\" fails because [\\"included\\" must contain 3 items]","name":"ValidationError"}',
+        error: {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'child "included" fails because ["included" must contain 3 items]',
+          name: 'ValidationError'
+        },
+        options: {
+          uri: 'http://127.0.0.1:2000/testplan',
+          method: 'POST',
+          json: true,
+          body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {      \n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
+          headers: {
+            'Content-Type': 'application/vnd.api+json',
+            Accept: 'text/plain'
+          },
+          simple: true,
+          resolveWithFullResponse: false,
+          transform2xxOnly: false
+        },
+        response: {
+          statusCode: 400,
+          body: {
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'child "included" fails because ["included" must contain 3 items]',
+            name: 'ValidationError'
+          },
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'cache-control': 'no-cache',
+            'content-length': '146',
+            date: 'Wed, 15 Aug 2018 02:05:34 GMT',
+            connection: 'close'
+          },
+          request: {
+            uri: {
+              protocol: 'http:',
+              slashes: true,
+              auth: null,
+              host: '127.0.0.1:2000',
+              port: '2000',
+              hostname: '127.0.0.1',
+              hash: null,
+              search: null,
+              query: null,
+              pathname: '/testplan',
+              path: '/testplan',
+              href: 'http://127.0.0.1:2000/testplan'
+            },
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/vnd.api+json',
+              Accept: 'text/plain',
+              'content-length': 2873
+            }
+          }
+        }
+      };
+      requestStub.returns(Promise.reject(error));
+      rewiredApi.__set__('request', requestStub);
+
+      flags.onCleanup = () => {
+        log.crit.restore();
+        rewiredRequest.post.restore();
+      };
+
+      await rewiredApi.getTestPlans(configFileContents);
+
+      expect(requestStub.getCall(0).args[0]).to.equal(requestMissingTypeOfTestSession);
+      expect(critStub.getCall(0).args[0]).to.equal('Error occured while attempting to communicate with the purpleteam SaaS. Error was: Validation of the supplied build user config failed: child "included" fails because ["included" must contain 3 items].');
+      expect(critStub.getCall(0).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
+      expect(critStub.getCall(1)).to.equal(null);
+    });
+
+
+    it('- on - SyntaxError - should throw error - syntaxError', () => {
+
+    });
+
+
+    it('- on - 500 - should throw error - unknown', async (flags) => {
+      const { context: { buildUserConfigFileContent, rewiredApi } } = flags;
+      const critStub = sinon.stub(log, 'crit');
+      log.crit = critStub;
+      rewiredApi.init(log);
+      const configFileContents = await buildUserConfigFileContent;
+
+      const rewiredRequest = rewiredApi.__get__('request');
+      const requestStub = sinon.stub(rewiredRequest, 'post');
+
+      const statusCodeError = {
+        name: 'StatusCodeError',
+        statusCode: 500,
+        message: '500 - {"statusCode":500,"error":"Internal Server Error","message":"An internal server error occurred"}',
+        error: {
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred'
+        },
+        options: {
+          uri: 'http://127.0.0.1:2000/testplan',
+          method: 'POST',
+          json: true,
+          body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession",\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
+          headers: {
+            'Content-Type': 'application/vnd.api+json',
+            Accept: 'text/plain'
+          },
+          simple: true,
+          resolveWithFullResponse: false,
+          transform2xxOnly: false
+        },
+        response: {
+          statusCode: 500,
+          body: {
+            statusCode: 500,
+            error: 'Internal Server Error',
+            message: 'An internal server error occurred'
+          },
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'cache-control': 'no-cache',
+            'content-length': '96',
+            date: 'Wed, 15 Aug 2018 01:15:04 GMT',
+            connection: 'close'
+          },
+          request: {
+            uri: {
+              protocol: 'http:',
+              slashes: true,
+              auth: null,
+              host: '127.0.0.1:2000',
+              port: '2000',
+              hostname: '127.0.0.1',
+              hash: null,
+              search: null,
+              query: null,
+              pathname: '/testplan',
+              path: '/testplan',
+              href: 'http://127.0.0.1:2000/testplan'
+            },
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/vnd.api+json',
+              Accept: 'text/plain',
+              'content-length': 2901
+            }
+          }
+        }
+      };
+      requestStub.returns(Promise.reject(statusCodeError));
+      rewiredApi.__set__('request', requestStub);
+
+      flags.onCleanup = () => {
+        log.crit.restore();
+        rewiredRequest.post.restore();
+      };
+
+      await rewiredApi.getTestPlans(configFileContents);
+
+      expect(requestStub.getCall(0).args[0]).to.equal(request);
+      expect(critStub.getCall(0).args[0]).to.equal('Error occured while attempting to communicate with the purpleteam SaaS. Error was: "Unknown"');
+      expect(critStub.getCall(0).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
+      expect(critStub.getCall(1)).to.equal(null);
     });
   });
 
