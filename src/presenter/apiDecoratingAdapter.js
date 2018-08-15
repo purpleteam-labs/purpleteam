@@ -112,12 +112,7 @@ const subscribeToTesterProgress = () => {
 const getTestPlans = async (configFileContents) => {
   const route = 'testplan';
   await postToApi(configFileContents, route);
-
-  if (apiResponse) {
-    dashboard.testPlan(apiResponse);
-  } else {
-    log.crit('There didn\'t appear to be a response from the purpleteam API', { tags: ['apiDecoratingAdapter'] });
-  }
+  if (apiResponse) dashboard.testPlan(apiResponse);
 };
 
 
@@ -138,8 +133,6 @@ const test = async (configFileContents) => {
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
     //    https://www.html5rocks.com/en/tutorials/eventsource/basics/#toc-canceling
-  } else {
-    log.crit('There didn\'t appear to be a response from the purpleteam API', { tags: ['apiDecoratingAdapter'] });
   }
 };
 
