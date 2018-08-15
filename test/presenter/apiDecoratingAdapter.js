@@ -1,6 +1,6 @@
 exports.lab = require('lab').script();
 
-const { describe, it, test, before, beforeEach /* , afterEach */ } = exports.lab; // eslint-disable-line
+const { describe, it, before, beforeEach } = exports.lab;
 
 const { expect } = require('code');
 const sinon = require('sinon');
@@ -11,17 +11,18 @@ const log = require('purpleteam-logger').init(config.get('logger'));
 
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
 const dashboard = require('src/view/dashboard');
+const api = require('src/presenter/apiDecoratingAdapter');
 
-describe('apiDecoratingAdapter', async () => {
-  describe('getTestPlans', async () => {
-    before(async ({ context }) => {
-      context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))(); // eslint-disable-line no-param-reassign
+describe('apiDecoratingAdapter', () => {
+  describe('getTestPlans', () => {
+    before(async (flags) => {
+      flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
     });
-    it('- should provide the dashboard with the test plan to display', async ({ context }) => {
-      const { buildUserConfigFileContent } = context;
-      const api = rewire('src/presenter/apiDecoratingAdapter');
+    it('- should provide the dashboard with the test plan to display', async (flags) => {
+      const { context: { buildUserConfigFileContent } } = flags;
+      const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
       const configFileContents = await buildUserConfigFileContent;
-      api.init(log);
+      rewiredApi.init(log);
       const apiResponse = [{
         name: 'app',
         message: `@app_scan
@@ -122,18 +123,95 @@ describe('apiDecoratingAdapter', async () => {
         message: 'No test plan available for the tls tester. The tls tester is currently in-active.'
       }];
 
-      const rewiredRequest = api.__get__('request');
+      const rewiredRequest = rewiredApi.__get__('request');
       const requestStub = sinon.stub(rewiredRequest, 'post');
       requestStub.returns(Promise.resolve(apiResponse));
-      api.__set__('request', requestStub);
+      rewiredApi.__set__('request', requestStub);
+
+      flags.onCleanup = () => { rewiredRequest.post.restore(); };
 
       const testPlanStub = sinon.stub(dashboard, 'testPlan');
       dashboard.testPlan = testPlanStub;
-      api.__set__('dashboard', dashboard);
+      rewiredApi.__set__('dashboard', dashboard);
 
-      await api.getTestPlans(configFileContents);
+      await rewiredApi.getTestPlans(configFileContents);
 
       expect(testPlanStub.getCall(0).args[0]).to.equal(expectedArgPasssedToTestPlan);
+    });
+  });
+
+
+  describe('postToApi', () => {
+    beforeEach(async (flags) => {
+      flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
+      flags.context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+    });
+    it(() => {});
+    it('- on - connect ECONNREFUSED - should throw error - backendUnreachable', async (flags) => {
+      const { context: { buildUserConfigFileContent, rewiredApi } } = flags;
+      const critStub = sinon.stub(log, 'crit');
+      log.crit = critStub;
+      rewiredApi.init(log);
+      const configFileContents = await buildUserConfigFileContent;
+
+      const rewiredRequest = rewiredApi.__get__('request');
+      const requestStub = sinon.stub(rewiredRequest, 'post');
+
+      const error = {
+        name: 'RequestError',
+        message: 'Error: connect ECONNREFUSED 127.0.0.1:2000',
+        cause: {
+          code: 'ECONNREFUSED',
+          errno: 'ECONNREFUSED',
+          syscall: 'connect',
+          address: '127.0.0.1',
+          port: 2000
+        },
+        error: {
+          code: 'ECONNREFUSED',
+          errno: 'ECONNREFUSED',
+          syscall: 'connect',
+          address: '127.0.0.1',
+          port: 2000
+        },
+        options: {
+          uri: 'http://127.0.0.1:2000/testplan',
+          method: 'POST',
+          json: true,
+          body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession",\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
+          headers: {
+            'Content-Type': 'application/vnd.api+json',
+            Accept: 'text/plain'
+          },
+          simple: true,
+          resolveWithFullResponse: false,
+          transform2xxOnly: false
+        }
+      };
+      requestStub.returns(Promise.reject(error));
+      rewiredApi.__set__('request', requestStub);
+
+      flags.onCleanup = () => {
+        log.crit.restore();
+        rewiredRequest.post.restore();
+      };
+
+      await rewiredApi.getTestPlans(configFileContents);
+
+      expect(requestStub.getCall(0).args[0]).to.equal({
+        uri: 'https://240.0.0.0:2000/testplan',
+        method: 'POST',
+        json: true,
+        body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession",\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'text/plain'
+        }
+      });
+      expect(critStub.getCall(0).args[0]).to.equal('Error occured while attempting to communicate with the purpleteam SaaS. Error was: "The purpleteam backend is currently unreachable".');
+      expect(critStub.getCall(0).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
+      expect(critStub.getCall(1).args[0]).to.equal('There didn\'t appear to be a response from the purpleteam API');
+      expect(critStub.getCall(1).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
     });
   });
 
@@ -143,19 +221,13 @@ describe('apiDecoratingAdapter', async () => {
   //      expect(true).to.equal(true);
   //    });
   //  });
-  // it('should return the build user config file contents', () => {
-  //   const cwd = process.cwd();
-  //   //require('app-module-path').addPath(cwd);
-  //   let apii = require(`${cwd}/src/presenter/apiDecoratingAdapter`);
-  //   expect(1 + 1).to.equal(2);
-  // });
+
   describe('getBuildUserConfigFile', async () => {
-    before(async ({ context }) => {
-      context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))(); // eslint-disable-line no-param-reassign
-      context.api = require('src/presenter/apiDecoratingAdapter'); // eslint-disable-line no-param-reassign, global-require
+    before(async (flags) => {
+      flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
     });
     it('- should return the build user config file contents', async ({ context }) => {
-      const { buildUserConfigFileContent, api } = context;
+      const { buildUserConfigFileContent } = context;
       api.init(log);
       const buildUserConfigFileContents = await api.getBuildUserConfigFile(buildUserConfigFilePath);
       expect(buildUserConfigFileContents).to.equal(buildUserConfigFileContent);
