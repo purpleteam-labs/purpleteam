@@ -34,6 +34,7 @@ describe('model', async () => {
   describe('testerSessions', async () => {
     it('- should return valid testerSessions', async () => {
       const model = await newModel();
+      // expectedTesterSessions also used in the presenter tests
       const expectedTesterSessions = [
         { testerType: 'app', sessionId: 'lowPrivUser', threshold: 12 },
         { testerType: 'app', sessionId: 'adminUser', threshold: 0 },

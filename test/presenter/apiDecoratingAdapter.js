@@ -128,11 +128,14 @@ describe('apiDecoratingAdapter', () => {
       requestStub.returns(Promise.resolve(apiResponse));
       rewiredApi.__set__('request', requestStub);
 
-      flags.onCleanup = () => { rewiredRequest.post.restore(); };
-
       const testPlanStub = sinon.stub(dashboard, 'testPlan');
       dashboard.testPlan = testPlanStub;
       rewiredApi.__set__('dashboard', dashboard);
+
+      flags.onCleanup = () => {
+        rewiredRequest.post.restore();
+        dashboard.testPlan.restore();
+      };
 
       await rewiredApi.getTestPlans(configFileContents);
 
@@ -514,11 +517,111 @@ describe('apiDecoratingAdapter', () => {
   });
 
 
-  //  describe('test', async () => {
-  //    it('- should', async () => {
-  //      expect(true).to.equal(true);
-  //    });
-  //  });
+  describe('test', async () => {
+    before(async (flags) => {
+      flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
+
+      flags.context.request = {
+        uri: 'https://240.0.0.0:2000/test',
+        method: 'POST',
+        json: true,
+        body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession",\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          Accept: 'text/plain'
+        }
+      };
+    });
+    it('- should', async (flags) => {
+      const { context: { buildUserConfigFileContent, request } } = flags;
+      const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      const configFileContents = await buildUserConfigFileContent;
+      rewiredApi.init(log);
+      const apiResponse = [
+        {
+          name: 'app',
+          message: 'App tests are now running.'
+        },
+        {
+          name: 'server',
+          message: 'No server testing available currently. The server tester is currently in-active.'
+        },
+        {
+          name: 'tls',
+          message: 'No tls testing available currently. The tls tester is currently in-active.'
+        }
+      ];
+
+      const rewiredRequest = rewiredApi.__get__('request');
+      const requestStub = sinon.stub(rewiredRequest, 'post');
+      requestStub.returns(Promise.resolve(apiResponse));
+      rewiredApi.__set__('request', requestStub);
+
+      const testStub = sinon.stub(dashboard, 'test');
+      dashboard.test = testStub;
+
+      const rewiredTesterEventHandler = rewiredApi.__get__('testerEventHandler');
+      const testerEventHandlerSpy = sinon.spy(rewiredTesterEventHandler);
+      rewiredApi.__set__('testerEventHandler', testerEventHandlerSpy);
+
+      const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
+      dashboard.handleTesterProgress = handleTesterProgressStub;
+
+      // const handleTesterPctCompleteStub = sinon.stub(dashboard, 'handleTesterPctComplete');
+      // dashboard.handleTesterPctComplete = handleTesterPctCompleteStub;
+
+      // const handleTesterBugCountStub = sinon.stub(dashboard, 'handleTesterBugCount');
+      // dashboard.handleTesterBugCount = handleTesterBugCountStub;
+
+      rewiredApi.__set__('dashboard', dashboard);
+
+
+      flags.onCleanup = () => {
+        rewiredRequest.post.restore();
+        dashboard.test.restore();
+        dashboard.handleTesterProgress.restore();
+        // dashboard.handleTesterPctComplete.restore();
+        // dashboard.handleTesterBugCount.restore();
+      };
+
+      await rewiredApi.test(configFileContents);
+
+      expect(requestStub.getCall(0).args[0]).to.equal(request);
+      expect(requestStub.callCount).to.equal(1);
+
+      const expectedTesterSessions = [ // Taken from the model test
+        { testerType: 'app', sessionId: 'lowPrivUser', threshold: 12 },
+        { testerType: 'app', sessionId: 'adminUser', threshold: 0 },
+        { testerType: 'server', sessionId: 'NA', threshold: 0 },
+        { testerType: 'tls', sessionId: 'NA', threshold: 0 }
+      ];
+
+      expect(testStub.getCall(0).args[0]).to.equal(expectedTesterSessions);
+      expect(testStub.callCount).to.equal(1);
+
+      // Setup expects for:
+      //   params to testerEventHandlerSpy, and number of invocations.
+      //   params to dashboard's handleTesterProgressStub, and number of invocations.
+      //   params to dashboard's handleTesterPctCompleteStub, and number of invocations.
+      //   params to dashboard's handleTesterBugCountStub, and number of invocations.
+
+      expect(testerEventHandlerSpy.callCount).to.equal(4);
+      expect(handleTesterProgressStub.callCount).to.equal(4);
+
+      expect(testerEventHandlerSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', 'App tests are now running.']);
+      expect(handleTesterProgressStub.getCall(0).args).to.equal(['app', 'lowPrivUser', 'App tests are now running.']);
+
+      expect(testerEventHandlerSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', 'App tests are now running.']);
+      expect(handleTesterProgressStub.getCall(1).args).to.equal(['app', 'adminUser', 'App tests are now running.']);
+
+      expect(testerEventHandlerSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
+      expect(handleTesterProgressStub.getCall(2).args).to.equal(['server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
+
+      expect(testerEventHandlerSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
+      expect(handleTesterProgressStub.getCall(3).args).to.equal(['tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
+    });
+  });
+
 
   describe('getBuildUserConfigFile', async () => {
     before(async (flags) => {

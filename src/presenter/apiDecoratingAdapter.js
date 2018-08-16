@@ -116,6 +116,11 @@ const getTestPlans = async (configFileContents) => {
 };
 
 
+const testerEventHandler = (eventName, testerType, sessionId, message) => {
+  dashboard[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`](testerType, sessionId, message);
+};
+
+
 const test = async (configFileContents) => {
   model = new Model(configFileContents);
   const route = 'test';
@@ -124,9 +129,7 @@ const test = async (configFileContents) => {
   if (apiResponse) {
     dashboard.test(model.testerSessions());
     model.eventNames.forEach((eN) => {
-      model.on(eN, (testerType, sessionId, message) => {
-        dashboard[`handle${eN.charAt(0).toUpperCase()}${eN.substring(1)}`](testerType, sessionId, message);
-      });
+      model.on(eN, (testerType, sessionId, message) => { testerEventHandler(eN, testerType, sessionId, message); });
     });
 
     subscribeToTesterProgress();
