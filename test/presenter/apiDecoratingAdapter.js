@@ -532,7 +532,7 @@ describe('apiDecoratingAdapter', () => {
         }
       };
     });
-    it('- should', async (flags) => {
+    it('- should subscribe to models tester events - should propagate initial SSEs for each tester - then verify event flow back through presenter and then to view', async (flags) => {
       const { context: { buildUserConfigFileContent, request } } = flags;
       const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
       const configFileContents = await buildUserConfigFileContent;
@@ -613,6 +613,98 @@ describe('apiDecoratingAdapter', () => {
 
       expect(testerEventHandlerSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', 'App tests are now running.']);
       expect(handleTesterProgressStub.getCall(1).args).to.equal(['app', 'adminUser', 'App tests are now running.']);
+
+      expect(testerEventHandlerSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
+      expect(handleTesterProgressStub.getCall(2).args).to.equal(['server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
+
+      expect(testerEventHandlerSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
+      expect(handleTesterProgressStub.getCall(3).args).to.equal(['tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
+    });
+
+
+    it('- should subscribe to models tester events - should propagate initial SSEs for each tester, even if app tester is offline - then verify event flow back through presenter and then to view', async (flags) => {
+      debugger; // eslint-disable-line
+      const { context: { buildUserConfigFileContent, request } } = flags;
+      const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      const configFileContents = await buildUserConfigFileContent;
+      rewiredApi.init(log);
+      const apiResponse = [
+        // Simulate no response from app tester to orchestrator.
+        // {
+        //   name: 'app',
+        //   message: 'App tests are now running.'
+        // },
+        {
+          name: 'server',
+          message: 'No server testing available currently. The server tester is currently in-active.'
+        },
+        {
+          name: 'tls',
+          message: 'No tls testing available currently. The tls tester is currently in-active.'
+        }
+      ];
+
+      const rewiredRequest = rewiredApi.__get__('request');
+      const requestStub = sinon.stub(rewiredRequest, 'post');
+      requestStub.returns(Promise.resolve(apiResponse));
+      rewiredApi.__set__('request', requestStub);
+
+      const testStub = sinon.stub(dashboard, 'test');
+      dashboard.test = testStub;
+
+      const rewiredTesterEventHandler = rewiredApi.__get__('testerEventHandler');
+      const testerEventHandlerSpy = sinon.spy(rewiredTesterEventHandler);
+      rewiredApi.__set__('testerEventHandler', testerEventHandlerSpy);
+
+      const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
+      dashboard.handleTesterProgress = handleTesterProgressStub;
+
+      // const handleTesterPctCompleteStub = sinon.stub(dashboard, 'handleTesterPctComplete');
+      // dashboard.handleTesterPctComplete = handleTesterPctCompleteStub;
+
+      // const handleTesterBugCountStub = sinon.stub(dashboard, 'handleTesterBugCount');
+      // dashboard.handleTesterBugCount = handleTesterBugCountStub;
+
+      rewiredApi.__set__('dashboard', dashboard);
+
+
+      flags.onCleanup = () => {
+        rewiredRequest.post.restore();
+        dashboard.test.restore();
+        dashboard.handleTesterProgress.restore();
+        // dashboard.handleTesterPctComplete.restore();
+        // dashboard.handleTesterBugCount.restore();
+      };
+
+      await rewiredApi.test(configFileContents);
+
+      expect(requestStub.getCall(0).args[0]).to.equal(request);
+      expect(requestStub.callCount).to.equal(1);
+
+      const expectedTesterSessions = [ // Taken from the model test
+        { testerType: 'app', sessionId: 'lowPrivUser', threshold: 12 },
+        { testerType: 'app', sessionId: 'adminUser', threshold: 0 },
+        { testerType: 'server', sessionId: 'NA', threshold: 0 },
+        { testerType: 'tls', sessionId: 'NA', threshold: 0 }
+      ];
+
+      expect(testStub.getCall(0).args[0]).to.equal(expectedTesterSessions);
+      expect(testStub.callCount).to.equal(1);
+
+      // Setup expects for:
+      //   params to testerEventHandlerSpy, and number of invocations.
+      //   params to dashboard's handleTesterProgressStub, and number of invocations.
+      //   params to dashboard's handleTesterPctCompleteStub, and number of invocations.
+      //   params to dashboard's handleTesterBugCountStub, and number of invocations.
+
+      expect(testerEventHandlerSpy.callCount).to.equal(4);
+      expect(handleTesterProgressStub.callCount).to.equal(4);
+
+      expect(testerEventHandlerSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', '"app" tester for session with Id "lowPrivUser" doesn\'t currently appear to be online']);
+      expect(handleTesterProgressStub.getCall(0).args).to.equal(['app', 'lowPrivUser', '"app" tester for session with Id "lowPrivUser" doesn\'t currently appear to be online']);
+
+      expect(testerEventHandlerSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', '"app" tester for session with Id "adminUser" doesn\'t currently appear to be online']);
+      expect(handleTesterProgressStub.getCall(1).args).to.equal(['app', 'adminUser', '"app" tester for session with Id "adminUser" doesn\'t currently appear to be online']);
 
       expect(testerEventHandlerSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
       expect(handleTesterProgressStub.getCall(2).args).to.equal(['server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
