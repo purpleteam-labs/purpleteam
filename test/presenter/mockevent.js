@@ -52,7 +52,7 @@ const baseHandler = {
       }
     } else {
       const star = this.url.indexOf('*');
-      if (this.url !== url && star === -1 || !new RegExp(this.url.replace(/[-[\]{}()+?.,\\^$|#\s]/g, '\\$&').replace(/\*/g, '.+')).test(url)) {
+      if (((this.url !== url) && (star === -1)) || !new RegExp(this.url.replace(/[-[\]{}()+?.,\\^$|#\s]/g, '\\$&').replace(/\*/g, '.+')).test(url)) {
         return false;
       }
     }
@@ -76,7 +76,6 @@ const baseHandler = {
   },
 
   errorEventName() {
-    //return `mock-event-${this.id}-error`;
     return 'error';
   },
 
@@ -85,22 +84,22 @@ const baseHandler = {
   },
 
   stream(responses) {
-    /* Handling the stream output via this.setInterval attribute, 
-    ironically it's being handled with the `setTimeout` function. */
+    // Handling the stream output via this.setInterval attribute,
+    // ironically it's being handled with the `setTimeout` function.
     const self = this;
     let timeoutId;
     let timeoutValue;
 
-    const streamIt = function () {
+    const streamIt = function () { // eslint-disable-line func-names
       if (responses.length) {
         const response = responses.shift();
-        if (self.evtSource.readyState === self.evtSource.OPEN){
+        if (self.evtSource.readyState === self.evtSource.OPEN) {
           self.lastResponseId = response.lastEventId;
           self.dispatchEvent(response);
           self.stream(responses);
         } else {
-          if (this.verbose) console.warn("Missed response because EventSource.close()", response);
-          self.dispatchError("`EventSource` instance closed while sending.");
+          if (this.verbose) console.warn('Missed response because EventSource.close()', response); // eslint-disable-line no-console
+          self.dispatchError('`EventSource` instance closed while sending.');
         }
       } else {
         clearTimeout(timeoutId);
@@ -112,7 +111,7 @@ const baseHandler = {
       if (self.setInterval instanceof Array) {
         const min = self.setInterval[0];
         const max = self.setInterval[1];
-        timeoutValue = Math.random() * (max - min) + min;
+        timeoutValue = (Math.random() * (max - min)) + min;
         timeoutId = setTimeout(streamIt, timeoutValue);
       } else {
         timeoutValue = self.setInterval;
@@ -121,7 +120,7 @@ const baseHandler = {
 
       // Logging on `verbose` = True
       if (this.verbose && responses.length) {
-        console.info("Send stream in " + timeoutValue + " milliseconds.");
+        console.info(`Send stream in ${timeoutValue} milliseconds.`); // eslint-disable-line no-console
       }
     }
   },
@@ -165,8 +164,7 @@ class EventSource extends EventEmitter {
       Host: internals.host,
       // 'Last-event-id': this.handler.lastResponseId || '',
       Origin: `${internals.protocol}//${internals.host}`,
-      Referer: `${internals.protocol}//${internals.host}`,
-      // 'User-Agent': window.navigator.userAgent
+      Referer: `${internals.protocol}//${internals.host}`
     };
   }
 
@@ -211,7 +209,7 @@ class EventSource extends EventEmitter {
         }
 
         this.handler = mockHandler;
-        mockHandler.evtSource = this;
+        mockHandler.evtSource = this; // eslint-disable-line no-param-reassign
 
         // mockHandler dispatches error event
         // EventSource calls `onerror` method
@@ -221,7 +219,7 @@ class EventSource extends EventEmitter {
           this.readyState = this.CONNECTING;
         }
 
-        if (this.readyState == this.CONNECTING) {
+        if (this.readyState == this.CONNECTING) { // eslint-disable-line eqeqeq
           if (this.onopen) {
             this.onopen({
               message: 'You are open!',
@@ -258,6 +256,7 @@ class MockEvent {
     return mockHandlers[i];
   }
 
+  // eslint-disable-next-line class-methods-use-this
   clear(i) {
     if (i || i === 0) {
       mockHandlers[i] = null;
@@ -265,12 +264,14 @@ class MockEvent {
       mockHandlers = [];
     }
   }
-  
+
+  // eslint-disable-next-line class-methods-use-this
   handlers(i) {
     if (i || i === 0) return mockHandlers[i];
     return mockHandlers;
   }
-  
+
+  // eslint-disable-next-line class-methods-use-this
   missed() {
     return missed;
   }
