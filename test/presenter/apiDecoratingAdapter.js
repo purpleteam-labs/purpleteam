@@ -491,7 +491,8 @@ describe('apiDecoratingAdapter', () => {
 
   describe('test and subscribeToTesterProgress', async () => {
     beforeEach(async (flags) => {
-      flags.context.request = {
+      const { context } = flags;
+      context.request = {
         uri: `${apiUrl}/test`,
         method: 'POST',
         json: true,
@@ -501,14 +502,18 @@ describe('apiDecoratingAdapter', () => {
           Accept: 'text/plain'
         }
       };
+      context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      context.configFileContents = await context.buildUserConfigFileContent;
+
+      context.rewiredApi.init(log);
+
+      context.rewiredRequest = context.rewiredApi.__get__('request');
+      context.requestStub = sinon.stub(context.rewiredRequest, 'post');
     });
 
 
     it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model - then verify event flow back through presenter and then to view', async (flags) => {
-      const { context: { buildUserConfigFileContent, request } } = flags;
-      const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
-      const configFileContents = await buildUserConfigFileContent;
-      rewiredApi.init(log);
+      const { context: { configFileContents, rewiredApi, request, rewiredRequest, requestStub } } = flags;
       const apiResponse = [
         {
           name: 'app',
@@ -524,38 +529,30 @@ describe('apiDecoratingAdapter', () => {
         }
       ];
 
-      const rewiredRequest = rewiredApi.__get__('request');
-      const requestStub = sinon.stub(rewiredRequest, 'post');
       requestStub.returns(Promise.resolve(apiResponse));
-      rewiredApi.__set__('request', requestStub);
+      const revertRewiredApiRequest = rewiredApi.__set__('request', requestStub);
 
       const testStub = sinon.stub(dashboard, 'test');
       dashboard.test = testStub;
 
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
       const handleModelTesterEventsSpy = sinon.spy(rewiredHandleModelTesterEvents);
-      rewiredApi.__set__('handleModelTesterEvents', handleModelTesterEventsSpy);
+      const revertRewiredApiHandleModelTesterEvents = rewiredApi.__set__('handleModelTesterEvents', handleModelTesterEventsSpy);
 
       const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
       dashboard.handleTesterProgress = handleTesterProgressStub;
 
-      // const handleTesterPctCompleteStub = sinon.stub(dashboard, 'handleTesterPctComplete');
-      // dashboard.handleTesterPctComplete = handleTesterPctCompleteStub;
-
-      // const handleTesterBugCountStub = sinon.stub(dashboard, 'handleTesterBugCount');
-      // dashboard.handleTesterBugCount = handleTesterBugCountStub;
-
-      rewiredApi.__set__('dashboard', dashboard);
-
-      rewiredApi.__set__('apiUrl', `${apiUrl}`);
-
+      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      const revertRewiredApiApiUrl = rewiredApi.__set__('apiUrl', `${apiUrl}`);
 
       flags.onCleanup = () => {
         rewiredRequest.post.restore();
         dashboard.test.restore();
         dashboard.handleTesterProgress.restore();
-        // dashboard.handleTesterPctComplete.restore();
-        // dashboard.handleTesterBugCount.restore();
+        revertRewiredApiRequest();
+        revertRewiredApiHandleModelTesterEvents();
+        revertRewiredApiDashboard();
+        revertRewiredApiApiUrl();
       };
 
       await rewiredApi.test(configFileContents);
@@ -591,10 +588,7 @@ describe('apiDecoratingAdapter', () => {
 
 
     it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model, even if app tester is offline - then verify event flow back through presenter and then to view', async (flags) => {
-      const { context: { buildUserConfigFileContent, request } } = flags;
-      const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
-      const configFileContents = await buildUserConfigFileContent;
-      rewiredApi.init(log);
+      const { context: { configFileContents, rewiredApi, request, rewiredRequest, requestStub } } = flags;
       const apiResponse = [
         // Simulate no response from app tester to orchestrator.
         // {
@@ -611,38 +605,30 @@ describe('apiDecoratingAdapter', () => {
         }
       ];
 
-      const rewiredRequest = rewiredApi.__get__('request');
-      const requestStub = sinon.stub(rewiredRequest, 'post');
       requestStub.returns(Promise.resolve(apiResponse));
-      rewiredApi.__set__('request', requestStub);
+      const revertRewiredApiRequest = rewiredApi.__set__('request', requestStub);
 
       const testStub = sinon.stub(dashboard, 'test');
       dashboard.test = testStub;
 
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
       const handleModelTesterEventsSpy = sinon.spy(rewiredHandleModelTesterEvents);
-      rewiredApi.__set__('handleModelTesterEvents', handleModelTesterEventsSpy);
+      const revertRewiredApiHandleModelTesterEvents = rewiredApi.__set__('handleModelTesterEvents', handleModelTesterEventsSpy);
 
       const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
       dashboard.handleTesterProgress = handleTesterProgressStub;
 
-      // const handleTesterPctCompleteStub = sinon.stub(dashboard, 'handleTesterPctComplete');
-      // dashboard.handleTesterPctComplete = handleTesterPctCompleteStub;
-
-      // const handleTesterBugCountStub = sinon.stub(dashboard, 'handleTesterBugCount');
-      // dashboard.handleTesterBugCount = handleTesterBugCountStub;
-
-      rewiredApi.__set__('dashboard', dashboard);
-
-      rewiredApi.__set__('apiUrl', `${apiUrl}`);
-
+      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      const revertRewiredApiApiUrl = rewiredApi.__set__('apiUrl', `${apiUrl}`);
 
       flags.onCleanup = () => {
         rewiredRequest.post.restore();
         dashboard.test.restore();
         dashboard.handleTesterProgress.restore();
-        // dashboard.handleTesterPctComplete.restore();
-        // dashboard.handleTesterBugCount.restore();
+        revertRewiredApiRequest();
+        revertRewiredApiHandleModelTesterEvents();
+        revertRewiredApiDashboard();
+        revertRewiredApiApiUrl();
       };
 
       await rewiredApi.test(configFileContents);
