@@ -95,7 +95,6 @@ const subscribeToTesterProgress = (model) => {
       });
       if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
         const eventSource = new EventSource(`${apiUrl}/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
-        //const eventSource = new EventSource(`/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
         const handleServerSentTesterEventsClosure = (event) => {
           handleServerSentTesterEvents(event, model, testerNameAndSession);
         };

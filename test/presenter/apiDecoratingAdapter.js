@@ -731,7 +731,6 @@ describe('apiDecoratingAdapter', () => {
             expect(event.origin).to.equal(eventSourceOrigin);
             expect(testerNameAndSessionToCheck.testerType).to.equal('app');
             expect(testerNameAndSessionToCheck.sessionId).to.equal('lowPrivUser');
-
           },
           two: (event, testerNameAndSessionToCheck) => {
             expect(event.type).to.equal('testerPctComplete');
