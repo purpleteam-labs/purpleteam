@@ -1,3 +1,4 @@
+require('app-module-path').addPath(process.cwd());
 exports.lab = require('lab').script();
 
 const { describe, it, before, beforeEach } = exports.lab;
@@ -9,15 +10,20 @@ const readFileAsync = require('util').promisify(require('fs').readFile);
 const config = require('config/config');
 const log = require('purpleteam-logger').init(config.get('logger'));
 
+const apiUrl = config.get('purpleteamApi.url');
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
 const dashboard = require('src/view/dashboard');
 const api = require('src/presenter/apiDecoratingAdapter');
+const { MockEvent, EventSource } = require('./mockevent');
+const { TesterProgressRouteSuffix } = require('src/strings');
+const Model = require('src/models/model');
+
 
 describe('apiDecoratingAdapter', () => {
+  before(async (flags) => {
+    flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
+  });
   describe('getTestPlans', () => {
-    before(async (flags) => {
-      flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
-    });
     it('- should provide the dashboard with the test plan to display', async (flags) => {
       const { context: { buildUserConfigFileContent } } = flags;
       const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
@@ -146,7 +152,7 @@ describe('apiDecoratingAdapter', () => {
 
   describe('postToApi', () => {
     const request = {
-      uri: 'https://240.0.0.0:2000/testplan',
+      uri: `${apiUrl}/testplan`,
       method: 'POST',
       json: true,
       body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession",\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
@@ -156,7 +162,7 @@ describe('apiDecoratingAdapter', () => {
       }
     };
     const requestMissingTypeOfTestSession = {
-      uri: 'https://240.0.0.0:2000/testplan',
+      uri: `${apiUrl}/testplan`,
       method: 'POST',
       json: true,
       body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
@@ -166,7 +172,7 @@ describe('apiDecoratingAdapter', () => {
       }
     };
     const requestMissingComma = {
-      uri: 'https://240.0.0.0:2000/testplan',
+      uri: `${apiUrl}/testplan`,
       method: 'POST',
       json: true,
       body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession"\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
@@ -175,11 +181,6 @@ describe('apiDecoratingAdapter', () => {
         Accept: 'text/plain'
       }
     };
-
-
-    before(async (flags) => {
-      flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
-    });
 
 
     beforeEach(async (flags) => {
@@ -517,12 +518,10 @@ describe('apiDecoratingAdapter', () => {
   });
 
 
-  describe('test', async () => {
-    before(async (flags) => {
-      flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
-
+  describe('test and subscribeToTesterProgress', async () => {
+    beforeEach(async (flags) => {
       flags.context.request = {
-        uri: 'https://240.0.0.0:2000/test',
+        uri: `${apiUrl}/test`,
         method: 'POST',
         json: true,
         body: '{\n  "data": {\n    "type": "testRun",\n    "attributes": {      \n      "version": "0.1.0-alpha.1",\n      "sutAuthentication": {\n        "route": "/login",\n        "usernameFieldLocater": "userName",\n        "passwordFieldLocater": "password",\n        "submit": "btn btn-danger"\n      },\n      "sutIp": "172.17.0.1",\n      "sutPort": "4000",\n      "sutProtocol": "http",\n      "browser": "chrome",\n      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\\"\\/dashboard\\">\\/dashboard<\\/a><\\/p>",\n      "reportFormats": ["html", "json", "md"]\n    },\n    "relationships": {\n      "data": [{\n        "type": "testSession",\n        "id": "lowPrivUser"\n      },\n      {\n        "type": "testSession",\n        "id": "adminUser"\n      }]\n    }\n  },\n  "included": [\n    {\n      "type": "testSession",\n      "id": "lowPrivUser",\n      "attributes": {\n        "username": "user1",\n        "password": "User1_123",\n        "aScannerAttackStrength": "HIGH",\n        "aScannerAlertThreshold": "LOW",\n        "alertThreshold": 12\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "testSession",\n      "id": "adminUser",\n      "attributes": {\n        "username": "admin",\n        "password": "Admin_123"\n      },\n      "relationships": {\n        "data": [{\n          "type": "route",\n          "id": "/memos"\n        },\n        {\n          "type": "route",\n          "id": "/profile"\n        }]\n      }\n    },\n    {\n      "type": "route",\n      "id": "/profile",\n      "attributes": {\n        "attackFields": [\n          {"name": "firstName", "value": "PurpleJohn", "visible": true},\n          {"name": "lastName", "value": "PurpleDoe", "visible": true},\n          {"name": "ssn", "value": "PurpleSSN", "visible": true},\n          {"name": "dob", "value": "12/23/5678", "visible": true},\n          {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},\n          {"name": "bankRouting", "value": "0198212#", "visible": true},\n          {"name": "address", "value": "PurpleAddress", "visible": true},\n          {"name": "_csrf", "value": ""},\n          {"name": "submit", "value": ""}\n        ],\n        "method": "POST",\n        "submit": "submit"\n      }\n    },\n    {\n      "type": "route",\n      "id": "/memos",\n      "attributes": {\n        "attackFields": [\n          {"name": "memo", "value": "PurpleMemo", "visible": true}\n        ],\n        "submit": "btn btn-primary"\n      }\n    }\n  ]\n}\n',
@@ -532,7 +531,9 @@ describe('apiDecoratingAdapter', () => {
         }
       };
     });
-    it('- should subscribe to models tester events - should propagate initial SSEs for each tester - then verify event flow back through presenter and then to view', async (flags) => {
+
+
+    it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model - then verify event flow back through presenter and then to view', async (flags) => {
       const { context: { buildUserConfigFileContent, request } } = flags;
       const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
       const configFileContents = await buildUserConfigFileContent;
@@ -560,9 +561,9 @@ describe('apiDecoratingAdapter', () => {
       const testStub = sinon.stub(dashboard, 'test');
       dashboard.test = testStub;
 
-      const rewiredTesterEventHandler = rewiredApi.__get__('testerEventHandler');
-      const testerEventHandlerSpy = sinon.spy(rewiredTesterEventHandler);
-      rewiredApi.__set__('testerEventHandler', testerEventHandlerSpy);
+      const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
+      const handleModelTesterEventsSpy = sinon.spy(rewiredHandleModelTesterEvents);
+      rewiredApi.__set__('handleModelTesterEvents', handleModelTesterEventsSpy);
 
       const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
       dashboard.handleTesterProgress = handleTesterProgressStub;
@@ -574,6 +575,8 @@ describe('apiDecoratingAdapter', () => {
       // dashboard.handleTesterBugCount = handleTesterBugCountStub;
 
       rewiredApi.__set__('dashboard', dashboard);
+
+      rewiredApi.__set__('apiUrl', `${apiUrl}`);
 
 
       flags.onCleanup = () => {
@@ -599,31 +602,24 @@ describe('apiDecoratingAdapter', () => {
       expect(testStub.getCall(0).args[0]).to.equal(expectedTesterSessions);
       expect(testStub.callCount).to.equal(1);
 
-      // Setup expects for:
-      //   params to testerEventHandlerSpy, and number of invocations.
-      //   params to dashboard's handleTesterProgressStub, and number of invocations.
-      //   params to dashboard's handleTesterPctCompleteStub, and number of invocations.
-      //   params to dashboard's handleTesterBugCountStub, and number of invocations.
-
-      expect(testerEventHandlerSpy.callCount).to.equal(4);
+      expect(handleModelTesterEventsSpy.callCount).to.equal(4);
       expect(handleTesterProgressStub.callCount).to.equal(4);
 
-      expect(testerEventHandlerSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', 'App tests are now running.']);
+      expect(handleModelTesterEventsSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', 'App tests are now running.']);
       expect(handleTesterProgressStub.getCall(0).args).to.equal(['app', 'lowPrivUser', 'App tests are now running.']);
 
-      expect(testerEventHandlerSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', 'App tests are now running.']);
+      expect(handleModelTesterEventsSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', 'App tests are now running.']);
       expect(handleTesterProgressStub.getCall(1).args).to.equal(['app', 'adminUser', 'App tests are now running.']);
 
-      expect(testerEventHandlerSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
+      expect(handleModelTesterEventsSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
       expect(handleTesterProgressStub.getCall(2).args).to.equal(['server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
 
-      expect(testerEventHandlerSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
+      expect(handleModelTesterEventsSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
       expect(handleTesterProgressStub.getCall(3).args).to.equal(['tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
     });
 
 
-    it('- should subscribe to models tester events - should propagate initial SSEs for each tester, even if app tester is offline - then verify event flow back through presenter and then to view', async (flags) => {
-      debugger; // eslint-disable-line
+    it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model, even if app tester is offline - then verify event flow back through presenter and then to view', async (flags) => {
       const { context: { buildUserConfigFileContent, request } } = flags;
       const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
       const configFileContents = await buildUserConfigFileContent;
@@ -652,9 +648,9 @@ describe('apiDecoratingAdapter', () => {
       const testStub = sinon.stub(dashboard, 'test');
       dashboard.test = testStub;
 
-      const rewiredTesterEventHandler = rewiredApi.__get__('testerEventHandler');
-      const testerEventHandlerSpy = sinon.spy(rewiredTesterEventHandler);
-      rewiredApi.__set__('testerEventHandler', testerEventHandlerSpy);
+      const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
+      const handleModelTesterEventsSpy = sinon.spy(rewiredHandleModelTesterEvents);
+      rewiredApi.__set__('handleModelTesterEvents', handleModelTesterEventsSpy);
 
       const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
       dashboard.handleTesterProgress = handleTesterProgressStub;
@@ -666,6 +662,8 @@ describe('apiDecoratingAdapter', () => {
       // dashboard.handleTesterBugCount = handleTesterBugCountStub;
 
       rewiredApi.__set__('dashboard', dashboard);
+
+      rewiredApi.__set__('apiUrl', `${apiUrl}`);
 
 
       flags.onCleanup = () => {
@@ -691,26 +689,120 @@ describe('apiDecoratingAdapter', () => {
       expect(testStub.getCall(0).args[0]).to.equal(expectedTesterSessions);
       expect(testStub.callCount).to.equal(1);
 
-      // Setup expects for:
-      //   params to testerEventHandlerSpy, and number of invocations.
-      //   params to dashboard's handleTesterProgressStub, and number of invocations.
-      //   params to dashboard's handleTesterPctCompleteStub, and number of invocations.
-      //   params to dashboard's handleTesterBugCountStub, and number of invocations.
-
-      expect(testerEventHandlerSpy.callCount).to.equal(4);
+      expect(handleModelTesterEventsSpy.callCount).to.equal(4);
       expect(handleTesterProgressStub.callCount).to.equal(4);
 
-      expect(testerEventHandlerSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', '"app" tester for session with Id "lowPrivUser" doesn\'t currently appear to be online']);
+      expect(handleModelTesterEventsSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', '"app" tester for session with Id "lowPrivUser" doesn\'t currently appear to be online']);
       expect(handleTesterProgressStub.getCall(0).args).to.equal(['app', 'lowPrivUser', '"app" tester for session with Id "lowPrivUser" doesn\'t currently appear to be online']);
 
-      expect(testerEventHandlerSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', '"app" tester for session with Id "adminUser" doesn\'t currently appear to be online']);
+      expect(handleModelTesterEventsSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', '"app" tester for session with Id "adminUser" doesn\'t currently appear to be online']);
       expect(handleTesterProgressStub.getCall(1).args).to.equal(['app', 'adminUser', '"app" tester for session with Id "adminUser" doesn\'t currently appear to be online']);
 
-      expect(testerEventHandlerSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
+      expect(handleModelTesterEventsSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
       expect(handleTesterProgressStub.getCall(2).args).to.equal(['server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
 
-      expect(testerEventHandlerSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
+      expect(handleModelTesterEventsSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
       expect(handleTesterProgressStub.getCall(3).args).to.equal(['tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
+    });
+  });
+
+
+  describe('subscribeToTesterProgress SSE and handlers', async () => {
+    before(async (flags) => {
+      flags.context.apiResponse = [
+        {
+          name: 'app',
+          message: 'App tests are now running.'
+        },
+        {
+          name: 'server',
+          message: 'No server testing available currently. The server tester is currently in-active.'
+        },
+        {
+          name: 'tls',
+          message: 'No tls testing available currently. The tls tester is currently in-active.'
+        }
+      ];
+    });
+
+
+    beforeEach(async (flags) => {
+      const { context: { apiResponse } } = flags;
+      const configFileContents = await flags.context.buildUserConfigFileContent;
+      flags.context.model = new Model(configFileContents);
+      const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      rewiredApi.init(log);
+
+      rewiredApi.__set__('apiResponse', apiResponse);
+      rewiredApi.__set__('EventSource', EventSource);
+
+      flags.context.rewiredSubscribeToTesterProgress = rewiredApi.__get__('subscribeToTesterProgress');
+      flags.context.rewiredApi = rewiredApi;
+    });
+
+
+    it('- given a mock event for each of the available testers sessions - given invocation of all the tester events - relevant handler instances should be run', async (flags) => {
+      const { context: { model, rewiredSubscribeToTesterProgress, rewiredApi } } = flags;
+
+      new MockEvent({ // eslint-disable-line no-new
+        url: `${apiUrl}/app-lowPrivUser${TesterProgressRouteSuffix}`,
+        setInterval: 100,
+        responses: [
+          { id: 1, name: 'testerProgress', data: { progress: 'Initialising subscription to "app-lowPrivUser" channel for the event "testerProgress"' } },
+          { id: 2, name: 'testerPctComplete', data: { pctComplete: 8 } },
+          { id: 3, name: 'testerBugCount', data: { bugCount: 3 } }
+        ]
+      });
+      new MockEvent({ // eslint-disable-line no-new
+        url: `${apiUrl}/app-adminUser${TesterProgressRouteSuffix}`,
+        setInterval: 100,
+        responses: [
+          { id: 1, name: 'testerProgress', data: { progress: 'Initialising subscription to "app-adminUser" channel for the event "testerProgress"' } },
+          { id: 2, name: 'testerPctComplete', data: { pctComplete: 99 } },
+          { id: 3, name: 'testerBugCount', data: { bugCount: 7 } }
+        ]
+      });
+
+      await new Promise((resolve) => {
+        let handlerCallCount = 0;
+        const handleServerSentTesterEvents = (event, model, testerNameAndSession) => {
+          handlerCallCount += 1;
+
+          // event.id
+          // event.type
+          // event.data
+          // event.origin
+
+          // model
+
+          // testerNameAndSessions
+
+          if (handlerCallCount === 2) resolve();
+        };
+  
+        rewiredApi.__set__('handleServerSentTesterEvents', handleServerSentTesterEvents);
+
+        rewiredSubscribeToTesterProgress(model);
+      });
+
+
+
+
+      // flags.onCleanup = () => {
+      //   rewiredRequest.post.restore();
+      //   dashboard.test.restore();
+      //   dashboard.handleTesterProgress.restore();
+
+      //   //  //////////////////// Add the below
+
+      //   dashboard.handleTesterPctComplete.restore();
+      //   dashboard.handleTesterBugCount.restore();
+
+      //   // ////////////////////
+      // };
+
+
+
     });
   });
 
