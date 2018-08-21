@@ -133,15 +133,17 @@ describe('apiDecoratingAdapter', () => {
       const rewiredRequest = rewiredApi.__get__('request');
       const requestStub = sinon.stub(rewiredRequest, 'post');
       requestStub.returns(Promise.resolve(apiResponse));
-      rewiredApi.__set__('request', requestStub);
+      const revertRewiredApiRequest = rewiredApi.__set__('request', requestStub);
 
       const testPlanStub = sinon.stub(dashboard, 'testPlan');
       dashboard.testPlan = testPlanStub;
-      rewiredApi.__set__('dashboard', dashboard);
+      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
 
       flags.onCleanup = () => {
         rewiredRequest.post.restore();
         dashboard.testPlan.restore();
+        revertRewiredApiRequest();
+        revertRewiredApiDashboard();
       };
 
       await rewiredApi.getTestPlans(configFileContents);
@@ -185,25 +187,29 @@ describe('apiDecoratingAdapter', () => {
 
 
     beforeEach(async (flags) => {
-      flags.context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      const { context } = flags;
+      context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+
+      context.rewiredRequest = context.rewiredApi.__get__('request');
+      context.requestStub = sinon.stub(context.rewiredRequest, 'post');
+
+      context.revertRewiredApiRequest = context.rewiredApi.__set__('request', context.requestStub);
+
+      context.log = log;
+      context.critStub = sinon.stub(context.log, 'crit');
+      context.log.crit = context.critStub;
+      context.rewiredApi.init(context.log);
     });
 
 
-    it('- on - socket hang up - should throw error - backendTookToLong', () => {
-      // Todo: KC: Need to reproduce error state.
-    });
+    // it('- on - socket hang up - should throw error - backendTookToLong', () => {
+    //   // Todo: KC: Need to reproduce error state.
+    // });
 
 
     it('- on - connect ECONNREFUSED - should throw error - backendUnreachable', async (flags) => {
-      const { context: { buildUserConfigFileContent, rewiredApi } } = flags;
-      const critStub = sinon.stub(log, 'crit');
-      log.crit = critStub;
-      rewiredApi.init(log);
+      const { context: { buildUserConfigFileContent, rewiredApi, requestStub, critStub } } = flags;
       const configFileContents = await buildUserConfigFileContent;
-
-      const rewiredRequest = rewiredApi.__get__('request');
-      const requestStub = sinon.stub(rewiredRequest, 'post');
-
       const error = {
         name: 'RequestError',
         message: 'Error: connect ECONNREFUSED 127.0.0.1:2000',
@@ -236,12 +242,6 @@ describe('apiDecoratingAdapter', () => {
         }
       };
       requestStub.returns(Promise.reject(error));
-      rewiredApi.__set__('request', requestStub);
-
-      flags.onCleanup = () => {
-        log.crit.restore();
-        rewiredRequest.post.restore();
-      };
 
       await rewiredApi.getTestPlans(configFileContents);
 
@@ -254,15 +254,8 @@ describe('apiDecoratingAdapter', () => {
 
     it('- on - ValidationError - should throw error - validationError', async (flags) => {
       // Lots of checking around the validation on the server side will be required.
-      const { context: { rewiredApi } } = flags;
-      const critStub = sinon.stub(log, 'crit');
-      log.crit = critStub;
-      rewiredApi.init(log);
+      const { context: { rewiredApi, requestStub, critStub } } = flags;
       const configFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_0.1.0-alpha.1_missing_type_of_testSession`, { encoding: 'utf8' }))();
-
-      const rewiredRequest = rewiredApi.__get__('request');
-      const requestStub = sinon.stub(rewiredRequest, 'post');
-
       const error = {
         name: 'StatusCodeError',
         statusCode: 400,
@@ -326,12 +319,6 @@ describe('apiDecoratingAdapter', () => {
         }
       };
       requestStub.returns(Promise.reject(error));
-      rewiredApi.__set__('request', requestStub);
-
-      flags.onCleanup = () => {
-        log.crit.restore();
-        rewiredRequest.post.restore();
-      };
 
       await rewiredApi.getTestPlans(configFileContents);
 
@@ -343,15 +330,8 @@ describe('apiDecoratingAdapter', () => {
 
 
     it('- on - SyntaxError - should throw error - syntaxError', async (flags) => {
-      const { context: { rewiredApi } } = flags;
-      const critStub = sinon.stub(log, 'crit');
-      log.crit = critStub;
-      rewiredApi.init(log);
+      const { context: { rewiredApi, requestStub, critStub } } = flags;
       const configFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_0.1.0-alpha.1_missing_comma`, { encoding: 'utf8' }))();
-
-      const rewiredRequest = rewiredApi.__get__('request');
-      const requestStub = sinon.stub(rewiredRequest, 'post');
-
       const error = {
         name: 'StatusCodeError',
         statusCode: 400,
@@ -415,12 +395,6 @@ describe('apiDecoratingAdapter', () => {
         }
       };
       requestStub.returns(Promise.reject(error));
-      rewiredApi.__set__('request', requestStub);
-
-      flags.onCleanup = () => {
-        log.crit.restore();
-        rewiredRequest.post.restore();
-      };
 
       await rewiredApi.getTestPlans(configFileContents);
 
@@ -432,15 +406,8 @@ describe('apiDecoratingAdapter', () => {
 
 
     it('- on - 500 - should throw error - unknown', async (flags) => {
-      const { context: { buildUserConfigFileContent, rewiredApi } } = flags;
-      const critStub = sinon.stub(log, 'crit');
-      log.crit = critStub;
-      rewiredApi.init(log);
+      const { context: { buildUserConfigFileContent, rewiredApi, requestStub, critStub } } = flags;
       const configFileContents = await buildUserConfigFileContent;
-
-      const rewiredRequest = rewiredApi.__get__('request');
-      const requestStub = sinon.stub(rewiredRequest, 'post');
-
       const statusCodeError = {
         name: 'StatusCodeError',
         statusCode: 500,
@@ -502,12 +469,6 @@ describe('apiDecoratingAdapter', () => {
         }
       };
       requestStub.returns(Promise.reject(statusCodeError));
-      rewiredApi.__set__('request', requestStub);
-
-      flags.onCleanup = () => {
-        log.crit.restore();
-        rewiredRequest.post.restore();
-      };
 
       await rewiredApi.getTestPlans(configFileContents);
 
@@ -515,6 +476,15 @@ describe('apiDecoratingAdapter', () => {
       expect(critStub.getCall(0).args[0]).to.equal('Error occured while attempting to communicate with the purpleteam SaaS. Error was: "Unknown"');
       expect(critStub.getCall(0).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
       expect(critStub.getCall(1)).to.equal(null);
+    });
+
+
+    afterEach((flags) => {
+      const { context } = flags;
+      context.revertRewiredApiRequest();
+
+      context.log.crit.restore();
+      context.rewiredRequest.post.restore();
     });
   });
 
