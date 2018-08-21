@@ -8,7 +8,6 @@ const { TesterUnavailable, TesterProgressRouteSuffix } = require('src/strings');
 
 let log;
 let apiResponse;
-let model;
 
 const init = (logger) => {
   if (log) return;
@@ -57,8 +56,33 @@ const postToApi = async (configFileContents, route) => {
   });
 };
 
+// Needs testing for all events and testerNameAndSession permatations, that model is called.
+const handleServerSentTesterEvents = (event, model, testerNameAndSession) => {
+  if (event.origin === apiUrl) {
+    const eventDataPropPascalCase = event.type.replace('tester', '');
+    const eventDataProp = `${eventDataPropPascalCase.charAt(0).toLowerCase()}${eventDataPropPascalCase.substring(1)}`;
+    const message = JSON.parse(event.data)[eventDataProp];
+    if (message != null) {
+      model.propagateTesterMessage({
+        testerType: testerNameAndSession.testerType,
+        sessionId: testerNameAndSession.sessionId,
+        message,
+        event: event.type
+      });
+    } else {
+      log.warning(`A falsy ${event.type} event message was received from the orchestrator`, { tags: ['apiDecoratingAdapter'] });
+    }
+  } else {
+    model.propagateTesterMessage({
+      testerType: testerNameAndSession.testerType,
+      sessionId: testerNameAndSession.sessionId,
+      message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`
+    });
+  }
+};
 
-const subscribeToTesterProgress = () => {
+
+const subscribeToTesterProgress = (model) => {
   const { testerNamesAndSessions } = model;
 
   testerNamesAndSessions.forEach((testerNameAndSession) => {
@@ -71,32 +95,13 @@ const subscribeToTesterProgress = () => {
       });
       if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
         const eventSource = new EventSource(`${apiUrl}/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
-        const listenerCallback = (event) => {
-          if (event.origin === apiUrl) {
-            const eventDataPropPascalCase = event.type.replace('tester', '');
-            const eventDataProp = `${eventDataPropPascalCase.charAt(0).toLowerCase()}${eventDataPropPascalCase.substring(1)}`;
-            const message = JSON.parse(event.data)[eventDataProp];
-            if (message != null) {
-              model.propagateTesterMessage({
-                testerType: testerNameAndSession.testerType,
-                sessionId: testerNameAndSession.sessionId,
-                message,
-                event: event.type
-              });
-            } else {
-              log.warning(`A falsy ${event.type} event message was received from the orchestrator`, { tags: ['apiDecoratingAdapter'] });
-            }
-          } else {
-            model.propagateTesterMessage({
-              testerType: testerNameAndSession.testerType,
-              sessionId: testerNameAndSession.sessionId,
-              message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`
-            });
-          }
+        //const eventSource = new EventSource(`/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
+        const handleServerSentTesterEventsClosure = (event) => {
+          handleServerSentTesterEvents(event, model, testerNameAndSession);
         };
-        eventSource.addEventListener('testerProgress', listenerCallback);
-        eventSource.addEventListener('testerPctComplete', listenerCallback);
-        eventSource.addEventListener('testerBugCount', listenerCallback);
+        eventSource.addEventListener('testerProgress', handleServerSentTesterEventsClosure);
+        eventSource.addEventListener('testerPctComplete', handleServerSentTesterEventsClosure);
+        eventSource.addEventListener('testerBugCount', handleServerSentTesterEventsClosure);
       }
     } else {
       model.propagateTesterMessage({
@@ -115,24 +120,24 @@ const getTestPlans = async (configFileContents) => {
   if (apiResponse) dashboard.testPlan(apiResponse);
 };
 
-
-const testerEventHandler = (eventName, testerType, sessionId, message) => {
+// Needs testing for handleTesterPctComplete and handleBugCount
+const handleModelTesterEvents = (eventName, testerType, sessionId, message) => {
   dashboard[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`](testerType, sessionId, message);
 };
 
 
 const test = async (configFileContents) => {
-  model = new Model(configFileContents);
+  const model = new Model(configFileContents);
   const route = 'test';
   await postToApi(configFileContents, route);
 
   if (apiResponse) {
     dashboard.test(model.testerSessions());
     model.eventNames.forEach((eN) => {
-      model.on(eN, (testerType, sessionId, message) => { testerEventHandler(eN, testerType, sessionId, message); });
+      model.on(eN, (testerType, sessionId, message) => { handleModelTesterEvents(eN, testerType, sessionId, message); });
     });
 
-    subscribeToTesterProgress();
+    subscribeToTesterProgress(model);
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
     //    https://www.html5rocks.com/en/tutorials/eventsource/basics/#toc-canceling
