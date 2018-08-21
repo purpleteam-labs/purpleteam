@@ -64,13 +64,19 @@ const baseHandler = {
     delete this;
   },
 
-  dispatchEvent(response) {   
-    if (!(response.name && response.data)) this.dispatchError('`name` and `data` are required on mock handler response object');
-    else this.evtSource.emit(response.name, JSON.stringify(response.data));
+  dispatchEvent(response) {
+    if (!(response.type && response.data)) {
+      this.dispatchError('`type` and `data` are required on mock handler response object');
+    } else {
+      this.evtSource.emit(
+        response.type,
+        this.evtSource.url.includes('//') ? { ...response, origin: this.evtSource.url.split('/', 3).reduce((origin, parts) => `${origin}/${parts}`) } : response
+      );
+    }
   },
 
   errorEventName() {
-    // return `mock-event-${this.id}-error`;
+    //return `mock-event-${this.id}-error`;
     return 'error';
   },
 
@@ -89,7 +95,7 @@ const baseHandler = {
       if (responses.length) {
         const response = responses.shift();
         if (self.evtSource.readyState === self.evtSource.OPEN){
-          self.lastResponseId = response.id;
+          self.lastResponseId = response.lastEventId;
           self.dispatchEvent(response);
           self.stream(responses);
         } else {
@@ -183,7 +189,7 @@ class EventSource extends EventEmitter {
 
   listenForErrors(mockHandler) {
     this.addEventListener(mockHandler.errorEventName(), (event) => {
-      this.error(event.error);
+      this.error(event);
     });
   }
 
