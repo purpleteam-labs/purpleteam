@@ -1,9 +1,9 @@
 require('app-module-path').addPath(process.cwd());
 exports.lab = require('lab').script();
 
-const { describe, it, before, beforeEach } = exports.lab;
+const { describe, it, before, beforeEach, afterEach } = exports.lab;
 
-const { expect } = require('code');
+const { expect, fail } = require('code');
 const sinon = require('sinon');
 const rewire = require('rewire');
 const readFileAsync = require('util').promisify(require('fs').readFile);
@@ -11,6 +11,7 @@ const config = require('config/config');
 const log = require('purpleteam-logger').init(config.get('logger'));
 
 const apiUrl = config.get('purpleteamApi.url');
+const eventSourceOrigin = `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.ip')}:${config.get('purpleteamApi.port')}`;
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
 const dashboard = require('src/view/dashboard');
 const api = require('src/presenter/apiDecoratingAdapter');
@@ -727,82 +728,128 @@ describe('apiDecoratingAdapter', () => {
 
 
     beforeEach(async (flags) => {
-      const { context: { apiResponse } } = flags;
-      const configFileContents = await flags.context.buildUserConfigFileContent;
-      flags.context.model = new Model(configFileContents);
+      const { context, context: { apiResponse } } = flags;
+      const configFileContents = await context.buildUserConfigFileContent;
+      context.model = new Model(configFileContents);
       const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
       rewiredApi.init(log);
 
-      rewiredApi.__set__('apiResponse', apiResponse);
-      rewiredApi.__set__('EventSource', EventSource);
+      context.revertRewiredApiApiResponse = rewiredApi.__set__('apiResponse', apiResponse);
+      context.revertRewiredApiEventSource = rewiredApi.__set__('EventSource', EventSource);
 
-      flags.context.rewiredSubscribeToTesterProgress = rewiredApi.__get__('subscribeToTesterProgress');
-      flags.context.rewiredApi = rewiredApi;
+      context.rewiredSubscribeToTesterProgress = rewiredApi.__get__('subscribeToTesterProgress');
+      context.rewiredApi = rewiredApi;
     });
 
 
     it('- given a mock event for each of the available testers sessions - given invocation of all the tester events - relevant handler instances should be run', async (flags) => {
       const { context: { model, rewiredSubscribeToTesterProgress, rewiredApi } } = flags;
 
+      const numberOfEvents = 6;
       new MockEvent({ // eslint-disable-line no-new
         url: `${apiUrl}/app-lowPrivUser${TesterProgressRouteSuffix}`,
-        setInterval: 100,
+        setInterval: 1,
         responses: [
-          { id: 1, name: 'testerProgress', data: { progress: 'Initialising subscription to "app-lowPrivUser" channel for the event "testerProgress"' } },
-          { id: 2, name: 'testerPctComplete', data: { pctComplete: 8 } },
-          { id: 3, name: 'testerBugCount', data: { bugCount: 3 } }
+          { lastEventId: 'one', type: 'testerProgress', data: { progress: 'Initialising subscription to "app-lowPrivUser" channel for the event "testerProgress"' } },
+          { lastEventId: 'two', type: 'testerPctComplete', data: { pctComplete: 8 } },
+          { lastEventId: 'three', type: 'testerBugCount', data: { bugCount: 3 } }
         ]
       });
       new MockEvent({ // eslint-disable-line no-new
         url: `${apiUrl}/app-adminUser${TesterProgressRouteSuffix}`,
-        setInterval: 100,
+        setInterval: 1,
         responses: [
-          { id: 1, name: 'testerProgress', data: { progress: 'Initialising subscription to "app-adminUser" channel for the event "testerProgress"' } },
-          { id: 2, name: 'testerPctComplete', data: { pctComplete: 99 } },
-          { id: 3, name: 'testerBugCount', data: { bugCount: 7 } }
+          { lastEventId: 'four', type: 'testerProgress', data: { progress: 'Initialising subscription to "app-adminUser" channel for the event "testerProgress"' } },
+          { lastEventId: 'five', type: 'testerPctComplete', data: { pctComplete: 99 } },
+          { lastEventId: 'six', type: 'testerBugCount', data: { bugCount: 7 } }
         ]
       });
-
+      const eventHandled = { one: false, two: false, three: false, four: false, five: false, six: false };
       await new Promise((resolve) => {
         let handlerCallCount = 0;
-        const handleServerSentTesterEvents = (event, model, testerNameAndSession) => {
+        const checkExpectations = {
+          one: (event, testerNameAndSessionToCheck) => {
+            expect(event.type).to.equal('testerProgress');
+            expect(event.data).to.equal({ progress: 'Initialising subscription to "app-lowPrivUser" channel for the event "testerProgress"' });
+            expect(event.lastEventId).to.equal('one');
+            expect(event.origin).to.equal(eventSourceOrigin);
+            expect(testerNameAndSessionToCheck.testerType).to.equal('app');
+            expect(testerNameAndSessionToCheck.sessionId).to.equal('lowPrivUser');
+
+          },
+          two: (event, testerNameAndSessionToCheck) => {
+            expect(event.type).to.equal('testerPctComplete');
+            expect(event.data).to.equal({ pctComplete: 8 });
+            expect(event.lastEventId).to.equal('two');
+            expect(event.origin).to.equal(eventSourceOrigin);
+            expect(testerNameAndSessionToCheck.testerType).to.equal('app');
+            expect(testerNameAndSessionToCheck.sessionId).to.equal('lowPrivUser');
+          },
+          three: (event, testerNameAndSessionToCheck) => {
+            expect(event.type).to.equal('testerBugCount');
+            expect(event.data).to.equal({ bugCount: 3 });
+            expect(event.lastEventId).to.equal('three');
+            expect(event.origin).to.equal(eventSourceOrigin);
+            expect(testerNameAndSessionToCheck.testerType).to.equal('app');
+            expect(testerNameAndSessionToCheck.sessionId).to.equal('lowPrivUser');
+          },
+          four: (event, testerNameAndSessionToCheck) => {
+            expect(event.type).to.equal('testerProgress');
+            expect(event.data).to.equal({ progress: 'Initialising subscription to "app-adminUser" channel for the event "testerProgress"' });
+            expect(event.lastEventId).to.equal('four');
+            expect(event.origin).to.equal(eventSourceOrigin);
+            expect(testerNameAndSessionToCheck.testerType).to.equal('app');
+            expect(testerNameAndSessionToCheck.sessionId).to.equal('adminUser');
+          },
+          five: (event, testerNameAndSessionToCheck) => {
+            expect(event.type).to.equal('testerPctComplete');
+            expect(event.data).to.equal({ pctComplete: 99 });
+            expect(event.lastEventId).to.equal('five');
+            expect(event.origin).to.equal(eventSourceOrigin);
+            expect(testerNameAndSessionToCheck.testerType).to.equal('app');
+            expect(testerNameAndSessionToCheck.sessionId).to.equal('adminUser');
+          },
+          six: (event, testerNameAndSessionToCheck) => {
+            expect(event.type).to.equal('testerBugCount');
+            expect(event.data).to.equal({ bugCount: 7 });
+            expect(event.lastEventId).to.equal('six');
+            expect(event.origin).to.equal(eventSourceOrigin);
+            expect(testerNameAndSessionToCheck.testerType).to.equal('app');
+            expect(testerNameAndSessionToCheck.sessionId).to.equal('adminUser');
+          }
+        };
+        const handleServerSentTesterEvents = (event, receivedModel, testerNameAndSession) => {
           handlerCallCount += 1;
 
-          // event.id
-          // event.type
-          // event.data
-          // event.origin
+          expect(receivedModel).to.equal(model);
 
-          // model
+          if (eventHandled[event.lastEventId] === true) fail(`An event with a lastEventId of "${event.lastEventId}" was handled more than once.`);
+          eventHandled[event.lastEventId] = true;
+          checkExpectations[event.lastEventId](event, testerNameAndSession);
 
-          // testerNameAndSessions
-
-          if (handlerCallCount === 2) resolve();
+          if (handlerCallCount === numberOfEvents) resolve();
         };
-  
+
         rewiredApi.__set__('handleServerSentTesterEvents', handleServerSentTesterEvents);
 
         rewiredSubscribeToTesterProgress(model);
       });
 
+      flags.onCleanup = () => {
+        expect(eventHandled.one).to.be.true();
+        expect(eventHandled.two).to.be.true();
+        expect(eventHandled.three).to.be.true();
+        expect(eventHandled.four).to.be.true();
+        expect(eventHandled.five).to.be.true();
+        expect(eventHandled.six).to.be.true();
+      };
+    });
 
 
-
-      // flags.onCleanup = () => {
-      //   rewiredRequest.post.restore();
-      //   dashboard.test.restore();
-      //   dashboard.handleTesterProgress.restore();
-
-      //   //  //////////////////// Add the below
-
-      //   dashboard.handleTesterPctComplete.restore();
-      //   dashboard.handleTesterBugCount.restore();
-
-      //   // ////////////////////
-      // };
-
-
-
+    afterEach((flags) => {
+      const { context } = flags;
+      context.revertRewiredApiApiResponse();
+      context.revertRewiredApiEventSource();
     });
   });
 
