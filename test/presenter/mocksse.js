@@ -220,12 +220,7 @@ class EventSource extends EventEmitter {
         }
 
         if (this.readyState == this.CONNECTING) { // eslint-disable-line eqeqeq
-          if (this.onopen) {
-            this.onopen({
-              message: 'You are open!',
-              apology: 'I did not know what else to say.'
-            });
-          }
+          if (this.onopen) this.onopen({ message: 'The opening message.', anotherCustomeProp: { prop: 'whatever' } });
           this.readyState = this.OPEN;
         }
 

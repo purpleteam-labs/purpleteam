@@ -15,7 +15,7 @@ const eventSourceOrigin = `${config.get('purpleteamApi.protocol')}://${config.ge
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
 const dashboard = require('src/view/dashboard');
 const api = require('src/presenter/apiDecoratingAdapter');
-const { MockEvent, EventSource } = require('./mockevent');
+const { MockEvent, EventSource } = require('./mocksse');
 const { TesterProgressRouteSuffix } = require('src/strings');
 const Model = require('src/models/model');
 
