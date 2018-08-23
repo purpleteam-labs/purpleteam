@@ -4,9 +4,9 @@ const internals = {
   mockEventProps: {
     setTimeout: 0,
     setInterval: 0,
-    verbose: false,
-    on: true
-  }
+    verbose: false
+  },
+  origin: null
 };
 
 let mockHandlers = [];
@@ -14,7 +14,6 @@ const missed = [];
 
 
 const baseHandler = {
-
   id: null,
   url: '',
   setInterval: internals.mockEventProps.setInterval,
@@ -22,7 +21,6 @@ const baseHandler = {
   responses: [],
   response: null,
   proxy: null,
-  on: internals.mockEventProps.on,
   allResponses: [],
 
   initialize() {
@@ -34,7 +32,7 @@ const baseHandler = {
       'Access-Control-Allow-Credentials': true,
       'Access-Control-Allow-Headers': 'Content-type,Authorization',
       'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-      'Access-Control-Allow-Origin': `${internals.protocol}//${internals.host}`,
+      'Access-Control-Allow-Origin': internals.origin,
       'Access-Control-Expose-Headers': '*',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
@@ -60,7 +58,8 @@ const baseHandler = {
   },
 
   clear() {
-    mockHandlers[this.id] = null;
+    // mockHandlers[this.id] = null;
+    mockHandlers = [];
     delete this;
   },
 
@@ -83,23 +82,40 @@ const baseHandler = {
     this.evtSource.emit(this.errorEventName(), errorMessage);
   },
 
+  interval() {
+    if (this.setInterval instanceof Array) {
+      let min;
+      let max;
+      const firstElement = 0;
+      const secondElement = 1;
+      if (this.setInterval[firstElement] < this.setInterval[secondElement]) {
+        min = this.setInterval[firstElement];
+        max = this.setInterval[secondElement];
+      } else {
+        min = this.setInterval[secondElement];
+        max = this.setInterval[firstElement];
+      }
+      return (Math.random() * (max - min)) + min;
+    }
+    return this.setInterval;
+  },
+
   stream(responses) {
     // Handling the stream output via this.setInterval attribute,
     // ironically it's being handled with the `setTimeout` function.
-    const self = this;
     let timeoutId;
     let timeoutValue;
 
-    const streamIt = function () { // eslint-disable-line func-names
+    const streamIt = () => {
       if (responses.length) {
         const response = responses.shift();
-        if (self.evtSource.readyState === self.evtSource.OPEN) {
-          self.lastResponseId = response.lastEventId;
-          self.dispatchEvent(response);
-          self.stream(responses);
+        if (this.evtSource.readyState === this.evtSource.OPEN) {
+          this.lastResponseId = response.lastEventId;
+          this.dispatchEvent(response);
+          this.stream(responses);
         } else {
-          if (this.verbose) console.warn('Missed response because EventSource.close()', response); // eslint-disable-line no-console
-          self.dispatchError('`EventSource` instance closed while sending.');
+          if (this.verbose) console.warn(`The following response was missed because EventSource.close(), ${JSON.stringify(response)}`); // eslint-disable-line no-console
+          this.dispatchError('`EventSource` instance closed while sending.');
         }
       } else {
         clearTimeout(timeoutId);
@@ -108,29 +124,12 @@ const baseHandler = {
     };
 
     if (!timeoutId) {
-      if (self.setInterval instanceof Array) {
-        const min = self.setInterval[0];
-        const max = self.setInterval[1];
-        timeoutValue = (Math.random() * (max - min)) + min;
-        timeoutId = setTimeout(streamIt, timeoutValue);
-      } else {
-        timeoutValue = self.setInterval;
-        timeoutId = setTimeout(streamIt, timeoutValue);
-      }
+      timeoutValue = this.interval();
+      timeoutId = setTimeout(streamIt, timeoutValue);
 
       // Logging on `verbose` = True
-      if (this.verbose && responses.length) {
-        console.info(`Send stream in ${timeoutValue} milliseconds.`); // eslint-disable-line no-console
-      }
+      if (this.verbose && responses.length) console.info(`Send stream in ${timeoutValue} milliseconds.`); // eslint-disable-line no-console
     }
-  },
-
-  stop() {
-    this.on = false;
-  },
-
-  start() {
-    this.on = true;
   }
 };
 
@@ -140,14 +139,16 @@ class EventSource extends EventEmitter {
     super();
     this.url = url;
     this.settings = settings;
-
     this.CONNECTING = 0;
     this.OPEN = 1;
     this.CLOSED = 2;
-
     this.readyState = null;
-
     this.responses = [];
+    if (url.includes('//')) {
+      const originParts = url.split('/', 3);
+      internals.origin = originParts.reduce((origin, parts) => `${origin}/${parts}`);
+      internals.host = originParts[2].split(':', 1)[0]; // eslint-disable-line prefer-destructuring
+    }
 
     this.scheduleEvents();
   }
@@ -163,15 +164,15 @@ class EventSource extends EventEmitter {
       // 'Cookie': docCookies.cookiesToString(),
       Host: internals.host,
       // 'Last-event-id': this.handler.lastResponseId || '',
-      Origin: `${internals.protocol}//${internals.host}`,
-      Referer: `${internals.protocol}//${internals.host}`
+      Origin: internals.origin,
+      Referer: internals.origin
     };
   }
 
   // Creates event of type `error`
   // eslint-disable-next-line class-methods-use-this
   error(message) {
-    this.emit('error', message);
+    if (this.onerror) this.onerror(new Error(message));
   }
 
 
@@ -215,27 +216,16 @@ class EventSource extends EventEmitter {
         // EventSource calls `onerror` method
         this.listenForErrors(mockHandler);
 
-        if (this.readyState === null) {
-          this.readyState = this.CONNECTING;
-        }
-
+        if (this.readyState === null) this.readyState = this.CONNECTING;
         if (this.readyState == this.CONNECTING) { // eslint-disable-line eqeqeq
           if (this.onopen) this.onopen({ message: 'The opening message.', anotherCustomeProp: { prop: 'whatever' } });
           this.readyState = this.OPEN;
         }
-
-        if (!(mockHandler.allResponses.length || mockHandler.response)) this.error(`Handler ${mockHandler.url} requires response type attribute`);
-
+        if (!(mockHandler.allResponses.length || mockHandler.response)) this.error(`Handler for URL "${mockHandler.url}" requires response type attribute`);
         if (mockHandler.response) mockHandler.response(mockHandler, this);
-
         if (mockHandler.responses) mockHandler.stream([...mockHandler.responses]);
       });
-
-      if (this.handler === undefined) {
-        /* A handler was never found for this `EventSource`
-        instance. In this case we send a Timeout Error. */
-        this.error('Timeout Error');
-      }
+      if (this.handler === undefined) this.error(`There was no event handler found for EventSource with url: ${this.url}`);
     }, internals.mockEventProps.setTimeout);
   }
 }
@@ -253,27 +243,19 @@ class MockEvent {
 
   // eslint-disable-next-line class-methods-use-this
   clear(i) {
-    if (i || i === 0) {
-      mockHandlers[i] = null;
-    } else {
-      mockHandlers = [];
-    }
+    if (i || i === 0) mockHandlers[i] = null;
+    else mockHandlers = [];
   }
 
   // eslint-disable-next-line class-methods-use-this
   handlers(i) {
-    if (i || i === 0) return mockHandlers[i];
+    if (i || i === 0) { return mockHandlers[i]; }
     return mockHandlers;
   }
 
   // eslint-disable-next-line class-methods-use-this
-  missed() {
-    return missed;
-  }
+  missed() { return missed; }
 }
 
 
-module.exports = {
-  MockEvent,
-  EventSource
-};
+module.exports = { MockEvent, EventSource };

@@ -101,6 +101,7 @@ const subscribeToTesterProgress = (model) => {
         eventSource.addEventListener('testerProgress', handleServerSentTesterEventsClosure);
         eventSource.addEventListener('testerPctComplete', handleServerSentTesterEventsClosure);
         eventSource.addEventListener('testerBugCount', handleServerSentTesterEventsClosure);
+        // We may need an onerror subscription here, Let's see how it goes in alpha testing first.
       }
     } else {
       model.propagateTesterMessage({
@@ -140,6 +141,7 @@ const test = async (configFileContents) => {
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
     //    https://www.html5rocks.com/en/tutorials/eventsource/basics/#toc-canceling
+    //    https://developer.mozilla.org/en-US/docs/Web/API/EventSource/close
   }
 };
 
