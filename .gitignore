@@ -1,6 +1,7 @@
 node_modules/
 config.*.json
 !config.example.json
+!config.test.json
 
 .vscode
 *.code-workspace
