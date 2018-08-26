@@ -35,7 +35,7 @@
   "license": "",
   "homepage": "https://purpleteam-labs.com",
   "bugs": {
-    "url": "https://github.com/binarymist/purpleteam/issues"
+    "url": "https://gitlab.com/purpleteam-labs/purpleteam/issues"
   },
   "dependencies": {
     "app-module-path": "^2.2.0",
