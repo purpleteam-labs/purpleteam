@@ -7,7 +7,7 @@
     "lint": "eslint .",
     "deps": "npm-check",
     "update:deps": "npm-check -u",
-    "test": "lab --assert code",
+    "test": "lab --assert code --coverage",
     "test:debug": "node --inspect-brk ./node_modules/.bin/lab --assert code --timeout 0",
     "pretest": "npm run lint",
     "debug": "node --inspect-brk ./bin/purpleteam",
