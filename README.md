@@ -1,4 +1,4 @@
-[![Known Vulnerabilities](https://snyk.io/test/github/binarymist/purpleteam/badge.svg?targetFile=package.json)](https://snyk.io/test/github/binarymist/purpleteam?targetFile=package.json)
+[![pipeline status](https://gitlab.compurpleteam-labs/purpleteam/badges/master/pipeline.svg)](https://gitlab.com/purpleteam-labs/purpleteam/commits/master) &nbsp; [![Known Vulnerabilities](https://snyk.io/test/gitlab/purpleteam-labs/purpleteam/badge.svg?targetFile=package.json)](https://snyk.io/test/gitlab/purpleteam-labs/purpleteam?targetFile=package.json)
 
 ## Currently in heavy development
 
