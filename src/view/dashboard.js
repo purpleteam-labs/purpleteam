@@ -1,4 +1,6 @@
-const blessed = require('blessed');
+const config = require('config/config');
+// blessed breaks tests, so fake it.
+const blessed = require(config.get('modulePaths.blessed')); // eslint-disable-line import/no-dynamic-require
 const contrib = require('blessed-contrib');
 const { name: projectName } = require('package.json');
 const { testerViewTypes, testerPctCompleteType, statTableType, newBugsType, totalProgressType } = require('src/view/types');

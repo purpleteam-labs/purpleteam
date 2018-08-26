@@ -56,6 +56,13 @@ const schema = {
       format: String,
       default: '/testing/buildUserConfigFile'
     }
+  },
+  modulePaths: {
+    blessed: {
+      doc: 'The path to blessed module.',
+      format: String,
+      default: 'blessed'
+    }
   }
 };
 

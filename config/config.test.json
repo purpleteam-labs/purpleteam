@@ -5,6 +5,9 @@
   },
   "buildUserConfig": {
     "fileUri": "./testResources/jobs/job_0.1.0-alpha.1"
+  },
+  "modulePaths": {
+    "blessed": "testResources/blessedFake"
   }
 }
 
