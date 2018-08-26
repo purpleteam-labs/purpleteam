@@ -1,9 +1,9 @@
 require('app-module-path').addPath(process.cwd());
 exports.lab = require('lab').script();
 
-const { describe, /* it, */ before, beforeEach, afterEach } = exports.lab;
+const { describe, it, before, beforeEach, afterEach } = exports.lab;
 
-
+const { expect /* , fail */ } = require('code');
 const sinon = require('sinon');
 const rewire = require('rewire');
 const readFileAsync = require('util').promisify(require('fs').readFile);
@@ -14,7 +14,7 @@ const log = require('purpleteam-logger').init(config.get('logger'));
 // const eventSourceOrigin = `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.ip')}:${config.get('purpleteamApi.port')}`;
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
 // const dashboard = require('src/view/dashboard');
-// const api = require('src/presenter/apiDecoratingAdapter');
+const api = require('src/presenter/apiDecoratingAdapter');
 // const { MockEvent, EventSource } = require('./mocksse');
 // const { TesterProgressRouteSuffix } = require('src/strings');
 // const Model = require('src/models/model');
@@ -61,6 +61,12 @@ describe('apiDecoratingAdapter', () => {
   describe('getBuildUserConfigFile', async () => {
     before(async (flags) => {
       flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
+    });
+    it('- should return the build user config file contents', async ({ context }) => {
+      const { buildUserConfigFileContent } = context;
+      api.init(log);
+      const buildUserConfigFileContents = await api.getBuildUserConfigFile(buildUserConfigFilePath);
+      expect(buildUserConfigFileContents).to.equal(buildUserConfigFileContent);
     });
   });
 });
