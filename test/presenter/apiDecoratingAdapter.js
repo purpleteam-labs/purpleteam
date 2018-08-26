@@ -13,8 +13,8 @@ const log = require('purpleteam-logger').init(config.get('logger'));
 // const apiUrl = config.get('purpleteamApi.url');
 // const eventSourceOrigin = `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.ip')}:${config.get('purpleteamApi.port')}`;
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
-// const dashboard = require('src/view/dashboard');
-const api = require('src/presenter/apiDecoratingAdapter');
+const dashboard = require('src/view/dashboard');
+// const api = require('src/presenter/apiDecoratingAdapter');
 // const { MockEvent, EventSource } = require('./mocksse');
 // const { TesterProgressRouteSuffix } = require('src/strings');
 // const Model = require('src/models/model');
@@ -61,12 +61,21 @@ describe('apiDecoratingAdapter', () => {
   describe('getBuildUserConfigFile', async () => {
     before(async (flags) => {
       flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
+      flags.context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
     });
-    it('- should return the build user config file contents', async ({ context }) => {
-      const { buildUserConfigFileContent } = context;
-      api.init(log);
-      const buildUserConfigFileContents = await api.getBuildUserConfigFile(buildUserConfigFilePath);
+    it('- should return the build user config file contents', async (flags) => {
+      const { context: { buildUserConfigFileContent, rewiredApi } } = flags;
+
+      const dashboardStub = sinon.stub(dashboard);
+      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboardStub);
+
+      rewiredApi.init(log);
+      const buildUserConfigFileContents = await rewiredApi.getBuildUserConfigFile(buildUserConfigFilePath);
       expect(buildUserConfigFileContents).to.equal(buildUserConfigFileContent);
+
+      flags.onCleanup = () => {
+        revertRewiredApiDashboard();
+      };
     });
   });
 });
