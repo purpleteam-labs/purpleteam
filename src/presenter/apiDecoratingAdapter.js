@@ -120,7 +120,7 @@ const getTestPlans = async (configFileContents) => {
   if (apiResponse) dashboard.testPlan(apiResponse);
 };
 
-// Needs testing for handleTesterPctComplete and handleBugCount
+
 const handleModelTesterEvents = (eventName, testerType, sessionId, message) => {
   dashboard[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`](testerType, sessionId, message);
 };

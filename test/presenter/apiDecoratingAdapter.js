@@ -898,4 +898,85 @@ describe('apiDecoratingAdapter', () => {
       expect(handleTesterBugCountStub.getCall(0).args).to.equal(parameters);
     });
   });
+
+
+  describe('handleServerSentTesterEvents', async () => {
+    beforeEach(async (flags) => {
+      const { context } = flags;
+
+      const configFileContents = await context.buildUserConfigFileContent;
+      context.model = new Model(configFileContents);
+      context.modelPropagateTesterMessageStub = sinon.stub(context.model, 'propagateTesterMessage');
+
+      context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      context.logSpy = sinon.spy(log, 'warning');
+      context.rewiredApi.init(context.logSpy);
+
+      context.rewiredHandleServerSentTesterEvents = context.rewiredApi.__get__('handleServerSentTesterEvents');
+    });
+
+
+    // it('- given event with incorrect origin - should provide model.propagateTesterMessage with useful error message', async (flags) => {
+    //   const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
+    //   const event = {
+    //     type: 'testerProgress',
+    //     data: '{"progress":"it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser"}',
+    //     lastEventId: '1535354779913',
+    //     origin: 'apiUrl'
+    //   };
+    //   const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
+
+
+    //   rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
+
+    //   expect(modelPropagateTesterMessageStub.callCount).to.equal(1);
+    //   expect(modelPropagateTesterMessageStub.getCall(0).args).to.equal([{
+    //     testerType: testerNameAndSession.testerType,
+    //     sessionId: testerNameAndSession.sessionId,
+    //     message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`
+    //   }]);
+    // });
+
+
+    it('- given event `testerPctComplete` handleTesterPctComplete of the view should be called with correct arguments', async () => {
+      // const { context: { rewiredApi } } = flags;
+
+    });
+
+
+    it('- given event `testerBugCount` handleTesterBugCount of the view should be called with correct arguments', async () => {
+      // const { context: { rewiredApi } } = flags;
+
+    });
+
+
+    it('- given event with incorrect origin - should provide model.propagateTesterMessage with useful error message', async (flags) => {
+      const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
+      const event = {
+        type: 'testerProgress',
+        data: '{"progress":"it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser"}',
+        lastEventId: '1535354779913',
+        origin: 'devious origin'
+      };
+      const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
+
+
+      rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
+
+      expect(modelPropagateTesterMessageStub.callCount).to.equal(1);
+      expect(modelPropagateTesterMessageStub.getCall(0).args).to.equal([{
+        testerType: testerNameAndSession.testerType,
+        sessionId: testerNameAndSession.sessionId,
+        message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`
+      }]);
+    });
+
+
+    afterEach((flags) => {
+      const { context } = flags;
+      context.model.propagateTesterMessage.restore();
+      context.logSpy.restore();
+      context.rewiredApi.__set__('log', undefined);
+    });
+  });
 });
