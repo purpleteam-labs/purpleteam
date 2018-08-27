@@ -700,7 +700,6 @@ describe('apiDecoratingAdapter', () => {
 
     it('- given a mock event for each of the available testers sessions - given invocation of all the tester events - relevant handler instances should be run', async (flags) => {
       const { context: { model, rewiredSubscribeToTesterProgress, rewiredApi } } = flags;
-
       const numberOfEvents = 6;
       new MockEvent({ // eslint-disable-line no-new
         url: `${apiUrl}/app-lowPrivUser${TesterProgressRouteSuffix}`,
@@ -903,7 +902,6 @@ describe('apiDecoratingAdapter', () => {
   describe('handleServerSentTesterEvents', async () => {
     beforeEach(async (flags) => {
       const { context } = flags;
-
       const configFileContents = await context.buildUserConfigFileContent;
       context.model = new Model(configFileContents);
       context.modelPropagateTesterMessageStub = sinon.stub(context.model, 'propagateTesterMessage');
@@ -913,26 +911,26 @@ describe('apiDecoratingAdapter', () => {
     });
 
 
-    // it('- given `testerProgress` event with message - should model.propagateTesterMessage', async (flags) => {
-    //   const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
-    //   const event = {
-    //     type: 'testerProgress',
-    //     data: '{"progress":"it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser"}',
-    //     lastEventId: '1535354779913',
-    //     origin: apiUrl
-    //   };
-    //   const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
+    it('- given `testerProgress` event with message - should model.propagateTesterMessage', async (flags) => {
+      const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
+      const event = {
+        type: 'testerProgress',
+        data: '{"progress":"it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser"}',
+        lastEventId: '1535354779913',
+        origin: apiUrl
+      };
+      const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
 
-    //   rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
+      rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
 
-    //   expect(modelPropagateTesterMessageStub.callCount).to.equal(1);
-    //   expect(modelPropagateTesterMessageStub.getCall(0).args).to.equal([{
-    //     testerType: testerNameAndSession.testerType,
-    //     sessionId: testerNameAndSession.sessionId,
-    //     message: 'it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser',
-    //     event: event.type
-    //   }]);
-    // });
+      expect(modelPropagateTesterMessageStub.callCount).to.equal(1);
+      expect(modelPropagateTesterMessageStub.getCall(0).args).to.equal([{
+        testerType: testerNameAndSession.testerType,
+        sessionId: testerNameAndSession.sessionId,
+        message: 'it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser',
+        event: event.type
+      }]);
+    });
 
 
     it('- given event `testerPctComplete` handleTesterPctComplete of the view should be called with correct arguments', async () => {
@@ -943,7 +941,6 @@ describe('apiDecoratingAdapter', () => {
 
     it('- given `testerProgress` event with falsy message - should log.warning with appropriate message', async (flags) => {
       const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents, rewiredApi } } = flags;
-
       const warningStub = sinon.stub(log, 'warning');
       log.warning = warningStub;
       rewiredApi.init(log);
@@ -973,7 +970,6 @@ describe('apiDecoratingAdapter', () => {
       const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
       const event = { origin: 'devious origin' };
       const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
-
 
       rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
 
