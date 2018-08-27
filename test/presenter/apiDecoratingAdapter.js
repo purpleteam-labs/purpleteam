@@ -820,4 +820,50 @@ describe('apiDecoratingAdapter', () => {
       expect(buildUserConfigFileContents).to.equal(buildUserConfigFileContent);
     });
   });
+
+
+  describe('handleModelTesterEvents', async () => {
+    beforeEach(async (flags) => {
+      const { context } = flags;
+      context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+    });
+    it('- given event `testerProgress` handleTesterProgress of the view should be called with correct arguments', async (flags) => {
+      const { context: { rewiredApi } } = flags;
+      const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
+      dashboard.handleTesterProgress = handleTesterProgressStub;
+      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
+
+      flags.onCleanup = () => {
+        dashboard.handleTesterProgress.restore();
+        revertRewiredApiDashboard();
+      };
+
+      const eventName = 'testerProgress';
+      const testerType = 'app';
+      const sessionId = 'lowPrivUser';
+      const message = 'App tests are now running.';
+      const parameters = [testerType, sessionId, message];
+      rewiredHandleModelTesterEvents(eventName, testerType, sessionId, message);
+
+      expect(handleTesterProgressStub.callCount).to.equal(1);
+      expect(handleTesterProgressStub.getCall(0).args).to.equal(parameters);
+    });
+
+
+    it('- given event `testerPctComplete` handleTesterPctComplete of the view should be called with correct arguments', async () => {
+      // const eventName = 'testerPctComplete';
+      // const testerType = 'app';
+      // const sessionId = 'lowPrivUser';
+      // const message = 11;
+    });
+
+
+    it('- given event `testerBugCount` handleTesterBugCount of the view should be called with correct arguments', async () => {
+      // const eventName = 'testerBugCount';
+      // const testerType = 'app';
+      // const sessionId = 'lowPrivUser';
+      // const message = 56;
+    });
+  });
 });
