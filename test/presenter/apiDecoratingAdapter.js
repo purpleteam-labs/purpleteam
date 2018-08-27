@@ -909,12 +909,6 @@ describe('apiDecoratingAdapter', () => {
       context.modelPropagateTesterMessageStub = sinon.stub(context.model, 'propagateTesterMessage');
 
       context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
-      context.log = log;
-      context.warningStub = sinon.stub(context.log, 'warning');
-      context.log.warning = context.warningStub;
-      context.rewiredApi.init(context.log);
-
-
       context.rewiredHandleServerSentTesterEvents = context.rewiredApi.__get__('handleServerSentTesterEvents');
     });
 
@@ -948,7 +942,12 @@ describe('apiDecoratingAdapter', () => {
 
 
     it('- given `testerProgress` event with falsy message - should log.warning with appropriate message', async (flags) => {
-      const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents, warningStub } } = flags;
+      const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents, rewiredApi } } = flags;
+
+      const warningStub = sinon.stub(log, 'warning');
+      log.warning = warningStub;
+      rewiredApi.init(log);
+
       const event = {
         type: 'testerProgress',
         data: '{"progress":null}',
@@ -956,6 +955,11 @@ describe('apiDecoratingAdapter', () => {
         origin: apiUrl
       };
       const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
+
+      flags.onCleanup = () => {
+        log.warning.restore();
+        rewiredApi.__set__('log', undefined);
+      };
 
       rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
 
@@ -985,8 +989,6 @@ describe('apiDecoratingAdapter', () => {
     afterEach((flags) => {
       const { context } = flags;
       context.model.propagateTesterMessage.restore();
-      context.log.warning.restore();
-      context.rewiredApi.__set__('log', undefined);
     });
   });
 });
