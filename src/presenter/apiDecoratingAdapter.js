@@ -56,7 +56,7 @@ const postToApi = async (configFileContents, route) => {
   });
 };
 
-// Needs testing for all events and testerNameAndSession permatations, that model is called.
+
 const handleServerSentTesterEvents = (event, model, testerNameAndSession) => {
   if (event.origin === apiUrl) {
     const eventDataPropPascalCase = event.type.replace('tester', '');

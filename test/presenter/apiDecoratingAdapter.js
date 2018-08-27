@@ -899,7 +899,7 @@ describe('apiDecoratingAdapter', () => {
   });
 
 
-  describe('handleServerSentTesterEvents', async () => {
+  describe('handleServerSentTesterEvents', () => {
     beforeEach(async (flags) => {
       const { context } = flags;
       const configFileContents = await context.buildUserConfigFileContent;
@@ -911,35 +911,75 @@ describe('apiDecoratingAdapter', () => {
     });
 
 
-    it('- given `testerProgress` event with message - should model.propagateTesterMessage', async (flags) => {
-      const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
-      const event = {
-        type: 'testerProgress',
-        data: '{"progress":"it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser"}',
-        lastEventId: '1535354779913',
-        origin: apiUrl
-      };
-      const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
+    describe('- event with message - should model.propagateTesterMessage', () => {
+      it('`testerProgress`', (flags) => {
+        const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
+        const event = {
+          type: 'testerProgress',
+          data: '{"progress":"it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser"}',
+          lastEventId: '1535354779913',
+          origin: apiUrl
+        };
+        const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
 
-      rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
+        rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
 
-      expect(modelPropagateTesterMessageStub.callCount).to.equal(1);
-      expect(modelPropagateTesterMessageStub.getCall(0).args).to.equal([{
-        testerType: testerNameAndSession.testerType,
-        sessionId: testerNameAndSession.sessionId,
-        message: 'it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser',
-        event: event.type
-      }]);
+        expect(modelPropagateTesterMessageStub.callCount).to.equal(1);
+        expect(modelPropagateTesterMessageStub.getCall(0).args).to.equal([{
+          testerType: testerNameAndSession.testerType,
+          sessionId: testerNameAndSession.sessionId,
+          message: 'it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser',
+          event: event.type
+        }]);
+      });
+
+
+      it('`testerPctComplete`', (flags) => {
+        const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
+        const event = {
+          type: 'testerPctComplete',
+          data: '{"pctComplete":100}',
+          lastEventId: '1535354779913',
+          origin: apiUrl
+        };
+        const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
+
+        rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
+
+        expect(modelPropagateTesterMessageStub.callCount).to.equal(1);
+        expect(modelPropagateTesterMessageStub.getCall(0).args).to.equal([{
+          testerType: testerNameAndSession.testerType,
+          sessionId: testerNameAndSession.sessionId,
+          message: 100,
+          event: event.type
+        }]);
+      });
+
+
+      it('`testerBugCount`', (flags) => {
+        const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
+        const event = {
+          type: 'testerBugCount',
+          data: '{"bugCount":2}',
+          lastEventId: '1535354779913',
+          origin: apiUrl
+        };
+        const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
+
+        rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
+
+        expect(modelPropagateTesterMessageStub.callCount).to.equal(1);
+        expect(modelPropagateTesterMessageStub.getCall(0).args).to.equal([{
+          testerType: testerNameAndSession.testerType,
+          sessionId: testerNameAndSession.sessionId,
+          message: 2,
+          event: event.type
+        }]);
+      });
     });
 
 
-    it('- given event `testerPctComplete` handleTesterPctComplete of the view should be called with correct arguments', async () => {
-      // const { context: { rewiredApi } } = flags;
-
-    });
-
-
-    it('- given `testerProgress` event with falsy message - should log.warning with appropriate message', async (flags) => {
+    it('- given `testerProgress` event with falsy message - should log.warning with appropriate message', (flags) => {
       const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents, rewiredApi } } = flags;
       const warningStub = sinon.stub(log, 'warning');
       log.warning = warningStub;
@@ -966,7 +1006,7 @@ describe('apiDecoratingAdapter', () => {
     });
 
 
-    it('- given event with incorrect origin - should provide model.propagateTesterMessage with useful error message', async (flags) => {
+    it('- given event with incorrect origin - should provide model.propagateTesterMessage with useful error message', (flags) => {
       const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
       const event = { origin: 'devious origin' };
       const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
