@@ -909,23 +909,25 @@ describe('apiDecoratingAdapter', () => {
       context.modelPropagateTesterMessageStub = sinon.stub(context.model, 'propagateTesterMessage');
 
       context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
-      context.logSpy = sinon.spy(log, 'warning');
-      context.rewiredApi.init(context.logSpy);
+      context.log = log;
+      context.warningStub = sinon.stub(context.log, 'warning');
+      context.log.warning = context.warningStub;
+      context.rewiredApi.init(context.log);
+
 
       context.rewiredHandleServerSentTesterEvents = context.rewiredApi.__get__('handleServerSentTesterEvents');
     });
 
 
-    // it('- given event with incorrect origin - should provide model.propagateTesterMessage with useful error message', async (flags) => {
+    // it('- given `testerProgress` event with message - should model.propagateTesterMessage', async (flags) => {
     //   const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
     //   const event = {
     //     type: 'testerProgress',
     //     data: '{"progress":"it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser"}',
     //     lastEventId: '1535354779913',
-    //     origin: 'apiUrl'
+    //     origin: apiUrl
     //   };
     //   const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
-
 
     //   rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
 
@@ -933,7 +935,8 @@ describe('apiDecoratingAdapter', () => {
     //   expect(modelPropagateTesterMessageStub.getCall(0).args).to.equal([{
     //     testerType: testerNameAndSession.testerType,
     //     sessionId: testerNameAndSession.sessionId,
-    //     message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`
+    //     message: 'it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser',
+    //     event: event.type
     //   }]);
     // });
 
@@ -944,20 +947,27 @@ describe('apiDecoratingAdapter', () => {
     });
 
 
-    it('- given event `testerBugCount` handleTesterBugCount of the view should be called with correct arguments', async () => {
-      // const { context: { rewiredApi } } = flags;
+    it('- given `testerProgress` event with falsy message - should log.warning with appropriate message', async (flags) => {
+      const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents, warningStub } } = flags;
+      const event = {
+        type: 'testerProgress',
+        data: '{"progress":null}',
+        lastEventId: '1535354779913',
+        origin: apiUrl
+      };
+      const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
 
+      rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
+
+      expect(modelPropagateTesterMessageStub.callCount).to.equal(0);
+      expect(warningStub.callCount).to.equal(1);
+      expect(warningStub.getCall(0).args).to.equal([`A falsy ${event.type} event message was received from the orchestrator`, { tags: ['apiDecoratingAdapter'] }]);
     });
 
 
     it('- given event with incorrect origin - should provide model.propagateTesterMessage with useful error message', async (flags) => {
       const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents } } = flags;
-      const event = {
-        type: 'testerProgress',
-        data: '{"progress":"it is {red-fg}raining{/red-fg} cats and dogs1535354779913, session: lowPrivUser"}',
-        lastEventId: '1535354779913',
-        origin: 'devious origin'
-      };
+      const event = { origin: 'devious origin' };
       const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
 
 
@@ -975,7 +985,7 @@ describe('apiDecoratingAdapter', () => {
     afterEach((flags) => {
       const { context } = flags;
       context.model.propagateTesterMessage.restore();
-      context.logSpy.restore();
+      context.log.warning.restore();
       context.rewiredApi.__set__('log', undefined);
     });
   });
