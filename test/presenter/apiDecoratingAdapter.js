@@ -875,11 +875,27 @@ describe('apiDecoratingAdapter', () => {
     });
 
 
-    it('- given event `testerBugCount` handleTesterBugCount of the view should be called with correct arguments', async () => {
-      // const eventName = 'testerBugCount';
-      // const testerType = 'app';
-      // const sessionId = 'lowPrivUser';
-      // const message = 56;
+    it('- given event `testerBugCount` handleTesterBugCount of the view should be called with correct arguments', async (flags) => {
+      const { context: { rewiredApi } } = flags;
+      const handleTesterBugCountStub = sinon.stub(dashboard, 'handleTesterBugCount');
+      dashboard.handleTesterBugCount = handleTesterBugCountStub;
+      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
+
+      flags.onCleanup = () => {
+        dashboard.handleTesterBugCount.restore();
+        revertRewiredApiDashboard();
+      };
+
+      const eventName = 'testerBugCount';
+      const testerType = 'app';
+      const sessionId = 'lowPrivUser';
+      const message = 56;
+      const parameters = [testerType, sessionId, message];
+      rewiredHandleModelTesterEvents(eventName, testerType, sessionId, message);
+
+      expect(handleTesterBugCountStub.callCount).to.equal(1);
+      expect(handleTesterBugCountStub.getCall(0).args).to.equal(parameters);
     });
   });
 });
