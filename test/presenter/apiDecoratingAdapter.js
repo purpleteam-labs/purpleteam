@@ -851,11 +851,27 @@ describe('apiDecoratingAdapter', () => {
     });
 
 
-    it('- given event `testerPctComplete` handleTesterPctComplete of the view should be called with correct arguments', async () => {
-      // const eventName = 'testerPctComplete';
-      // const testerType = 'app';
-      // const sessionId = 'lowPrivUser';
-      // const message = 11;
+    it('- given event `testerPctComplete` handleTesterPctComplete of the view should be called with correct arguments', async (flags) => {
+      const { context: { rewiredApi } } = flags;
+      const handleTesterPctCompleteStub = sinon.stub(dashboard, 'handleTesterPctComplete');
+      dashboard.handleTesterPctComplete = handleTesterPctCompleteStub;
+      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
+
+      flags.onCleanup = () => {
+        dashboard.handleTesterPctComplete.restore();
+        revertRewiredApiDashboard();
+      };
+
+      const eventName = 'testerPctComplete';
+      const testerType = 'app';
+      const sessionId = 'lowPrivUser';
+      const message = 11;
+      const parameters = [testerType, sessionId, message];
+      rewiredHandleModelTesterEvents(eventName, testerType, sessionId, message);
+
+      expect(handleTesterPctCompleteStub.callCount).to.equal(1);
+      expect(handleTesterPctCompleteStub.getCall(0).args).to.equal(parameters);
     });
 
 
