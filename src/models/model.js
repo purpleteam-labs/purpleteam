@@ -18,9 +18,8 @@ class Model extends EventEmitter {
 
   // eslint-disable-next-line class-methods-use-this
   initTesterMessages(eventName) {
-    events[eventName] = job.included.filter(resourceObj =>
-      resourceObj.type === 'testSession').map(testSessionResObj =>
-      ({ testerType: 'app', sessionId: testSessionResObj.id, messages: [] }));
+    events[eventName] = job.included.filter(resourceObj => resourceObj.type === 'testSession')
+      .map(testSessionResObj => ({ testerType: 'app', sessionId: testSessionResObj.id, messages: [] }));
     events[eventName].push({ testerType: 'server', sessionId: 'NA', messages: [] });
     events[eventName].push({ testerType: 'tls', sessionId: 'NA', messages: [] });
   }
@@ -46,8 +45,7 @@ class Model extends EventEmitter {
 
   // eslint-disable-next-line class-methods-use-this
   testerSessions() {
-    const testerSessions = job.included.filter(resourceObj =>
-      resourceObj.type === 'testSession').map((testSessionResObj) => {
+    const testerSessions = job.included.filter(resourceObj => resourceObj.type === 'testSession').map((testSessionResObj) => {
       let alertThreshold;
       if (testSessionResObj.attributes) {
         alertThreshold = testSessionResObj.attributes.alertThreshold ? testSessionResObj.attributes.alertThreshold : 0;

@@ -134,11 +134,9 @@ const handleTesterPctComplete = (testerType, sessionId, message) => {
   // statTable
   infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId).pctComplete = message;
   // testerPctComplete
-  infoOuts[testerType].testerPctComplete.percent =
-    infoOuts[testerType]
-      .statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / infoOuts[testerType].statTable.records.length;
-  infoOuts[testerType].testerPctComplete.color =
-    colourOfDonut(infoOuts[testerType].testerPctComplete.percent);
+  infoOuts[testerType].testerPctComplete.percent = infoOuts[testerType]
+    .statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / infoOuts[testerType].statTable.records.length;
+  infoOuts[testerType].testerPctComplete.color = colourOfDonut(infoOuts[testerType].testerPctComplete.percent);
   // totalProgress
   const pctsComplete = [];
   testerNames.forEach((tN) => {
