@@ -99,7 +99,41 @@ describe('dashboard', () => {
 
 
   describe('handleTesterBugCount', () => {
+    it('- should handle testerBugCount event as expected', (flags) => {
+      const rewiredDashboard = rewire('src/view/dashboard');
+      const testerType = 'app';
+      const sessionId = 'lowPrivUser';
+      const message = 14;
 
+      const appStatTableRecords = [{ sessionId: 'lowPrivUser', threshold: 12, bugs: 0, pctComplete: 0 }, { sessionId: 'adminUser', threshold: 0, bugs: 0, pctComplete: 0 }];
+      const serverStatTableRecords = [{ sessionId: 'NA', threshold: 0, bugs: 0, pctComplete: 0 }];
+      const tlsStatTableRecords = [{ sessionId: 'NA', threshold: 0, bugs: 0, pctComplete: 0 }];
+      const revertRewiredDashboardInternalsInfoOutsAppStatTableRecords = rewiredDashboard.__set__(`internals.infoOuts.${testerType}.statTable.records`, appStatTableRecords);
+      const revertRewiredDashboardInternalsInfoOutsServerStatTableRecords = rewiredDashboard.__set__(`internals.infoOuts.${'server'}.statTable.records`, serverStatTableRecords);
+      const revertRewiredDashboardInternalsInfoOutsTlsStatTableRecords = rewiredDashboard.__set__(`internals.infoOuts.${'tls'}.statTable.records`, tlsStatTableRecords);
 
+      const setDataOnAllPageWidgetsStub = sinon.stub();
+      const revertRewiredDashboardSetDataOnAllPageWidgets = rewiredDashboard.__set__('setDataOnAllPageWidgets', setDataOnAllPageWidgetsStub);
+
+      rewiredDashboard.handleTesterBugCount(testerType, sessionId, message);
+
+      const rewiredInfoOuts = rewiredDashboard.__get__('internals.infoOuts');
+
+      expect(rewiredInfoOuts[testerType].statTable.records[0].bugs).to.equal(14);
+      expect(rewiredInfoOuts.app.newBugs.color).to.equal('red');
+      expect(rewiredInfoOuts.app.newBugs.value).to.equal(2);
+      expect(rewiredInfoOuts.server.newBugs.color).to.equal('red');
+      expect(rewiredInfoOuts.server.newBugs.value).to.equal(2);
+      expect(rewiredInfoOuts.tls.newBugs.color).to.equal('red');
+      expect(rewiredInfoOuts.tls.newBugs.value).to.equal(2);
+      expect(setDataOnAllPageWidgetsStub.callCount).to.equal(1);
+
+      flags.onCleanup = () => {
+        revertRewiredDashboardInternalsInfoOutsAppStatTableRecords();
+        revertRewiredDashboardInternalsInfoOutsServerStatTableRecords();
+        revertRewiredDashboardInternalsInfoOutsTlsStatTableRecords();
+        revertRewiredDashboardSetDataOnAllPageWidgets();
+      };
+    });
   });
 });
