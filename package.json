@@ -43,7 +43,7 @@
     "blessed-contrib": "^4.8.5",
     "chalk": "^2.4.1",
     "convict": "^4.3.0",
-    "eventsource": "^1.0.5",
+    "eventsource": "^1.0.7",
     "figlet": "^1.2.0",
     "purpleteam-logger": "git+https://git@github.com/binarymist/purpleteam-logger.git",
     "request": "^2.87.0",
