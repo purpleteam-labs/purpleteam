@@ -1,4 +1,3 @@
-require('app-module-path').addPath(process.cwd());
 exports.lab = require('lab').script();
 
 const { describe, it, before, beforeEach, afterEach } = exports.lab;
