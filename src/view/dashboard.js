@@ -176,7 +176,7 @@ const handleTesterBugCount = (testerType, sessionId, message) => {
   setDataOnAllPageWidgets();
 };
 
-
+/* $lab:coverage:off$ */
 const calculateGridCoordsForLoggers = (sessionIds) => {
   const loggerCount = sessionIds.length;
 
@@ -405,7 +405,7 @@ const initTPCarousel = (testPlans) => {
   const carousel = new contrib.carousel(carouselPages, { screen, interval: 0, controlKeys: true }); // eslint-disable-line new-cap
   carousel.start();
 };
-
+/* $lab:coverage:on$ */
 
 const setupInfoOutsForTest = (testerSessions) => {
   testerNames.forEach((tN) => {
