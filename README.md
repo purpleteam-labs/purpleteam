@@ -5,7 +5,7 @@
   </a>
   <br/>
 <br/>
-<b>purpleteam CLI</b><br/>
+<h2>purpleteam CLI</h2><br/>
   Currently in heavy development
 <br/><br/>
 
