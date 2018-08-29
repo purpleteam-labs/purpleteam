@@ -65,5 +65,8 @@
   },
   "bin": {
     "purpleteam": "./bin/purpleteam"
-  }
+  },
+  "pre-commit": [
+    "test"
+  ]
 }
