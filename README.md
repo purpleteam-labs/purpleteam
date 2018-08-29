@@ -2,9 +2,9 @@
 
 ***
 
-[![pipeline status](https://gitlab.com/purpleteam-labs/purpleteam/badges/master/pipeline.svg)](https://gitlab.com/purpleteam-labs/purpleteam/commits/master) &nbsp; [![test coverage](https://gitlab.com/purpleteam-labs/purpleteam/badges/master/coverage.svg)](https://gitlab.com/purpleteam-labs/purpleteam/commits/master) &nbsp; [![known vulnerabilities](https://snyk.io/test/github/purpleteam-labs/purpleteam/badge.svg?targetFile=package.json)](https://snyk.io/test/github/purpleteam-labs/purpleteam?targetFile=package.json)
-
 ## Currently in heavy development
+
+[![pipeline status](https://gitlab.com/purpleteam-labs/purpleteam/badges/master/pipeline.svg)](https://gitlab.com/purpleteam-labs/purpleteam/commits/master) &nbsp; [![test coverage](https://gitlab.com/purpleteam-labs/purpleteam/badges/master/coverage.svg)](https://gitlab.com/purpleteam-labs/purpleteam/commits/master) &nbsp; [![known vulnerabilities](https://snyk.io/test/github/purpleteam-labs/purpleteam/badge.svg?targetFile=package.json)](https://snyk.io/test/github/purpleteam-labs/purpleteam?targetFile=package.json)
 
 Along with the other components in the PurpleTeam solution, this project is the interface project:
 
