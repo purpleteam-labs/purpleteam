@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 require('app-module-path/cwd');
+const root = require('..');
 
-async function main () {
-    await require('..').start({ argv: process.argv});
+async function main() {
+  await root.start({ argv: process.argv });
 }
 
 main();
-
