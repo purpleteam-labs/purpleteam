@@ -54,7 +54,7 @@ const internals = {
 };
 
 const screen = blessed.screen({
-  dump: `${process.cwd()}/logs/dashboard/log.log`,
+  // dump: `${process.cwd()}/logs/dashboard/log.log`,
   smartCSR: true,
   autoPadding: false,
   warnings: true,
