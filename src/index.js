@@ -1,5 +1,5 @@
 const config = require('config/config');
-const log = require('purpleteam-logger').init(config.get('logger'));
+const log = require('purpleteam-logger').init(config.get('loggers.def'));
 
 const { processCommands } = require('src/cli');
 

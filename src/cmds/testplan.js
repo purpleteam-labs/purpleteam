@@ -1,8 +1,6 @@
 const config = require('config/config'); // eslint-disable-line no-unused-vars
-const log = require('purpleteam-logger').logger();
 const api = require('src/presenter/apiDecoratingAdapter');
 
-api.init(log);
 
 exports.flags = 'testplan';
 exports.desc = 'Retrieve the test plan that will be executed when you run test.';

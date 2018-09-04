@@ -8,16 +8,30 @@ const schema = {
     default: 'production',
     env: 'NODE_ENV'
   },
-  logger: {
-    level: {
-      doc: 'Write all log events with this level and below. Syslog levels used: https://github.com/winstonjs/winston#logging-levels',
-      format: ['emerg', 'alert', 'crit', 'error', 'warning', 'notice', 'info', 'debug'],
-      default: 'notice'
+  loggers: {
+    def: {
+      level: {
+        doc: 'Default logger to write all log events with this level and below. Syslog levels used: https://github.com/winstonjs/winston#logging-levels',
+        format: ['emerg', 'alert', 'crit', 'error', 'warning', 'notice', 'info', 'debug'],
+        default: 'notice'
+      },
+      transports: {
+        doc: 'Transports to send generic logging events to.',
+        format: Array,
+        default: ['SignaleTransport']
+      }
     },
-    transports: {
-      doc: 'Transports to send logging events to.',
-      format: Array,
-      default: ['SignaleTransport']
+    testerProgress: {
+      transports: {
+        doc: 'Transports to send testerProgress events to.',
+        format: Array,
+        default: ['File']
+      },
+      dirname: {
+        doc: 'Location of testerProgress logs',
+        format: String,
+        default: `${process.cwd()}/logs/`
+      }
     }
   },
   purpleteamApi: {

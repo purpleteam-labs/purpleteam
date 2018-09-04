@@ -2,7 +2,7 @@ const sywac = require('sywac');
 const chalk = require('chalk');
 const figlet = require('figlet');
 const pkg = require('package.json');
-const log = require('purpleteam-logger').logger();
+const log = require('purpleteam-logger').get();
 
 const processCommands = async (options) => { // eslint-disable-line no-unused-vars
   log.debug('Configuring sywac', { tags: ['cli'] });

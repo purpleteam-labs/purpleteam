@@ -1,4 +1,9 @@
 {
+  "loggers": {
+    "def": {
+      "level": "debug"
+    }
+  },
   "purpleteamApi": {
     "protocol": "http",
     "ip": "127.0.0.1"

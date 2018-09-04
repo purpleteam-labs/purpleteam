@@ -6,13 +6,10 @@ const Model = require('src/models/model');
 const dashboard = require('src/view/dashboard');
 const { TesterUnavailable, TesterProgressRouteSuffix } = require('src/strings');
 
-let log;
-let apiResponse;
+const ptLogger = require('purpleteam-logger');
 
-const init = (logger) => {
-  if (log) return;
-  log = logger;
-};
+const log = ptLogger.init(config.get('loggers.def'));
+let apiResponse;
 
 const apiUrl = config.get('purpleteamApi.url');
 
@@ -86,6 +83,10 @@ const subscribeToTesterProgress = (model) => {
   const { testerNamesAndSessions } = model;
 
   testerNamesAndSessions.forEach((testerNameAndSession) => {
+    const loggerType = `${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}`;
+    const { transports, dirname } = config.get('loggers.testerProgress');
+    ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}` });
+
     const testerRepresentative = apiResponse.find(element => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
       model.propagateTesterMessage({
@@ -123,6 +124,7 @@ const getTestPlans = async (configFileContents) => {
 
 const handleModelTesterEvents = (eventName, testerType, sessionId, message) => {
   dashboard[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`](testerType, sessionId, message);
+  if (eventName === 'testerProgress') ptLogger.get(`${testerType}-${sessionId}`).notice(message);
 };
 
 
@@ -147,7 +149,6 @@ const test = async (configFileContents) => {
 
 
 module.exports = {
-  init,
   getBuildUserConfigFile,
   getTestPlans,
   test

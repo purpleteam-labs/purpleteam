@@ -1,8 +1,6 @@
 const config = require('config/config'); // eslint-disable-line no-unused-vars
-const log = require('purpleteam-logger').logger();
 const api = require('src/presenter/apiDecoratingAdapter');
 
-api.init(log);
 
 exports.flags = 'test';
 exports.description = 'Launch purpleteam to attack your specified target';

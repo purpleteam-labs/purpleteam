@@ -1,4 +1,4 @@
-const log = require('purpleteam-logger').logger();
+const log = require('purpleteam-logger').get();
 const pkg = require('package.json');
 
 exports.flags = '*';

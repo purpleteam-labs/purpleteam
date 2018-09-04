@@ -7,7 +7,7 @@ const sinon = require('sinon');
 const rewire = require('rewire');
 const readFileAsync = require('util').promisify(require('fs').readFile);
 const config = require('config/config');
-const log = require('purpleteam-logger').init(config.get('logger'));
+const log = require('purpleteam-logger').init(config.get('loggers.def'));
 
 const apiUrl = config.get('purpleteamApi.url');
 const eventSourceOrigin = `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.ip')}:${config.get('purpleteamApi.port')}`;
@@ -28,7 +28,6 @@ describe('apiDecoratingAdapter', () => {
       const { context: { buildUserConfigFileContent } } = flags;
       const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
       const configFileContents = await buildUserConfigFileContent;
-      rewiredApi.init(log);
       const apiResponse = [{
         name: 'app',
         message: `@app_scan
@@ -197,7 +196,8 @@ describe('apiDecoratingAdapter', () => {
       context.log = log;
       context.critStub = sinon.stub(context.log, 'crit');
       context.log.crit = context.critStub;
-      context.rewiredApi.init(context.log);
+
+      context.revertRewiredApiLog = context.rewiredApi.__set__('log', context.log);
     });
 
 
@@ -481,6 +481,7 @@ describe('apiDecoratingAdapter', () => {
     afterEach((flags) => {
       const { context } = flags;
       context.revertRewiredApiRequest();
+      context.revertRewiredApiLog();
 
       context.log.crit.restore();
       context.rewiredRequest.post.restore();
@@ -503,8 +504,6 @@ describe('apiDecoratingAdapter', () => {
       };
       context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
       context.configFileContents = await context.buildUserConfigFileContent;
-
-      context.rewiredApi.init(log);
 
       context.rewiredRequest = context.rewiredApi.__get__('request');
       context.requestStub = sinon.stub(context.rewiredRequest, 'post');
@@ -687,7 +686,6 @@ describe('apiDecoratingAdapter', () => {
       const configFileContents = await context.buildUserConfigFileContent;
       context.model = new Model(configFileContents);
       const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
-      rewiredApi.init(log);
 
       context.revertRewiredApiApiResponse = rewiredApi.__set__('apiResponse', apiResponse);
       context.revertRewiredApiEventSource = rewiredApi.__set__('EventSource', EventSource);
@@ -813,7 +811,6 @@ describe('apiDecoratingAdapter', () => {
     });
     it('- should return the build user config file contents', async ({ context }) => {
       const { buildUserConfigFileContent } = context;
-      api.init(log);
       const buildUserConfigFileContents = await api.getBuildUserConfigFile(buildUserConfigFilePath);
       expect(buildUserConfigFileContents).to.equal(buildUserConfigFileContent);
     });
@@ -982,7 +979,7 @@ describe('apiDecoratingAdapter', () => {
       const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents, rewiredApi } } = flags;
       const warningStub = sinon.stub(log, 'warning');
       log.warning = warningStub;
-      rewiredApi.init(log);
+      const revertRewiredApiLog = rewiredApi.__set__('log', log);
 
       const event = {
         type: 'testerProgress',
@@ -994,7 +991,7 @@ describe('apiDecoratingAdapter', () => {
 
       flags.onCleanup = () => {
         log.warning.restore();
-        rewiredApi.__set__('log', undefined);
+        revertRewiredApiLog();
       };
 
       rewiredHandleServerSentTesterEvents(event, model, testerNameAndSession);
