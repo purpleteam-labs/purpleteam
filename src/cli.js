@@ -22,7 +22,9 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
       group: str => chalk.hex('#9961ed').bold(str),
       messages: str => chalk.keyword('orange').bold(str)
     })
-    .parseAndExit();
+    .parse();
+
+  if (cliArgs.errors.length) log.error(cliArgs.errors);
 };
 
 module.exports = { processCommands };

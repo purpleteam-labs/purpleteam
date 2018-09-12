@@ -38,7 +38,7 @@ const postToApi = async (configFileContents, route) => {
       errorMessageFrame: innerMessage => `Error occured while attempting to communicate with the purpleteam SaaS. Error was: ${innerMessage}`,
       backendTookToLong: '"The purpleteam backend took to long to respond"',
       backendUnreachable: '"The purpleteam backend is currently unreachable".',
-      validationError: `Validation of the supplied build user config failed: ${err.error.message}.`,
+      validationError: `Validation of the supplied build user config failed. Errors: ${err.error.message}.`,
       syntaxError: `SyntaxError: ${err.error.message}.`,
       unknown: '"Unknown"',
       testPlanFetchFailure: () => {
@@ -83,6 +83,7 @@ const subscribeToTesterProgress = (model) => {
   const { testerNamesAndSessions } = model;
 
   testerNamesAndSessions.forEach((testerNameAndSession) => {
+    // Todo: KC: Add test for the following logging.
     const loggerType = `${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}`;
     const { transports, dirname } = config.get('loggers.testerProgress');
     ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}` });
@@ -124,12 +125,18 @@ const getTestPlans = async (configFileContents) => {
 
 const handleModelTesterEvents = (eventName, testerType, sessionId, message) => {
   dashboard[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`](testerType, sessionId, message);
-  if (eventName === 'testerProgress') ptLogger.get(`${testerType}-${sessionId}`).notice(message);
+  if (eventName === 'testerProgress') ptLogger.get(`${testerType}-${sessionId}`).notice(message); // Todo: this line is not tested.
 };
 
 
 const test = async (configFileContents) => {
-  const model = new Model(configFileContents);
+  let model;
+  try {
+    model = new Model(configFileContents);
+  } catch (error) {
+    if (error.name === 'SyntaxError') throw new Error(`Syntax error in the build user config: ${error.message}`);
+    throw error;
+  }
   const route = 'test';
   await postToApi(configFileContents, route);
 
