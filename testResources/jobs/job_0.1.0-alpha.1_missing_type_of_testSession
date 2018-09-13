@@ -7,10 +7,11 @@
         "route": "/login",
         "usernameFieldLocater": "userName",
         "passwordFieldLocater": "password",
-        "submit": "btn btn-danger"
+        "submit": "btn btn-danger",
+        "expectedResponseFail": "Invalid"
       },
       "sutIp": "172.17.0.1",
-      "sutPort": "4000",
+      "sutPort": 4000,
       "sutProtocol": "http",
       "browser": "chrome",
       "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\"\/dashboard\">\/dashboard<\/a><\/p>",
@@ -88,6 +89,7 @@
         "attackFields": [
           {"name": "memo", "value": "PurpleMemo", "visible": true}
         ],
+        "method": "POST",
         "submit": "btn btn-primary"
       }
     }
