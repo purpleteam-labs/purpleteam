@@ -3,8 +3,15 @@ const TestPlanUnavailable = tester => `No test plan available for the ${tester} 
 
 const TesterProgressRouteSuffix = '-tester-progress';
 
+const NowAsFileName = () => {
+  const date = new Date();
+  const padLeft = num => (num < 10 ? `0${num}` : `${num}`);
+  return `${date.getFullYear()}-${padLeft(date.getMonth())}-${padLeft(date.getDate())}T${padLeft(date.getHours())}:${padLeft(date.getMinutes())}:${padLeft(date.getSeconds())}`;
+};
+
 module.exports = {
   TesterUnavailable,
   TestPlanUnavailable,
-  TesterProgressRouteSuffix
+  TesterProgressRouteSuffix,
+  NowAsFileName
 };

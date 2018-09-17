@@ -4,7 +4,7 @@ const request = require('request-promise-native');
 const EventSource = require('eventsource');
 const Model = require('src/models/model');
 const dashboard = require('src/view/dashboard');
-const { TesterUnavailable, TesterProgressRouteSuffix } = require('src/strings');
+const { TesterUnavailable, TesterProgressRouteSuffix, NowAsFileName } = require('src/strings');
 
 const ptLogger = require('purpleteam-logger');
 
@@ -86,7 +86,7 @@ const subscribeToTesterProgress = (model) => {
     // Todo: KC: Add test for the following logging.
     const loggerType = `${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}`;
     const { transports, dirname } = config.get('loggers.testerProgress');
-    ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}` });
+    ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}` });
 
     const testerRepresentative = apiResponse.find(element => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
