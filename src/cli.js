@@ -22,15 +22,18 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
       messages: str => chalk.keyword('orange').bold(str)
     });
 
+  const shouldParseAndexit = (argv) => {
+    const command = argv[2];
+    const arg = argv[3];
+    return argv.length < 3
+      || command === 'about'
+      || command === '-v' || command === '--version'
+      || command === '-h' || command === '--help'
+      || (command !== 'test' && command !== 'testplan')
+      || (command === 'test' && !!arg) || (command === 'testplan' && !!arg);
+  };
 
-  if (options.argv.length < 3) await api.parseAndExit();
-  if (options.argv[2] === 'about') await api.parseAndExit();
-  if (options.argv[2] === '-v' || options.argv[2] === '--version') await api.parseAndExit();
-  if (options.argv[2] === '-h' || options.argv[2] === '--help') await api.parseAndExit();
-  if (options.argv[2] !== 'test' && options.argv[2] !== 'testplan') await api.parseAndExit();
-
-
-  const cliArgs = await api.parse();
+  const cliArgs = shouldParseAndexit(options.argv) ? await api.parseAndExit() : await api.parse();
 
   if (cliArgs.errors.length) log.error(cliArgs.errors);
 };
