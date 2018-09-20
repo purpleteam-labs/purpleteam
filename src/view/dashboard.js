@@ -108,8 +108,11 @@ const setDataOnNewBugsWidget = () => {
 
 const setDataOnTotalProgressWidget = () => {
   const { infoOuts } = internals;
-  const totalProgress = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)].totalProgress; // eslint-disable-line prefer-destructuring
-  totalProgress.instance.setStack([{ percent: totalProgress.percent, stroke: 'blue' }, { percent: 100 - totalProgress.percent, stroke: 'red' }]);
+  const { totalProgress } = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)];
+  let roundedPercent = Math.round(totalProgress.percent);
+  // Bug in the blessed contrib component that does't render the guage propertly if percent is 1 or less.
+  if (roundedPercent <= 1) roundedPercent = 0;
+  totalProgress.instance.setStack([{ percent: roundedPercent, stroke: 'blue' }, { percent: 100 - roundedPercent, stroke: 'red' }]);
 };
 
 
@@ -132,7 +135,7 @@ const handleTesterProgress = (testerType, sessionId, message) => {
 const handleTesterPctComplete = (testerType, sessionId, message) => {
   const { infoOuts } = internals;
   // statTable
-  infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId).pctComplete = message;
+  infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId).pctComplete = Math.round(message);
   // testerPctComplete
   infoOuts[testerType].testerPctComplete.percent = infoOuts[testerType]
     .statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / infoOuts[testerType].statTable.records.length;
