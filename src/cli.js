@@ -35,7 +35,7 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
 
   const cliArgs = shouldParseAndexit(options.argv) ? await api.parseAndExit() : await api.parse();
 
-  if (cliArgs.errors.length) log.error(cliArgs.errors);
+  if (cliArgs.errors) log.error(cliArgs.errors);
 };
 
 module.exports = { processCommands };
