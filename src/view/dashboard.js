@@ -127,8 +127,11 @@ const setDataOnAllPageWidgets = () => {
 
 
 const handleTesterProgress = (testerType, sessionId, message) => {
-  const logger = internals.infoOuts[testerType].loggers.find(l => l.sessionId === sessionId);
-  if (logger.instance !== 'To be assigned') logger.instance.log(message);
+  const logger = internals.infoOuts[testerType].loggers.find(l => l.sessionId === sessionId);  
+  if (logger.instance !== 'To be assigned') {
+    const lines = message.split('\n');
+    lines.forEach((line) => { logger.instance.log(line); });
+  }
 };
 
 
