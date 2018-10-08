@@ -133,7 +133,7 @@ const handleTesterProgress = (testerType, sessionId, message) => {
       const lines = message.split('\n');
       lines.forEach((line) => { logger.instance.log(line); });
     } catch (e) {
-      throw new Error(`An error occured while attempting to split a testerProgress event message. The message was "${message}", the error was "${e}"`);
+      throw new Error(`An error occurred while attempting to split a testerProgress event message. The message was "${message}", the error was "${e}"`);
     }
   }
 };
