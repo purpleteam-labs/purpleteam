@@ -502,7 +502,7 @@ describe('apiDecoratingAdapter', () => {
       await rewiredApi.getTestPlans(configFileContents);
 
       expect(requestStub.getCall(0).args[0]).to.equal(request);
-      expect(critStub.getCall(0).args[0]).to.equal('Error occured while attempting to communicate with the purpleteam SaaS. Error was: "Unknown"');
+      expect(critStub.getCall(0).args[0]).to.equal('Error occurred while attempting to communicate with the purpleteam SaaS. Error was: "Unknown"');
       expect(critStub.getCall(0).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
       expect(critStub.getCall(1)).to.equal(null);
     });
