@@ -16,6 +16,7 @@ module.exports = {
     // https://eslint.org/docs/rules/function-paren-newline
     'function-paren-newline': ['error', 'multiline'],
     'import/no-unresolved': 'off',
+    'no-unused-expressions': ["error", { 'allowShortCircuit': true, 'allowTernary': true }],
     'object-curly-newline': ['error', { 'multiline': true }]
   },
   env: {
