@@ -1,5 +1,10 @@
 const config = require('config/config');
-const readFileAsync = require('util').promisify(require('fs').readFile);
+const fs = require('fs');
+const { promisify } = require('util');
+
+const readFileAsync = promisify(fs.readFile);
+const writeFileAsync = promisify(fs.writeFile);
+
 const request = require('request-promise-native');
 const EventSource = require('eventsource');
 const Model = require('src/models/model');
@@ -24,6 +29,24 @@ const getBuildUserConfigFile = async (filePath) => {
 };
 
 
+const getOutcomesFromApi = async () => {
+  const outcomesFilePath = `${config.get('outcomes.filePath')}`.replace('time', NowAsFileName());
+  let result;
+  await request({
+    uri: `${apiUrl}/outcomes`,
+    method: 'GET',
+    encoding: null
+  }).then(async (res) => {
+    await writeFileAsync(outcomesFilePath, res)
+      .then(() => { result = `Outcomes have been downloaded to: ${outcomesFilePath}`; })
+      .catch((error) => { result = `Error occurred while writing the outcomes file: ${outcomesFilePath}, error was: ${error}`; });
+  }).catch((err) => {
+    result = `Error occurred while downloading the outcomes file, error was: ${err}`;
+  });
+  return result;
+};
+
+
 const postToApi = async (configFileContents, route) => {
   await request({
     uri: `${apiUrl}/${route}`,
@@ -35,7 +58,7 @@ const postToApi = async (configFileContents, route) => {
     apiResponse = answer;
   }).catch((err) => {
     const handle = {
-      errorMessageFrame: innerMessage => `Error occured while attempting to communicate with the purpleteam SaaS. Error was: ${innerMessage}`,
+      errorMessageFrame: innerMessage => `Error occurred while attempting to communicate with the purpleteam SaaS. Error was: ${innerMessage}`,
       backendTookToLong: '"The purpleteam backend took to long to respond"',
       backendUnreachable: '"The purpleteam backend is currently unreachable".',
       validationError: `Validation of the supplied build user config failed. Errors: ${err.error.message}.`,
@@ -54,12 +77,15 @@ const postToApi = async (configFileContents, route) => {
 };
 
 
-const handleServerSentTesterEvents = (event, model, testerNameAndSession) => {
+const handleServerSentTesterEvents = async (event, model, testerNameAndSession) => {
   if (event.origin === apiUrl) {
     const eventDataPropPascalCase = event.type.replace('tester', '');
     const eventDataProp = `${eventDataPropPascalCase.charAt(0).toLowerCase()}${eventDataPropPascalCase.substring(1)}`;
-    const message = JSON.parse(event.data)[eventDataProp];
+    let message = JSON.parse(event.data)[eventDataProp];
     if (message != null) {
+      if (event.type === 'testerProgress' && message.startsWith('All test sessions of all testers are finished')) {
+        message = message.concat(`\n${await getOutcomesFromApi()}`);
+      }
       model.propagateTesterMessage({
         testerType: testerNameAndSession.testerType,
         sessionId: testerNameAndSession.sessionId,
@@ -81,7 +107,6 @@ const handleServerSentTesterEvents = (event, model, testerNameAndSession) => {
 
 const subscribeToTesterProgress = (model) => {
   const { testerNamesAndSessions } = model;
-
   testerNamesAndSessions.forEach((testerNameAndSession) => {
     // Todo: KC: Add test for the following logging.
     const loggerType = `${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}`;

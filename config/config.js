@@ -57,11 +57,21 @@ const schema = {
       default: 'not yet set'
     }
   },
-  results: {
-    uri: {
+  outcomes: {
+    dir: {
       doc: 'The location of the results.',
       format: String,
-      default: `${process.cwd()}/outcomes/results.txt`
+      default: `${process.cwd()}/outcomes/`
+    },
+    fileName: {
+      doc: 'The name of the archive file containing all of the Tester outcomes (results, reports)',
+      format: String,
+      default: 'outcomes_time.zip'
+    },
+    filePath: {
+      doc: 'The full file path of the archive file containing all of the Tester outcomes (results, reports)',
+      format: String,
+      default: 'not yet set'
     }
   },
   buildUserConfig: {
@@ -85,5 +95,6 @@ config.loadFile(path.join(__dirname, `config.${process.env.NODE_ENV}.json`));
 config.validate();
 
 config.set('purpleteamApi.url', `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.ip')}:${config.get('purpleteamApi.port')}`);
+config.set('outcomes.filePath', `${config.get('outcomes.dir')}${config.get('outcomes.fileName')}`);
 
 module.exports = config;
