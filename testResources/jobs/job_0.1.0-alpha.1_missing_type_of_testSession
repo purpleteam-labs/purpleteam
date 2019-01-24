@@ -10,7 +10,7 @@
         "submit": "btn btn-danger",
         "expectedResponseFail": "Invalid"
       },
-      "sutIp": "172.17.0.1",
+      "sutIp": "pt-sut-cont",
       "sutPort": 4000,
       "sutProtocol": "http",
       "browser": "chrome",
