@@ -70,8 +70,8 @@
     "figlet": "^1.2.1",
     "purpleteam-logger": "^1.0.0",
     "request": "^2.88.0",
-    "request-promise": "^4.2.2",
-    "request-promise-native": "^1.0.5",
+    "request-promise": "^4.2.4",
+    "request-promise-native": "^1.0.7",
     "sywac": "^1.2.1"
   },
   "devDependencies": {
