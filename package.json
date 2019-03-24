@@ -78,7 +78,7 @@
     "code": "^5.2.4",
     "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-import": "^2.16.0",
     "lab": "^18.0.2",
     "mocksse": "^1.0.1",
     "npm-check": "^5.9.0",
