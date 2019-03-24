@@ -68,7 +68,7 @@
     "convict": "^4.4.1",
     "eventsource": "^1.0.7",
     "figlet": "^1.2.1",
-    "purpleteam-logger": "^1.0.0",
+    "purpleteam-logger": "^1.0.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "request-promise-native": "^1.0.7",
