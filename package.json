@@ -81,7 +81,7 @@
     "eslint-plugin-import": "^2.12.0",
     "lab": "^15.5.0",
     "mocksse": "^1.0.1",
-    "npm-check": "^5.8.0",
+    "npm-check": "^5.9.0",
     "pre-commit": "^1.2.2",
     "rewire": "^4.0.1",
     "sinon": "^7.3.0"
