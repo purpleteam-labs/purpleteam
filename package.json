@@ -65,7 +65,7 @@
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.6",
     "chalk": "^2.4.2",
-    "convict": "^4.3.2",
+    "convict": "^4.4.1",
     "eventsource": "^1.0.7",
     "figlet": "^1.2.1",
     "purpleteam-logger": "^1.0.0",
