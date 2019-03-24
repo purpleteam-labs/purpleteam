@@ -75,7 +75,7 @@
     "sywac": "^1.2.1"
   },
   "devDependencies": {
-    "code": "^5.2.0",
+    "code": "^5.2.4",
     "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.12.0",
