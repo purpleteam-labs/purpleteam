@@ -23,7 +23,7 @@ const getBuildUserConfigFile = async (filePath) => {
     const fileContents = await readFileAsync(filePath, { encoding: 'utf8' });
     return fileContents;
   } catch (err) {
-    log.error(`Could not read file: ${filePath}, the error was: ${err}`, { tags: ['apiDecoratingAdapter'] });
+    log.error(`Could not read file: ${filePath}, the error was: ${err}.`, { tags: ['apiDecoratingAdapter'] });
     throw err;
   }
 };
@@ -38,10 +38,10 @@ const getOutcomesFromApi = async () => {
     encoding: null
   }).then(async (res) => {
     await writeFileAsync(outcomesFilePath, res)
-      .then(() => { result = `Outcomes have been downloaded to: ${outcomesFilePath}`; })
-      .catch((error) => { result = `Error occurred while writing the outcomes file: ${outcomesFilePath}, error was: ${error}`; });
+      .then(() => { result = `Outcomes have been downloaded to: ${outcomesFilePath}.`; })
+      .catch((error) => { result = `Error occurred while writing the outcomes file: ${outcomesFilePath}, error was: ${error}.`; });
   }).catch((err) => {
-    result = `Error occurred while downloading the outcomes file, error was: ${err}`;
+    result = `Error occurred while downloading the outcomes file, error was: ${err}.`;
   });
   return result;
 };
@@ -59,7 +59,7 @@ const postToApi = async (configFileContents, route) => {
   }).catch((err) => {
     const handle = {
       errorMessageFrame: innerMessage => `Error occurred while attempting to communicate with the purpleteam SaaS. Error was: ${innerMessage}`,
-      backendTookToLong: '"The purpleteam backend took to long to respond"',
+      backendTookToLong: '"The purpleteam backend took to long to respond".',
       backendUnreachable: '"The purpleteam backend is currently unreachable".',
       validationError: `Validation of the supplied build user config failed. Errors: ${err.error.message}.`,
       syntaxError: `SyntaxError: ${err.error.message}.`,
