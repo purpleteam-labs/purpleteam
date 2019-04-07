@@ -22,6 +22,7 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
       messages: str => chalk.keyword('orange').bold(str)
     });
 
+  // Introduced this function due to https://github.com/sywac/sywac/issues/25
   const shouldParseAndexit = (argv) => {
     const command = argv[2];
     const arg = argv[3];
