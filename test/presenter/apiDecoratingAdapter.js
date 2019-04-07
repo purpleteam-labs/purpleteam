@@ -206,22 +206,22 @@ describe('apiDecoratingAdapter', () => {
     // });
 
 
-    it('- on - connect ECONNREFUSED - should throw error - backendUnreachable', async (flags) => {
+    it('- on - connect EHOSTUNREACH - should throw error - backendUnreachable', async (flags) => {
       const { context: { buildUserConfigFileContent, rewiredApi, requestStub, critStub } } = flags;
       const configFileContents = await buildUserConfigFileContent;
       const error = {
         name: 'RequestError',
-        message: 'Error: connect ECONNREFUSED 127.0.0.1:2000',
+        message: 'Error: connect EHOSTUNREACH 127.0.0.1:2000',
         cause: {
-          code: 'ECONNREFUSED',
-          errno: 'ECONNREFUSED',
+          code: 'EHOSTUNREACH',
+          errno: 'EHOSTUNREACH',
           syscall: 'connect',
           address: '127.0.0.1',
           port: 2000
         },
         error: {
-          code: 'ECONNREFUSED',
-          errno: 'ECONNREFUSED',
+          code: 'EHOSTUNREACH',
+          errno: 'EHOSTUNREACH',
           syscall: 'connect',
           address: '127.0.0.1',
           port: 2000

@@ -66,7 +66,7 @@ const postToApi = async (configFileContents, route) => {
       unknown: '"Unknown"',
       testPlanFetchFailure: () => {
         if (err.message.includes('socket hang up')) return 'backendTookToLong';
-        if (err.message.includes('connect ECONNREFUSED')) return 'backendUnreachable';
+        if (err.message.includes('connect EHOSTUNREACH')) return 'backendUnreachable';
         if (err.error.name === 'ValidationError') return 'validationError';
         if (err.error.name === 'SyntaxError') return 'syntaxError';
         return 'unknown';
