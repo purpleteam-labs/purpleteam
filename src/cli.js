@@ -6,7 +6,7 @@ const log = require('purpleteam-logger').get();
 
 const processCommands = async (options) => { // eslint-disable-line no-unused-vars
   log.debug('Configuring sywac\n', { tags: ['cli'] });
-  const api = await sywac // eslint-disable-line no-unused-vars
+  const api = sywac // eslint-disable-line no-unused-vars
     .usage('Usage: $0 [command] [option(s)]')
     .commandDirectory('cmds')
     // This overrides the --help and --version and adds their aliases
@@ -14,7 +14,7 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
     .version('-v, --version', { desc: 'Show version number' })
     .help('-h, --help')
     .preface(figlet.textSync(pkg.name, 'Chunky'), chalk.bgHex('#9961ed')(pkg.description))
-    .epilogue('For more informatiion, find the manual at https://docs.purpleteam-labs.com')
+    .epilogue('For more information, find the manual at https://docs.purpleteam-labs.com')
     .style({
       // usagePrefix: str => chalk.hex('#9961ed').bold(str),
       flags: str => chalk.bold(str),
@@ -22,7 +22,6 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
       messages: str => chalk.keyword('orange').bold(str)
     });
 
-  // Currently awaiting some answers: https://github.com/sywac/sywac/issues/25
   const shouldParseAndexit = (argv) => {
     const command = argv[2];
     const arg = argv[3];

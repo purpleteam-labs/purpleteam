@@ -11,6 +11,9 @@ exports.setup = (sywac) => {
       desc: 'Build user supplied configuration file. Must be a file conforming to the schema defined in the purpleteam documentation.',
       mustExist: true,
       defaultValue: config.get('buildUserConfig.fileUri')
+    })
+    .check((argv, context) => {
+      if (argv._.length) context.cliMessage(`Unknown argument${argv._.length > 1 ? 's' : ''}: ${argv._.join(', ')}`);
     });
 };
 exports.run = async (parsedArgv, context) => {
