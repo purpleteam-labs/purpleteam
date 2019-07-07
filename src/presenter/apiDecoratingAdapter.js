@@ -49,11 +49,13 @@ const getOutcomesFromApi = async () => {
 
 const postToApi = async (configFileContents, route) => {
   await request({
+    // For debugging your request, add the below and start your http intercepting proxy (burp, zap, etc) bound to the same:
+    // proxy: 'http://127.0.0.1:8080',
     uri: `${apiUrl}/${route}`,
     method: 'POST',
     json: true,
     body: configFileContents,
-    headers: { 'Content-Type': 'application/vnd.api+json', Accept: 'text/plain' }
+    headers: { 'Content-Type': 'application/vnd.api+json', Accept: 'text/plain', charset: 'utf-8' }
   }).then((answer) => {
     apiResponse = answer;
   }).catch((err) => {
