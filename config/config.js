@@ -40,9 +40,9 @@ const schema = {
       format: ['https', 'http'],
       default: 'https'
     },
-    ip: {
-      doc: 'The IP address of the purpleteam SaaS.',
-      format: 'ipaddress',
+    host: {
+      doc: 'The IP address or hostname of the purpleteam SaaS.',
+      format: String,
       default: '240.0.0.0'
     },
     port: {
@@ -94,7 +94,7 @@ const config = convict(schema);
 config.loadFile(path.join(__dirname, `config.${process.env.NODE_ENV}.json`));
 config.validate();
 
-config.set('purpleteamApi.url', `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.ip')}:${config.get('purpleteamApi.port')}`);
+config.set('purpleteamApi.url', `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.host')}:${config.get('purpleteamApi.port')}`);
 config.set('outcomes.filePath', `${config.get('outcomes.dir')}${config.get('outcomes.fileName')}`);
 
 module.exports = config;

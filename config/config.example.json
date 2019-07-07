@@ -1,7 +1,7 @@
 {
   "purpleteamApi": {
     "protocol": "http",
-    "ip": "127.0.0.1"
+    "host": "127.0.0.1"
   },
   "buildUserConfig": {
     "fileUri": "/home/user/Documents/purpleteam/requests/builduser-config"
