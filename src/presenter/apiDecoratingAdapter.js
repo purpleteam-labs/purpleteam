@@ -17,6 +17,11 @@ const log = ptLogger.init(config.get('loggers.def'));
 let apiResponse;
 
 const apiUrl = config.get('purpleteamApi.url');
+let accessToken;
+let authUrl;
+let apiStage;
+let customerId;
+let apiKey;
 
 const getBuildUserConfigFile = async (filePath) => {
   try {
@@ -28,8 +33,51 @@ const getBuildUserConfigFile = async (filePath) => {
   }
 };
 
+const refreshAccessToken = async () => {
+  const appClientId = config.get('purpleteamAuth.appClientId');
+  const appClientSecret = config.get('purpleteamAuth.appClientSecret');
+  const base64AppClientIdAndSecret = Buffer.from(`${appClientId}:${appClientSecret}`).toString('base64');
+  authUrl = config.get('purpleteamAuth.url');
 
-const getOutcomesFromApi = async () => {
+  await request({
+    uri: authUrl,
+    method: 'POST',
+    body: 'grant_type=client_credentials',
+    headers: { 'Content-type': 'application/x-www-form-urlencoded', Authorization: `Basic ${base64AppClientIdAndSecret}` },
+    json: true
+  }).then((answer) => {
+    accessToken = answer.access_token;
+  }).catch((err) => {
+    log.crit(`Error occurred attempting to obtain access token, error was: ${err}`, { tags: ['apiDecoratingAdapter'] });
+  });
+};
+
+
+const getOutcomesFromCloudApi = async () => {
+  const outcomesFilePath = `${config.get('outcomes.filePath')}`.replace('time', NowAsFileName());
+  let result;
+  await request({
+    uri: `${apiUrl}/${apiStage}/${customerId}/outcomes`,
+    method: 'GET',
+    encoding: null,
+    headers: { 'x-api-key': apiKey, Authorization: `Bearer ${accessToken}` }
+  }).then(async (res) => {
+    await writeFileAsync(outcomesFilePath, res)
+      .then(() => { result = `Outcomes have been downloaded to: ${outcomesFilePath}.`; })
+      .catch((error) => { result = `Error occurred while writing the outcomes file: ${outcomesFilePath}, error was: ${error}.`; });
+  }).catch(async (err) => {
+    // Todo: The following will need to be tested once stage 2 containers are done in AWS.
+
+    result = err.error.message === 'The incoming token has expired' ? async () => {
+      await refreshAccessToken();
+      result = await getOutcomesFromCloudApi();
+    } : `Error occurred while downloading the outcomes file, error was: ${err}.`;
+  });
+  return result;
+};
+
+
+const getOutcomesFromLocalApi = async () => {
   const outcomesFilePath = `${config.get('outcomes.filePath')}`.replace('time', NowAsFileName());
   let result;
   await request({
@@ -47,7 +95,53 @@ const getOutcomesFromApi = async () => {
 };
 
 
-const postToApi = async (configFileContents, route) => {
+const getOutcomesFromApi = async () => {
+  await {
+    cloud: getOutcomesFromCloudApi,
+    local: getOutcomesFromLocalApi
+  }[process.env.NODE_ENV]();
+};
+
+
+const postToCloudApi = async (configFileContents, route) => {
+  apiStage = config.get('purpleteamApi.stage');
+  customerId = config.get('purpleteamApi.customerId');
+  apiKey = config.get('purpleteamApi.apiKey');
+
+  await refreshAccessToken();
+
+  await request({
+    uri: `${apiUrl}/${apiStage}/${customerId}/${route}`,
+    method: 'POST',
+    json: true,
+    body: configFileContents,
+    headers: { 'Content-Type': 'application/vnd.api+json', Accept: 'text/plain', charset: 'utf-8', 'x-api-key': apiKey, Authorization: `Bearer ${accessToken}` }
+  }).then((answer) => {
+    apiResponse = answer;
+  }).catch((err) => {
+    const handle = {
+      errorMessageFrame: innerMessage => `Error occurred while attempting to communicate with the purpleteam SaaS. Error was: ${innerMessage}`,
+      backendTookToLong: '"The purpleteam backend took to long to respond".',
+      backendUnreachable: '"The purpleteam API service is currently unreachable. Check the URL you are using".',
+      validationError: `Validation of the supplied build user config failed. Errors: ${err.error.message}.`,
+      syntaxError: `SyntaxError: ${err.error.message}.`,
+      500: err.message,
+      unknown: 'Unknown',
+      testPlanFetchFailure: () => {
+        if (err.message.includes('socket hang up')) return 'backendTookToLong'; // Not sure if this error is relevant?
+        if (err.message.includes('getaddrinfo ENOTFOUND')) return 'backendUnreachable';
+        if (err.error.name === 'ValidationError') return 'validationError';
+        if (err.error.name === 'SyntaxError') return 'syntaxError';
+        if (err.statusCode === 500) return '500';
+        return 'unknown';
+      }
+    };
+    log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['apiDecoratingAdapter'] });
+  });
+};
+
+
+const postToLocalApi = async (configFileContents, route) => {
   await request({
     // For debugging your request, add the below and start your http intercepting proxy (burp, zap, etc) bound to the same:
     // proxy: 'http://127.0.0.1:8080',
@@ -68,7 +162,7 @@ const postToApi = async (configFileContents, route) => {
       unknown: '"Unknown"',
       testPlanFetchFailure: () => {
         if (err.message.includes('socket hang up')) return 'backendTookToLong';
-        if (err.message.includes('connect EHOSTUNREACH')) return 'backendUnreachable';
+        if (err.message.includes('connect EHOSTUNREACH')) return 'backendUnreachable'; // Is 'connect EHOSTUNREACH' still correct?
         if (err.error.name === 'ValidationError') return 'validationError';
         if (err.error.name === 'SyntaxError') return 'syntaxError';
         return 'unknown';
@@ -76,6 +170,14 @@ const postToApi = async (configFileContents, route) => {
     };
     log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['apiDecoratingAdapter'] });
   });
+};
+
+
+const postToApi = async (configFileContents, route) => {
+  await {
+    cloud: postToCloudApi,
+    local: postToLocalApi
+  }[process.env.NODE_ENV](configFileContents, route);
 };
 
 

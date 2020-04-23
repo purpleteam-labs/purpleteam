@@ -4,8 +4,8 @@ const path = require('path');
 const schema = {
   env: {
     doc: 'The application environment.',
-    format: ['production', 'development', 'test'],
-    default: 'production',
+    format: ['cloud', 'local', 'test'],
+    default: 'cloud',
     env: 'NODE_ENV'
   },
   loggers: {
@@ -28,10 +28,46 @@ const schema = {
         default: ['File']
       },
       dirname: {
-        doc: 'Location of testerProgress logs',
+        doc: 'Location of testerProgress logs.',
         format: String,
         default: `${process.cwd()}/logs/`
       }
+    }
+  },
+  purpleteamAuth: {
+    protocol: {
+      doc: 'The protocol of the purpleteam authorisation server.',
+      format: ['https', 'http'],
+      default: 'https'
+    },
+    host: {
+      doc: 'The IP address or hostname of the purpleteam authorisation server.',
+      format: String,
+      default: 'purpleteam'
+    },
+    appClientId: {
+      doc: 'The App Client Id used to authenticate to the purpleteam authorisation server.',
+      format: String,
+      default: 'customer to set if using purpleteam in the cloud',
+      env: 'PURPLETEAM_APP_CLIENT_ID',
+      sensitive: true
+    },
+    appClientSecret: {
+      doc: 'The App Client Secret used to authenticate to the purpleteam authorisation server.',
+      format: String,
+      default: 'customer to set if using purpleteam in the cloud',
+      env: 'PURPLETEAM_APP_CLIENT_SECRET',
+      sensitive: true
+    },
+    custnSubdomain: {
+      doc: 'The customer specific subdomain.',
+      format: String,
+      default: 'custn'
+    },
+    url: {
+      doc: 'The URL of the purpleteam authorisation server.',
+      format: 'url',
+      url: 'https://set-me'
     }
   },
   purpleteamApi: {
@@ -52,9 +88,26 @@ const schema = {
       env: 'PORT'
     },
     url: {
-      doc: 'The URL of the purpleteam API',
-      formate: 'url',
-      default: 'not yet set'
+      doc: 'The URL of the purpleteam API.',
+      format: 'url',
+      default: 'https://set-me'
+    },
+    stage: {
+      doc: 'The API stage of the purpleteam SaaS, only used in the cloud.',
+      format: String,
+      default: 'customer to set if using purpleteam in the cloud'
+    },
+    customerId: {
+      doc: 'Your customer id if using purpleteam against cloud SaaS.',
+      format: String,
+      default: 'customer to set if using purpleteam in the cloud'
+    },
+    apiKey: {
+      doc: 'Your API key to interact with the purpleteam cloud SaaS.',
+      format: String,
+      default: 'customer to set if using purpleteam in the cloud',
+      env: 'PURPLETEAM_API_KEY',
+      sensitive: true
     }
   },
   outcomes: {
@@ -64,19 +117,19 @@ const schema = {
       default: `${process.cwd()}/outcomes/`
     },
     fileName: {
-      doc: 'The name of the archive file containing all of the Tester outcomes (results, reports)',
+      doc: 'The name of the archive file containing all of the Tester outcomes (results, reports).',
       format: String,
       default: 'outcomes_time.zip'
     },
     filePath: {
-      doc: 'The full file path of the archive file containing all of the Tester outcomes (results, reports)',
+      doc: 'The full file path of the archive file containing all of the Tester outcomes (results, reports).',
       format: String,
       default: 'not yet set'
     }
   },
   buildUserConfig: {
     fileUri: {
-      doc: 'The location of the build user config file',
+      doc: 'The location of the build user config file.',
       format: String,
       default: '/testing/buildUserConfigFile'
     }
@@ -91,10 +144,15 @@ const schema = {
 };
 
 const config = convict(schema);
+// If you would like to put your sensitive values in a different location and lock down access,
+//   simply provide the isolated file path as an array element to config.loadFile.
+// Doc: https://github.com/mozilla/node-convict/tree/master/packages/convict#configloadfilefile-or-filearray
+// config.loadFile([path.join(__dirname, `config.${process.env.NODE_ENV}.json`), '/my/locked/down/purpleteam_secrets.json']);
 config.loadFile(path.join(__dirname, `config.${process.env.NODE_ENV}.json`));
 config.validate();
 
 config.set('purpleteamApi.url', `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.host')}:${config.get('purpleteamApi.port')}`);
 config.set('outcomes.filePath', `${config.get('outcomes.dir')}${config.get('outcomes.fileName')}`);
+config.set('purpleteamAuth.url', `${config.get('purpleteamAuth.protocol')}://${config.get('purpleteamAuth.custnSubdomain')}.${config.get('purpleteamAuth.host')}/oauth2/token`);
 
 module.exports = config;

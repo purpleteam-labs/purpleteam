@@ -143,7 +143,10 @@ describe('apiDecoratingAdapter', () => {
         revertRewiredApiDashboard();
       };
 
+      const currentNodeEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'local';
       await rewiredApi.getTestPlans(configFileContents);
+      process.env.NODE_ENV = currentNodeEnv;
 
       expect(testPlanStub.getCall(0).args[0]).to.equal(expectedArgPasssedToTestPlan);
     });
@@ -245,7 +248,10 @@ describe('apiDecoratingAdapter', () => {
       };
       requestStub.returns(Promise.reject(error));
 
+      const currentNodeEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'local';
       await rewiredApi.getTestPlans(configFileContents);
+      process.env.NODE_ENV = currentNodeEnv;
 
       expect(requestStub.getCall(0).args[0]).to.equal(request);
       expect(critStub.getCall(0).args[0]).to.equal('Error occurred while attempting to communicate with the purpleteam SaaS. Error was: "The purpleteam backend is currently unreachable".');
@@ -344,7 +350,10 @@ describe('apiDecoratingAdapter', () => {
       };
       requestStub.returns(Promise.reject(error));
 
+      const currentNodeEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'local';
       await rewiredApi.getTestPlans(configFileContents);
+      process.env.NODE_ENV = currentNodeEnv;
 
       expect(requestStub.getCall(0).args[0]).to.equal(requestMissingTypeOfTestSession);
       expect(critStub.getCall(0).args[0]).to.equal(`Error occurred while attempting to communicate with the purpleteam SaaS. Error was: Validation of the supplied build user config failed. Errors: [
@@ -432,7 +441,10 @@ describe('apiDecoratingAdapter', () => {
       };
       requestStub.returns(Promise.reject(error));
 
+      const currentNodeEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'local';
       await rewiredApi.getTestPlans(configFileContents);
+      process.env.NODE_ENV = currentNodeEnv;
 
       expect(requestStub.getCall(0).args[0]).to.equal(requestMissingComma);
       expect(critStub.getCall(0).args[0]).to.equal('Error occurred while attempting to communicate with the purpleteam SaaS. Error was: SyntaxError: Unexpected string in JSON at position 810.');
@@ -508,7 +520,10 @@ describe('apiDecoratingAdapter', () => {
       };
       requestStub.returns(Promise.reject(statusCodeError));
 
+      const currentNodeEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'local';
       await rewiredApi.getTestPlans(configFileContents);
+      process.env.NODE_ENV = currentNodeEnv;
 
       expect(requestStub.getCall(0).args[0]).to.equal(request);
       expect(critStub.getCall(0).args[0]).to.equal('Error occurred while attempting to communicate with the purpleteam SaaS. Error was: "Unknown"');
@@ -593,7 +608,10 @@ describe('apiDecoratingAdapter', () => {
         revertRewiredApiApiUrl();
       };
 
+      const currentNodeEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'local';
       await rewiredApi.test(configFileContents);
+      process.env.NODE_ENV = currentNodeEnv;
 
       expect(requestStub.getCall(0).args[0]).to.equal(request);
       expect(requestStub.callCount).to.equal(1);
@@ -669,7 +687,10 @@ describe('apiDecoratingAdapter', () => {
         revertRewiredApiApiUrl();
       };
 
+      const currentNodeEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'local';
       await rewiredApi.test(configFileContents);
+      process.env.NODE_ENV = currentNodeEnv;
 
       expect(requestStub.getCall(0).args[0]).to.equal(request);
       expect(requestStub.callCount).to.equal(1);
