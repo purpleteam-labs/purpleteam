@@ -442,10 +442,14 @@ const test = (testerSessions) => {
   initCarousel();
 };
 
+const status = (log, statusOfPurpleteamApi) => {
+  log.notice(statusOfPurpleteamApi, { tags: ['dashboard'] });
+};
 
 module.exports = {
   testPlan,
   test,
+  status,
   handleTesterProgress,
   handleTesterPctComplete,
   handleTesterBugCount

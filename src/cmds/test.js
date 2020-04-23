@@ -3,7 +3,7 @@ const api = require('src/presenter/apiDecoratingAdapter');
 
 
 exports.flags = 'test';
-exports.description = 'Launch purpleteam to attack your specified target';
+exports.description = 'Launch purpleteam to attack your specified target.';
 exports.setup = (sywac) => {
   sywac
     .option('-c, --config-file <config-file path>', {

@@ -76,7 +76,6 @@ const getOutcomesFromCloudApi = async () => {
   return result;
 };
 
-
 const getOutcomesFromLocalApi = async () => {
   const outcomesFilePath = `${config.get('outcomes.filePath')}`.replace('time', NowAsFileName());
   let result;
@@ -94,12 +93,44 @@ const getOutcomesFromLocalApi = async () => {
   return result;
 };
 
-
 const getOutcomesFromApi = async () => {
   await {
     cloud: getOutcomesFromCloudApi,
     local: getOutcomesFromLocalApi
   }[process.env.NODE_ENV]();
+};
+
+
+const getStatusFromCloudApi = async () => {
+  apiStage = config.get('purpleteamApi.stage');
+  customerId = config.get('purpleteamApi.customerId');
+  apiKey = config.get('purpleteamApi.apiKey');
+
+  await refreshAccessToken();
+
+  await request({
+    uri: `${apiUrl}/${apiStage}/${customerId}/status`,
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, Authorization: `Bearer ${accessToken}` }
+  }).then(async (answer) => {
+    apiResponse = answer;
+  }).catch(async (err) => {
+    (err.statusCode === 500) && (apiResponse = 'purpleteam Cloud API responded with "orchestrator is down."');
+    (err.message.includes('getaddrinfo ENOTFOUND')) && (apiResponse = 'purpleteam Cloud API is down.');
+  });
+};
+// Todo: The following will need to be tested once stage 2 containers are done in AWS.
+const getStatusFromLocalApi = async () => {
+  await request({
+    uri: `${apiUrl}/status`,
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  }).then(async (answer) => {
+    apiResponse = answer;
+  }).catch((err) => {
+    // Todo: Work out what we need here.
+    apiResponse = `Failed: ${err}`;
+  });
 };
 
 
@@ -140,7 +171,6 @@ const postToCloudApi = async (configFileContents, route) => {
   });
 };
 
-
 const postToLocalApi = async (configFileContents, route) => {
   await request({
     // For debugging your request, add the below and start your http intercepting proxy (burp, zap, etc) bound to the same:
@@ -171,7 +201,6 @@ const postToLocalApi = async (configFileContents, route) => {
     log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['apiDecoratingAdapter'] });
   });
 };
-
 
 const postToApi = async (configFileContents, route) => {
   await {
@@ -248,7 +277,7 @@ const subscribeToTesterProgress = (model) => {
 const getTestPlans = async (configFileContents) => {
   const route = 'testplan';
   await postToApi(configFileContents, route);
-  if (apiResponse) dashboard.testPlan(apiResponse);
+  apiResponse && dashboard.testPlan(apiResponse);
 };
 
 
@@ -284,8 +313,19 @@ const test = async (configFileContents) => {
 };
 
 
+const getStatus = async () => {
+  await {
+    cloud: getStatusFromCloudApi,
+    local: getStatusFromLocalApi
+  }[process.env.NODE_ENV]();
+
+  apiResponse && dashboard.status(log, apiResponse);
+};
+
+
 module.exports = {
   getBuildUserConfigFile,
   getTestPlans,
-  test
+  test,
+  getStatus
 };

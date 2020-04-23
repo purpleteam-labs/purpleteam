@@ -30,8 +30,8 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
       || command === 'about'
       || command === '-v' || command === '--version'
       || command === '-h' || command === '--help'
-      || (command !== 'test' && command !== 'testplan')
-      || (command === 'test' && !!arg) || (command === 'testplan' && !!arg);
+      || (command !== 'test' && command !== 'testplan' && command !== 'status')
+      || (command === 'test' && !!arg) || (command === 'testplan' && !!arg) || (command === 'status' && !!arg);
   };
 
   const cliArgs = shouldParseAndexit(options.argv) ? await api.parseAndExit() : await api.parse();
