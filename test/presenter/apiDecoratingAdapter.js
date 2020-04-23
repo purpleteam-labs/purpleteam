@@ -254,7 +254,7 @@ describe('apiDecoratingAdapter', () => {
       process.env.NODE_ENV = currentNodeEnv;
 
       expect(requestStub.getCall(0).args[0]).to.equal(request);
-      expect(critStub.getCall(0).args[0]).to.equal('Error occurred while attempting to communicate with the purpleteam SaaS. Error was: "The purpleteam backend is currently unreachable".');
+      expect(critStub.getCall(0).args[0]).to.equal('Error occurred while attempting to communicate with the purpleteam orchestrator. Error was: "The purpleteam backend is currently unreachable".');
       expect(critStub.getCall(0).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
       expect(critStub.getCall(1)).to.equal(null);
     });
@@ -356,7 +356,7 @@ describe('apiDecoratingAdapter', () => {
       process.env.NODE_ENV = currentNodeEnv;
 
       expect(requestStub.getCall(0).args[0]).to.equal(requestMissingTypeOfTestSession);
-      expect(critStub.getCall(0).args[0]).to.equal(`Error occurred while attempting to communicate with the purpleteam SaaS. Error was: Validation of the supplied build user config failed. Errors: [
+      expect(critStub.getCall(0).args[0]).to.equal(`Error occurred while attempting to communicate with the purpleteam orchestrator. Error was: Validation of the supplied build user config failed. Errors: [
             {
               "keyword": "required",
               "dataPath": ".included[0]",
@@ -447,7 +447,7 @@ describe('apiDecoratingAdapter', () => {
       process.env.NODE_ENV = currentNodeEnv;
 
       expect(requestStub.getCall(0).args[0]).to.equal(requestMissingComma);
-      expect(critStub.getCall(0).args[0]).to.equal('Error occurred while attempting to communicate with the purpleteam SaaS. Error was: SyntaxError: Unexpected string in JSON at position 810.');
+      expect(critStub.getCall(0).args[0]).to.equal('Error occurred while attempting to communicate with the purpleteam orchestrator. Error was: SyntaxError: Unexpected string in JSON at position 810.');
       expect(critStub.getCall(0).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
       expect(critStub.getCall(1)).to.equal(null);
     });
@@ -526,7 +526,7 @@ describe('apiDecoratingAdapter', () => {
       process.env.NODE_ENV = currentNodeEnv;
 
       expect(requestStub.getCall(0).args[0]).to.equal(request);
-      expect(critStub.getCall(0).args[0]).to.equal('Error occurred while attempting to communicate with the purpleteam SaaS. Error was: "Unknown"');
+      expect(critStub.getCall(0).args[0]).to.equal('Error occurred while attempting to communicate with the purpleteam orchestrator. Error was: "Unknown"');
       expect(critStub.getCall(0).args[1]).to.equal({ tags: ['apiDecoratingAdapter'] });
       expect(critStub.getCall(1)).to.equal(null);
     });

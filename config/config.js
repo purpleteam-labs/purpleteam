@@ -72,17 +72,17 @@ const schema = {
   },
   purpleteamApi: {
     protocol: {
-      doc: 'The protocol of the purpleteam SaaS.',
+      doc: 'The protocol of the purpleteam Cloud API.',
       format: ['https', 'http'],
       default: 'https'
     },
     host: {
-      doc: 'The IP address or hostname of the purpleteam SaaS.',
+      doc: 'The IP address or hostname of the purpleteam Cloud API.',
       format: String,
       default: '240.0.0.0'
     },
     port: {
-      doc: 'The port of the purpleteam SaaS.',
+      doc: 'The port of the purpleteam Cloud API or Local orchestrator.',
       format: 'port',
       default: 2000,
       env: 'PORT'
@@ -93,17 +93,17 @@ const schema = {
       default: 'https://set-me'
     },
     stage: {
-      doc: 'The API stage of the purpleteam SaaS, only used in the cloud.',
+      doc: 'The API stage of the purpleteam Cloud API, only used in the cloud.',
       format: String,
       default: 'customer to set if using purpleteam in the cloud'
     },
     customerId: {
-      doc: 'Your customer id if using purpleteam against cloud SaaS.',
+      doc: 'Your customer id if using purpleteam with the Cloud service.',
       format: String,
       default: 'customer to set if using purpleteam in the cloud'
     },
     apiKey: {
-      doc: 'Your API key to interact with the purpleteam cloud SaaS.',
+      doc: 'Your API key to interact with the purpleteam Cloud service.',
       format: String,
       default: 'customer to set if using purpleteam in the cloud',
       env: 'PURPLETEAM_API_KEY',

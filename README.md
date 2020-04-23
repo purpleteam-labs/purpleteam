@@ -31,8 +31,8 @@
 
 Along with the other components in the PurpleTeam solution, this project is the interface project:
 
-* [purpleteam](https://gitlab.com/purpleteam-labs/purpleteam) (node.js CLI, driven from CI / nightly build)
-* [purpleteam-orchestrator](https://gitlab.com/purpleteam-labs/purpleteam-orchestrator) (hapi.js orchestrator - SaaS interface, this package)
+* [purpleteam](https://gitlab.com/purpleteam-labs/purpleteam) (node.js CLI, driven from CI / nightly build, manually)
+* [purpleteam-orchestrator](https://gitlab.com/purpleteam-labs/purpleteam-orchestrator) (The component that orchestrates the Testers and takes order and updates the CLI)
 * purpleteam-advisor (machine learning module which continuously improves tests, plugs into orchestrator, future roadmap)
 * Testers:
   * [purpleteam-app-scanner](https://gitlab.com/purpleteam-labs/purpleteam-app-scanner) (web app / api scanner)

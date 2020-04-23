@@ -120,7 +120,7 @@ const postToCloudApi = async (configFileContents, route) => {
     apiResponse = answer;
   }).catch((err) => {
     const handle = {
-      errorMessageFrame: innerMessage => `Error occurred while attempting to communicate with the purpleteam SaaS. Error was: ${innerMessage}`,
+      errorMessageFrame: innerMessage => `Error occurred while attempting to communicate with the purpleteam Cloud API. Error was: ${innerMessage}`,
       backendTookToLong: '"The purpleteam backend took to long to respond".',
       backendUnreachable: '"The purpleteam API service is currently unreachable. Check the URL you are using".',
       validationError: `Validation of the supplied build user config failed. Errors: ${err.error.message}.`,
@@ -154,7 +154,7 @@ const postToLocalApi = async (configFileContents, route) => {
     apiResponse = answer;
   }).catch((err) => {
     const handle = {
-      errorMessageFrame: innerMessage => `Error occurred while attempting to communicate with the purpleteam SaaS. Error was: ${innerMessage}`,
+      errorMessageFrame: innerMessage => `Error occurred while attempting to communicate with the purpleteam orchestrator. Error was: ${innerMessage}`,
       backendTookToLong: '"The purpleteam backend took to long to respond".',
       backendUnreachable: '"The purpleteam backend is currently unreachable".',
       validationError: `Validation of the supplied build user config failed. Errors: ${err.error.message}.`,
