@@ -6,7 +6,7 @@
   <br/>
   <br/>
   <h2>purpleteam CLI</h2><br/>
-    Currently in heavy development
+    Currently in alpha
   <br/><br/>
 
   <a href="https://gitlab.com/purpleteam-labs/purpleteam/commits/master" title="pipeline status">
