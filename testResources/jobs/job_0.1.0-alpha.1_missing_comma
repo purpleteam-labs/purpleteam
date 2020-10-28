@@ -14,7 +14,7 @@
       "sutPort": 4000,
       "sutProtocol": "http",
       "browser": "chrome",
-      "loggedInIndicator": "<p>Moved Temporarily. Redirecting to <a href=\"\/dashboard\">\/dashboard<\/a><\/p>",
+      "loggedInIndicator": "<p>Found. Redirecting to <a href=\"\/dashboard\">\/dashboard<\/a><\/p>",
       "reportFormats": ["html", "json", "md"]
     },
     "relationships": {
@@ -72,10 +72,11 @@
           {"name": "firstName", "value": "PurpleJohn", "visible": true},
           {"name": "lastName", "value": "PurpleDoe", "visible": true},
           {"name": "ssn", "value": "PurpleSSN", "visible": true},
-          {"name": "dob", "value": "12/23/5678", "visible": true},
+          {"name": "dob", "value": "12235678", "visible": true},
           {"name": "bankAcc", "value": "PurpleBankAcc", "visible": true},
           {"name": "bankRouting", "value": "0198212#", "visible": true},
           {"name": "address", "value": "PurpleAddress", "visible": true},
+          {"name": "website", "value": "https://purpleteam-labs.com", "visible": true},
           {"name": "_csrf", "value": ""},
           {"name": "submit", "value": ""}
         ],
