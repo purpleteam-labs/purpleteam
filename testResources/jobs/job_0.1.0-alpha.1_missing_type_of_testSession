@@ -8,7 +8,7 @@
         "usernameFieldLocater": "userName",
         "passwordFieldLocater": "password",
         "submit": "btn btn-danger",
-        "expectedResponseFail": "Invalid"
+        "expectedPageSourceSuccess": "Log Out"
       },
       "sutIp": "pt-sut-cont",
       "sutPort": 4000,
