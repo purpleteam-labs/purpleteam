@@ -254,10 +254,11 @@ const subscribeToTesterProgress = (model) => {
         message: testerRepresentative.message
       });
       if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
-        let eventSource;
-        if (process.env.NODE_ENV === 'local') eventSource = new EventSource(`${apiUrl}/${TesterProgressRoutePrefix}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`);
-        // Todo: Convert cloud to long polling.
-        if (process.env.NODE_ENV === 'cloud') eventSource = new EventSource(`${apiUrl}/${apiStage}/${customerId}/${TesterProgressRoutePrefix}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`, { headers: { 'x-api-key': apiKey, Authorization: `Bearer ${accessToken}` } });
+        const eventSource = new EventSource(`${apiUrl}/${TesterProgressRoutePrefix}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`);
+        // Todo: Cloud currently broken. AWS API Gateway doesn't support SSE. Convert cloud to long polling.
+        // This request works:
+        //   `${apiUrl}/${apiStage}/${customerId}/${TesterProgressRoutePrefix}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`,
+        //   { headers: { 'x-api-key': apiKey, Authorization: `Bearer ${accessToken}` } }
         const handleServerSentTesterEventsClosure = (event) => {
           handleServerSentTesterEvents(event, model, testerNameAndSession);
         };
