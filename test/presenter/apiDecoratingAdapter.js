@@ -14,7 +14,7 @@ const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
 const dashboard = require('src/view/dashboard');
 const api = require('src/presenter/apiDecoratingAdapter');
 const { MockEvent, EventSource } = require('mocksse');
-const { TesterProgressRouteSuffix } = require('src/strings');
+const { TesterProgressRoutePrefix } = require('src/strings');
 const Model = require('src/models/model');
 
 
@@ -760,7 +760,7 @@ describe('apiDecoratingAdapter', () => {
       const { context: { model, rewiredSubscribeToTesterProgress, rewiredApi } } = flags;
       const numberOfEvents = 6;
       new MockEvent({ // eslint-disable-line no-new
-        url: `${apiUrl}/app-lowPrivUser${TesterProgressRouteSuffix}`,
+        url: `${apiUrl}/${TesterProgressRoutePrefix}app/lowPrivUser`,
         setInterval: 1,
         responses: [
           { lastEventId: 'one', type: 'testerProgress', data: { progress: 'Initialising subscription to "app-lowPrivUser" channel for the event "testerProgress"' } },
@@ -769,7 +769,7 @@ describe('apiDecoratingAdapter', () => {
         ]
       });
       new MockEvent({ // eslint-disable-line no-new
-        url: `${apiUrl}/app-adminUser${TesterProgressRouteSuffix}`,
+        url: `${apiUrl}/${TesterProgressRoutePrefix}/app/adminUser`,
         setInterval: 1,
         responses: [
           { lastEventId: 'four', type: 'testerProgress', data: { progress: 'Initialising subscription to "app-adminUser" channel for the event "testerProgress"' } },
