@@ -760,7 +760,7 @@ describe('apiDecoratingAdapter', () => {
       const { context: { model, rewiredSubscribeToTesterProgress, rewiredApi } } = flags;
       const numberOfEvents = 6;
       new MockEvent({ // eslint-disable-line no-new
-        url: `${apiUrl}/${TesterProgressRoutePrefix}app/lowPrivUser`,
+        url: `${apiUrl}/${TesterProgressRoutePrefix}/app/lowPrivUser`,
         setInterval: 1,
         responses: [
           { lastEventId: 'one', type: 'testerProgress', data: { progress: 'Initialising subscription to "app-lowPrivUser" channel for the event "testerProgress"' } },
