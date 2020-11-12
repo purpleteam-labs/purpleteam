@@ -9,7 +9,7 @@ const request = require('request-promise-native');
 const EventSource = require('eventsource');
 const Model = require('src/models/model');
 const dashboard = require('src/view/dashboard');
-const { TesterUnavailable, TesterProgressRouteSuffix, NowAsFileName } = require('src/strings');
+const { TesterUnavailable, TesterProgressRoutePrefix, NowAsFileName } = require('src/strings');
 
 const ptLogger = require('purpleteam-logger');
 
@@ -254,7 +254,10 @@ const subscribeToTesterProgress = (model) => {
         message: testerRepresentative.message
       });
       if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
-        const eventSource = new EventSource(`${apiUrl}/${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}${TesterProgressRouteSuffix}`);
+        let eventSource;
+        if (process.env.NODE_ENV === 'local') eventSource = new EventSource(`${apiUrl}/${TesterProgressRoutePrefix}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`);
+        // Todo: Convert cloud to long polling.
+        if (process.env.NODE_ENV === 'cloud') eventSource = new EventSource(`${apiUrl}/${apiStage}/${customerId}/${TesterProgressRoutePrefix}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`, { headers: { 'x-api-key': apiKey, Authorization: `Bearer ${accessToken}` } });
         const handleServerSentTesterEventsClosure = (event) => {
           handleServerSentTesterEvents(event, model, testerNameAndSession);
         };

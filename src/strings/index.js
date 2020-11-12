@@ -1,7 +1,7 @@
 const TesterUnavailable = tester => `No ${tester} testing available currently. The ${tester} tester is currently in-active.`;
 const TestPlanUnavailable = tester => `No test plan available for the ${tester} tester. The ${tester} tester is currently in-active.`;
 
-const TesterProgressRouteSuffix = '-tester-progress';
+const TesterProgressRoutePrefix = (() => ({ local: 'tester-progress', cloud: 'poll-tester-progress' }[process.env.NODE_ENV]))();
 
 // Also used in the app tester.
 const NowAsFileName = () => {
@@ -13,6 +13,6 @@ const NowAsFileName = () => {
 module.exports = {
   TesterUnavailable,
   TestPlanUnavailable,
-  TesterProgressRouteSuffix,
+  TesterProgressRoutePrefix,
   NowAsFileName
 };
