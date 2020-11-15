@@ -7,8 +7,8 @@
     "lint": "eslint .",
     "deps": "npm-check",
     "update:deps": "npm-check -u",
-    "test": "lab --assert code --coverage",
-    "test:debug": "node --inspect-brk ./node_modules/.bin/lab --assert code --timeout 0",
+    "test": "lab --assert @hapi/code --coverage",
+    "test:debug": "node --inspect-brk ./node_modules/.bin/lab --assert @hapi/code --timeout 0",
     "pretest": "npm run lint",
     "debug": "node --inspect-brk ./bin/purpleteam",
     "start": "node ./bin/purpleteam"
@@ -75,11 +75,11 @@
     "sywac": "^1.2.1"
   },
   "devDependencies": {
-    "code": "^5.2.4",
+    "@hapi/code": "^8.0.2",
+    "@hapi/lab": "^24.1.0",
     "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
-    "lab": "^18.0.2",
     "mocksse": "^1.0.1",
     "npm-check": "^5.9.0",
     "pre-commit": "^1.2.2",

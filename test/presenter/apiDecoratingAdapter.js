@@ -1,8 +1,8 @@
-exports.lab = require('lab').script();
+exports.lab = require('@hapi/lab').script();
 
 const { describe, it, before, beforeEach, afterEach } = exports.lab;
 
-const { expect, fail } = require('code');
+const { expect, fail } = require('@hapi/code');
 const sinon = require('sinon');
 const rewire = require('rewire');
 const readFileAsync = require('util').promisify(require('fs').readFile);
@@ -543,7 +543,7 @@ describe('apiDecoratingAdapter', () => {
   });
 
 
-  describe('test and subscribeToTesterProgress', async () => {
+  describe('test and subscribeToTesterProgress', /* async */ () => {
     beforeEach(async (flags) => {
       const { context } = flags;
       context.request = {
@@ -723,7 +723,7 @@ describe('apiDecoratingAdapter', () => {
   });
 
 
-  describe('subscribeToTesterProgress SSE and handlers', async () => {
+  describe('subscribeToTesterProgress SSE and handlers', /* async */ () => {
     before(async (flags) => {
       flags.context.apiResponse = [
         {
@@ -866,7 +866,7 @@ describe('apiDecoratingAdapter', () => {
   });
 
 
-  describe('getBuildUserConfigFile', async () => {
+  describe('getBuildUserConfigFile', /* async */ () => {
     before(async (flags) => {
       flags.context.buildUserConfigFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
     });
@@ -878,7 +878,7 @@ describe('apiDecoratingAdapter', () => {
   });
 
 
-  describe('handleModelTesterEvents', async () => {
+  describe('handleModelTesterEvents', /* async */ () => {
     beforeEach(async (flags) => {
       const { context } = flags;
       context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');

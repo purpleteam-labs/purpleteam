@@ -1,8 +1,8 @@
-exports.lab = require('lab').script();
+exports.lab = require('@hapi/lab').script();
 
 const { describe, it } = exports.lab;
 
-const { expect, fail } = require('code');
+const { expect, fail } = require('@hapi/code');
 // const sinon = require('sinon');
 // const rewire = require('rewire');
 
@@ -19,7 +19,7 @@ const newModel = async () => {
 };
 
 
-describe('model', async () => {
+describe('model', /* async */ () => {
   // The only way to verify initTesterMessages is by the result of propagateTesterMessage
 
 
@@ -31,7 +31,7 @@ describe('model', async () => {
   });
 
 
-  describe('testerSessions', async () => {
+  describe('testerSessions', /* async */ () => {
     it('- should return valid testerSessions', async () => {
       const model = await newModel();
       // expectedTesterSessions also used in the presenter tests
@@ -49,7 +49,7 @@ describe('model', async () => {
   });
 
 
-  describe('testerNamesAndSessions', async () => {
+  describe('testerNamesAndSessions', /* async */ () => {
     it('- should return valid testerNamesAndSessions', async () => {
       const model = await newModel();
       const expectedTesterNamesAndSessions = [
@@ -66,7 +66,7 @@ describe('model', async () => {
   });
 
 
-  describe('propagateTesterMessage', async () => {
+  describe('propagateTesterMessage', /* async */ () => {
     const invokedOnce = 1;
     it('- with testerType app, sessionId lowPrivUser - should fire testerProgress event, if event not specified, once only', async () => {
       const model = await newModel();
