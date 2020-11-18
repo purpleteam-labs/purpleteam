@@ -8,7 +8,7 @@ class Model extends EventEmitter {
   constructor(options) {
     super();
     job = JSON.parse(options);
-    this.eventNames.forEach(e => this.initTesterMessages(e));
+    this.eventNames.forEach((e) => this.initTesterMessages(e));
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -18,15 +18,15 @@ class Model extends EventEmitter {
 
   // eslint-disable-next-line class-methods-use-this
   initTesterMessages(eventName) {
-    events[eventName] = job.included.filter(resourceObj => resourceObj.type === 'testSession')
-      .map(testSessionResObj => ({ testerType: 'app', sessionId: testSessionResObj.id, messages: [] }));
+    events[eventName] = job.included.filter((resourceObj) => resourceObj.type === 'testSession')
+      .map((testSessionResObj) => ({ testerType: 'app', sessionId: testSessionResObj.id, messages: [] }));
     events[eventName].push({ testerType: 'server', sessionId: 'NA', messages: [] });
     events[eventName].push({ testerType: 'tls', sessionId: 'NA', messages: [] });
   }
 
   // eslint-disable-next-line class-methods-use-this
   get testerNamesAndSessions() {
-    return events.testerProgress.map(tNAS => ({ testerType: tNAS.testerType, sessionId: tNAS.sessionId }));
+    return events.testerProgress.map((tNAS) => ({ testerType: tNAS.testerType, sessionId: tNAS.sessionId }));
   }
 
 
@@ -34,7 +34,7 @@ class Model extends EventEmitter {
     const defaultEvent = 'testerProgress';
     const eventType = msgOpts.event || defaultEvent;
     if (this.eventNames.includes(eventType)) {
-      const msgEvents = events[eventType].find(record => record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId);
+      const msgEvents = events[eventType].find((record) => record.testerType === msgOpts.testerType && record.sessionId === msgOpts.sessionId);
       msgEvents.messages.push(msgOpts.message);
       // (push/shift) Setup as placeholder for proper queue if needed.
       this.emit(msgOpts.event || defaultEvent, msgEvents.testerType, msgEvents.sessionId, msgEvents.messages.shift());
@@ -45,7 +45,7 @@ class Model extends EventEmitter {
 
   // eslint-disable-next-line class-methods-use-this
   testerSessions() {
-    const testerSessions = job.included.filter(resourceObj => resourceObj.type === 'testSession').map((testSessionResObj) => {
+    const testerSessions = job.included.filter((resourceObj) => resourceObj.type === 'testSession').map((testSessionResObj) => {
       let alertThreshold;
       if (testSessionResObj.attributes) {
         alertThreshold = testSessionResObj.attributes.alertThreshold ? testSessionResObj.attributes.alertThreshold : 0;

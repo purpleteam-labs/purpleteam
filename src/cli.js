@@ -17,9 +17,9 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
     .epilogue('For more information, find the manual at https://docs.purpleteam-labs.com')
     .style({
       // usagePrefix: str => chalk.hex('#9961ed').bold(str),
-      flags: str => chalk.bold(str),
-      group: str => chalk.hex('#9961ed').bold(str),
-      messages: str => chalk.keyword('orange').bold(str)
+      flags: (str) => chalk.bold(str),
+      group: (str) => chalk.hex('#9961ed').bold(str),
+      messages: (str) => chalk.keyword('orange').bold(str)
     });
 
   // Introduced this function due to https://github.com/sywac/sywac/issues/25

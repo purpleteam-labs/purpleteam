@@ -5,7 +5,7 @@ const contrib = require('blessed-contrib');
 const { name: projectName } = require('package.json');
 const { testerViewTypes, testerPctCompleteType, statTableType, newBugsType, totalProgressType } = require('src/view/types');
 
-const testerNames = testerViewTypes.map(tv => tv.testOpts.args.name);
+const testerNames = testerViewTypes.map((tv) => tv.testOpts.args.name);
 
 const internals = {
   infoOuts: {
@@ -73,7 +73,7 @@ const colourOfDonut = (pct) => {
 
 const setDataOnTesterPctCompleteWidget = () => {
   const { infoOuts } = internals;
-  const testerPctCompleteInstance = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)].testerPctComplete.instance;
+  const testerPctCompleteInstance = infoOuts[testerNames.find((tN) => infoOuts[tN].focussedPage)].testerPctComplete.instance;
   testerPctCompleteInstance.update(testerNames.map((tN) => {
     const record = infoOuts[tN].testerPctComplete;
     return { percent: record.percent, label: tN, color: record.color };
@@ -83,13 +83,13 @@ const setDataOnTesterPctCompleteWidget = () => {
 
 const setDataOnStatTableWidget = () => {
   const { infoOuts } = internals;
-  const statTableInstance = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)].statTable.instance;
+  const statTableInstance = infoOuts[testerNames.find((tN) => infoOuts[tN].focussedPage)].statTable.instance;
   statTableInstance.setData({
     headers: statTableType.headers,
     data: (() => {
       const statTableDataRows = [];
       testerNames.forEach((tn) => {
-        statTableDataRows.push(...infoOuts[tn].statTable.records.map(row => [tn, row.sessionId, row.threshold, row.bugs, row.pctComplete]));
+        statTableDataRows.push(...infoOuts[tn].statTable.records.map((row) => [tn, row.sessionId, row.threshold, row.bugs, row.pctComplete]));
       });
       return statTableDataRows;
     })()
@@ -100,7 +100,7 @@ const setDataOnStatTableWidget = () => {
 
 const setDataOnNewBugsWidget = () => {
   const { infoOuts } = internals;
-  const newBugs = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)].newBugs; // eslint-disable-line prefer-destructuring
+  const newBugs = infoOuts[testerNames.find((tN) => infoOuts[tN].focussedPage)].newBugs; // eslint-disable-line prefer-destructuring
   newBugs.instance.setDisplay(newBugs.value);
   newBugs.instance.setOptions({ color: newBugs.color });
 };
@@ -108,7 +108,7 @@ const setDataOnNewBugsWidget = () => {
 
 const setDataOnTotalProgressWidget = () => {
   const { infoOuts } = internals;
-  const { totalProgress } = infoOuts[testerNames.find(tN => infoOuts[tN].focussedPage)];
+  const { totalProgress } = infoOuts[testerNames.find((tN) => infoOuts[tN].focussedPage)];
   let roundedPercent = Math.round(totalProgress.percent);
   // Bug in the blessed contrib component that does't render the guage propertly if percent is 1 or less.
   if (roundedPercent <= 1) roundedPercent = 0;
@@ -127,7 +127,7 @@ const setDataOnAllPageWidgets = () => {
 
 
 const handleTesterProgress = (testerType, sessionId, message) => {
-  const logger = internals.infoOuts[testerType].loggers.find(l => l.sessionId === sessionId);
+  const logger = internals.infoOuts[testerType].loggers.find((l) => l.sessionId === sessionId);
   if (logger.instance !== 'To be assigned') {
     try {
       const lines = message.split('\n');
@@ -142,7 +142,7 @@ const handleTesterProgress = (testerType, sessionId, message) => {
 const handleTesterPctComplete = (testerType, sessionId, message) => {
   const { infoOuts } = internals;
   // statTable
-  infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId).pctComplete = Math.round(message);
+  infoOuts[testerType].statTable.records.find((r) => r.sessionId === sessionId).pctComplete = Math.round(message);
   // testerPctComplete
   infoOuts[testerType].testerPctComplete.percent = infoOuts[testerType]
     .statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / infoOuts[testerType].statTable.records.length;
@@ -150,7 +150,7 @@ const handleTesterPctComplete = (testerType, sessionId, message) => {
   // totalProgress
   const pctsComplete = [];
   testerNames.forEach((tN) => {
-    pctsComplete.push(...infoOuts[tN].statTable.records.map(r => r.pctComplete));
+    pctsComplete.push(...infoOuts[tN].statTable.records.map((r) => r.pctComplete));
   });
   const totalProgress = pctsComplete.reduce((accum, curr) => accum + curr) / pctsComplete.length;
   testerNames.forEach((tN) => {
@@ -163,7 +163,7 @@ const handleTesterPctComplete = (testerType, sessionId, message) => {
 const handleTesterBugCount = (testerType, sessionId, message) => {
   const { infoOuts } = internals;
   // statTable
-  const statTableRecord = infoOuts[testerType].statTable.records.find(r => r.sessionId === sessionId);
+  const statTableRecord = infoOuts[testerType].statTable.records.find((r) => r.sessionId === sessionId);
   statTableRecord.bugs = message;
   // Collect
   const statTableRecords = (() => {
@@ -298,7 +298,7 @@ const calculateGridCoordsForLoggers = (sessionIds) => {
 
 
 const initCarousel = () => {
-  const carouselPages = testerViewTypes.map(testerViewType => (scrn) => {
+  const carouselPages = testerViewTypes.map((testerViewType) => (scrn) => {
     const grid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
     const testerType = testerViewType.testOpts.args.name;
 
@@ -364,7 +364,7 @@ const initCarousel = () => {
     // There is another bug with blessed, where there is no parent of the below instances, this exhibits itself in blessed/lib/widgets/element at https://github.com/chjj/blessed/blob/eab243fc7ad27f1d2932db6134f7382825ee3488/lib/widgets/element.js#L1060
     //   https://github.com/chjj/blessed/issues/350
     scrn.on('resize', function resizeHandler() {
-      loggers.forEach(logger => logger.instance.emit('attach'));
+      loggers.forEach((logger) => logger.instance.emit('attach'));
       testerPctComplete.instance.parent = this;
       testerPctComplete.instance.emit('attach');
       statTable.instance.emit('attach');
@@ -383,14 +383,14 @@ const initCarousel = () => {
 
 const setDataOnLogWidget = (testPlans) => {
   const { infoOuts } = internals;
-  const testerName = testerNames.find(tN => infoOuts[tN].focussedPage);
+  const testerName = testerNames.find((tN) => infoOuts[tN].focussedPage);
   const logger = infoOuts[testerName].loggers;
-  logger.instance.log(testPlans.find(plan => plan.name === testerName).message);
+  logger.instance.log(testPlans.find((plan) => plan.name === testerName).message);
 };
 
 
 const initTPCarousel = (testPlans) => {
-  const carouselPages = testerViewTypes.map(testerViewType => (scrn) => {
+  const carouselPages = testerViewTypes.map((testerViewType) => (scrn) => {
     const grid = new contrib.grid({ rows: 12, cols: 12, screen: scrn }); // eslint-disable-line new-cap
     const testerType = testerViewType.testPlanOpts.args.name;
 
@@ -420,11 +420,11 @@ const initTPCarousel = (testPlans) => {
 const setupInfoOutsForTest = (testerSessions) => {
   testerNames.forEach((tN) => {
     const { infoOuts } = internals;
-    const sessionsPerTester = testerSessions.filter(t => t.testerType === tN);
-    const loggerGridCoordsPerTester = calculateGridCoordsForLoggers(sessionsPerTester.map(row => row.sessionId));
-    infoOuts[tN].loggers = sessionsPerTester.map(t => ({ sessionId: t.sessionId, instance: 'To be assigned', gridCoords: loggerGridCoordsPerTester[t.sessionId] }));
-    infoOuts[tN].statTable.records = sessionsPerTester.map(t => ({ sessionId: t.sessionId, threshold: t.threshold, bugs: 0, pctComplete: 0 }));
-    const testerPctCompleteTypeData = testerPctCompleteType.args.data.find(record => record.label === tN);
+    const sessionsPerTester = testerSessions.filter((t) => t.testerType === tN);
+    const loggerGridCoordsPerTester = calculateGridCoordsForLoggers(sessionsPerTester.map((row) => row.sessionId));
+    infoOuts[tN].loggers = sessionsPerTester.map((t) => ({ sessionId: t.sessionId, instance: 'To be assigned', gridCoords: loggerGridCoordsPerTester[t.sessionId] }));
+    infoOuts[tN].statTable.records = sessionsPerTester.map((t) => ({ sessionId: t.sessionId, threshold: t.threshold, bugs: 0, pctComplete: 0 }));
+    const testerPctCompleteTypeData = testerPctCompleteType.args.data.find((record) => record.label === tN);
     infoOuts[tN].testerPctComplete = { instance: 'To be assigned', percent: testerPctCompleteTypeData.percent, color: testerPctCompleteTypeData.color };
     const newBugsTypeData = newBugsType.args;
     infoOuts[tN].newBugs = { instance: 'To be assigned', value: newBugsTypeData.display, color: newBugsTypeData.color, elementPadding: newBugsTypeData.elementPadding };

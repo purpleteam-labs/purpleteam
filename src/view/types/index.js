@@ -20,7 +20,7 @@ const testerPctCompleteType = {
     arcWidth: 3,
     remainColor: 'black',
     yPadding: 4,
-    data: testerViewTypes.map(tv => ({ label: tv.testOpts.args.name, percent: 0, color: 'red' })),
+    data: testerViewTypes.map((tv) => ({ label: tv.testOpts.args.name, percent: 0, color: 'red' })),
     style: { fg: 'default', bg: 'default', border: { fg: 'magenta', bg: 'default' } },
     border: { type: 'line', fg: '#00ff00' }
   }
@@ -47,7 +47,7 @@ const statTableType = {
     style: { fg: 'blue', bg: 'default', border: { fg: 'magenta', bg: 'default' } }
   },
   headers: ['Testers', 'SessionId', 'Threshold', 'Bugs', 'Complete (%)'],
-  seedData: testerViewTypes.map(tv => [tv.testOpts.args.name, '-', 0, 0, 0])
+  seedData: testerViewTypes.map((tv) => [tv.testOpts.args.name, '-', 0, 0, 0])
 };
 
 const newBugsType = {
