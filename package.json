@@ -63,7 +63,7 @@
   "dependencies": {
     "app-module-path": "^2.2.0",
     "blessed": "^0.1.81",
-    "blessed-contrib": "^4.8.12",
+    "blessed-contrib": "^4.8.20",
     "chalk": "^4.1.0",
     "convict": "^6.0.0",
     "convict-format-with-validator": "^6.0.0",
