@@ -8,6 +8,7 @@
     "deps": "npm-check",
     "update:deps": "npm-check -u",
     "test": "lab --assert @hapi/code --coverage",
+    "test:nolint": "lab --assert @hapi/code --coverage",
     "test:debug": "node --inspect-brk ./node_modules/.bin/lab --assert @hapi/code --timeout 0",
     "pretest": "npm run lint",
     "debug": "node --inspect-brk ./bin/purpleteam",
@@ -61,6 +62,7 @@
     "url": "https://gitlab.com/purpleteam-labs/purpleteam/issues"
   },
   "dependencies": {
+    "@hapi/bourne": "^2.0.0",
     "app-module-path": "^2.2.0",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.20",
@@ -69,19 +71,18 @@
     "convict-format-with-validator": "^6.0.0",
     "eventsource": "^1.0.7",
     "figlet": "^1.5.0",
+    "got": "^11.8.0",
     "purpleteam-logger": "^1.0.2",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.4",
-    "request-promise-native": "^1.0.7",
     "sywac": "^1.3.0"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.2",
     "@hapi/lab": "^24.1.0",
-    "eslint": "^7.13.0",
+    "eslint": "^7.14.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "mocksse": "^1.0.2",
+    "nock": "^13.0.5",
     "npm-check": "^5.9.2",
     "pre-commit": "^1.2.2",
     "rewire": "^5.0.0",

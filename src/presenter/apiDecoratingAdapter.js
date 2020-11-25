@@ -5,23 +5,18 @@ const { promisify } = require('util');
 const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 
-const request = require('request-promise-native');
+const got = require('got');
 const EventSource = require('eventsource');
+const Bourne = require('@hapi/bourne');
 const Model = require('src/models/model');
 const dashboard = require('src/view/dashboard');
 const { TesterUnavailable, TesterProgressRoutePrefix, NowAsFileName } = require('src/strings');
-
+const pkg = require('package.json');
 const ptLogger = require('purpleteam-logger');
 
 const log = ptLogger.init(config.get('loggers.def'));
-let apiResponse;
-
 const apiUrl = config.get('purpleteamApi.url');
-let accessToken;
-let authUrl;
-let apiStage;
-let customerId;
-let apiKey;
+const env = config.get('env');
 
 const getBuildUserConfigFile = async (filePath) => {
   try {
@@ -33,191 +28,171 @@ const getBuildUserConfigFile = async (filePath) => {
   }
 };
 
-const refreshAccessToken = async () => {
-  const appClientId = config.get('purpleteamAuth.appClientId');
-  const appClientSecret = config.get('purpleteamAuth.appClientSecret');
-  const base64AppClientIdAndSecret = Buffer.from(`${appClientId}:${appClientSecret}`).toString('base64');
-  authUrl = config.get('purpleteamAuth.url');
+const gotCloudAuth = got.extend({
+  prefixUrl: config.get('purpleteamAuth.url'),
+  body: 'grant_type=client_credentials',
+  responseType: 'json',
+  resolveBodyOnly: true,
+  headers: {
+    'user-agent': `${pkg.name}/${pkg.version} ${pkg.description} ${pkg.homepage}`,
+    'Content-type': 'application/x-www-form-urlencoded',
+    Authorization: `Basic ${(() => Buffer.from(`${config.get('purpleteamAuth.appClientId')}:${config.get('purpleteamAuth.appClientSecret')}`).toString('base64'))()}`
+  }
+});
 
-  await request({
-    uri: authUrl,
-    method: 'POST',
-    body: 'grant_type=client_credentials',
-    headers: { 'Content-type': 'application/x-www-form-urlencoded', Authorization: `Basic ${base64AppClientIdAndSecret}` },
-    json: true
-  }).then((answer) => {
-    accessToken = answer.access_token;
-  }).catch((err) => {
-    log.crit(`Error occurred attempting to obtain access token, error was: ${err}`, { tags: ['apiDecoratingAdapter'] });
+const getAccessToken = async () => {
+  let accessToken;
+  await gotCloudAuth.post().then((response) => {
+    accessToken = response.access_token;
+  }).catch((error) => {
+    const knownErrors = [
+      { ENOTFOUND: 'The authorisation service appears to be down, or an incorrect URL has been specified in the CLI config.' }, // error.code
+      { 'Response code 400 (Bad Request)': 'The authorisation service responded with 400 (Bad Request). This could be because your authentication details are incorrect.' } // error.message
+    ];
+    const knownError = knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.code))
+      ?? knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.message))
+      ?? { default: `An unknown error occurred while attempting to get the access token. Error follows: ${error}` };
+    log.crit(Object.values(knownError)[0], { tags: ['apiDecoratingAdapter'] });
+  });
+  return accessToken;
+};
+
+/* eslint-disable no-param-reassign */
+const gotPt = got.extend({
+  prefixUrl: { local: `${apiUrl}/`, cloud: `${apiUrl}/${config.get('purpleteamApi.stage')}/${config.get('purpleteamApi.customerId')}/` }[env],
+  headers: {
+    local: { 'user-agent': `${pkg.name}/${pkg.version} ${pkg.description} ${pkg.homepage}` },
+    cloud: { 'user-agent': `${pkg.name}/${pkg.version} ${pkg.description} ${pkg.homepage}`, 'x-api-key': config.get('purpleteamApi.apiKey') /* , Authorization: `Bearer ${await getAccessToken()}` */ }
+  }[env],
+  hooks: {
+    beforeRequest: {
+      local: [],
+      cloud: [
+        async (options) => {
+          if (!Object.prototype.hasOwnProperty.call(options.headers, 'authorization')) {
+            options.headers.authorization = `Bearer ${await getAccessToken()}`;
+            // Save for further requests.
+            gotPt.defaults.options = got.mergeOptions(gotPt.defaults.options, options);
+          }
+        }
+      ]
+    }[env],
+    afterResponse: {
+      local: [],
+      cloud: [
+        // We use this function for custom retry logic.
+        async (response, retryWithMergedOptions) => {
+          if (response.statusCode === 401 || response.statusCode === 403) { // Unauthorised or Forbidden
+            const updatedOptions = { headers: { authorization: `Bearer ${await getAccessToken()}` } };
+            // Save for further requests.
+            gotPt.defaults.options = got.mergeOptions(gotPt.defaults.options, updatedOptions);
+            // Make a new retry
+            return retryWithMergedOptions(gotPt.defaults.options);
+          }
+          return response;
+        }
+      ]
+    }[env],
+    beforeError: {
+      local: [
+        (error) => {
+          const knownErrors = [
+            { EHOSTUNREACH: 'orchestrator is down, or an incorrect URL has been specified in the CLI config.' } // error.code
+            // Others?
+          ];
+          const knownError = knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.code));
+          if (knownError) {
+            error.processed = true;
+            const [message] = Object.values(knownError);
+            error.message = message;
+          }
+          return error;
+        }
+      ],
+      cloud: [
+        (error) => {
+          const knownErrors = [
+            { 'Response code 500 (Internal Server Error)': 'purpleteam Cloud API responded with "orchestrator is down".' }, // error.message
+            { ENOTFOUND: 'purpleteam Cloud API is down, or an incorrect URL has been specified in the CLI config.' }, // error.code
+            { 'Response code 401 (Unauthorized)': 'You are not authorised to access the purpleteam Cloud API.' }, // error.message
+            { 'Response code 504 (Gateway Timeout)': 'purpleteam Cloud API responded with "gateway timeout".' } // error.message
+          ];
+          const knownError = knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.code))
+            ?? knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.message));
+          if (knownError) {
+            error.processed = true;
+            const [message] = Object.values(knownError);
+            error.message = message;
+          }
+          return error;
+        }
+      ]
+    }[env]
+  },
+  mutableDefaults: true
+});
+/* eslint-enable no-param-reassign */
+
+const requestStatus = async () => {
+  await gotPt.get('status').then((response) => {
+    dashboard.status(log, response.body);
+  }).catch((error) => {
+    dashboard.status(log, error.processed ? error.message : `An unknown error occurred while attempting to get the status. Error follows: ${error}`);
   });
 };
 
-
-const getOutcomesFromCloudApi = async () => {
+const requestOutcomes = async () => {
   const outcomesFilePath = `${config.get('outcomes.filePath')}`.replace('time', NowAsFileName());
   let result;
-  await request({
-    uri: `${apiUrl}/${apiStage}/${customerId}/outcomes`,
-    method: 'GET',
-    encoding: null,
-    headers: { 'x-api-key': apiKey, Authorization: `Bearer ${accessToken}` }
-  }).then(async (res) => {
-    await writeFileAsync(outcomesFilePath, res)
+  await gotPt.get('outcomes', { responseType: 'buffer', resolveBodyOnly: true }).then(async (response) => {
+    await writeFileAsync(outcomesFilePath, response)
       .then(() => { result = `Outcomes have been downloaded to: ${outcomesFilePath}.`; })
       .catch((error) => { result = `Error occurred while writing the outcomes file: ${outcomesFilePath}, error was: ${error}.`; });
-  }).catch(async (err) => {
-    // Todo: The following will need to be tested once stage 2 containers are done in AWS.
-
-    result = err.error.message === 'The incoming token has expired' ? async () => {
-      await refreshAccessToken();
-      result = await getOutcomesFromCloudApi();
-    } : `Error occurred while downloading the outcomes file, error was: ${err}.`;
+  }).catch((error) => {
+    // Errors not tested.
+    result = `Error occurred while downloading the outcomes file, error was: ${error.processed ? error.message : error}.`;
   });
   return result;
 };
 
-const getOutcomesFromLocalApi = async () => {
-  const outcomesFilePath = `${config.get('outcomes.filePath')}`.replace('time', NowAsFileName());
+const requestTestOrTestPlan = async (configFileContents, route) => {
   let result;
-  await request({
-    uri: `${apiUrl}/outcomes`,
-    method: 'GET',
-    encoding: null
-  }).then(async (res) => {
-    await writeFileAsync(outcomesFilePath, res)
-      .then(() => { result = `Outcomes have been downloaded to: ${outcomesFilePath}.`; })
-      .catch((error) => { result = `Error occurred while writing the outcomes file: ${outcomesFilePath}, error was: ${error}.`; });
-  }).catch((err) => {
-    result = `Error occurred while downloading the outcomes file, error was: ${err}.`;
+  await gotPt.post(`${route}`, { headers: { 'Content-Type': 'application/vnd.api+json' }, json: configFileContents, responseType: 'json', resolveBodyOnly: true }).then((response) => {
+    result = response;
+  }).catch((error) => {
+    if (error.processed) {
+      log.crit(error.message, { tags: ['apiDecoratingAdapter'] });
+    } else {
+      // Find out what these errors look like and set-up correctly...
+      const knownErrors = [
+        { ValidationError: `${error.message}` }, // error.name . Not sure if we still get this one.
+        // Client-side will catch invalid JSON, server-side will also catch invalid Job against purpleteam schema.
+        // At time of writing, the errors array contains a single element with all errors, if that changes to multiple elements, the below logic will still work.
+        { 400: `Invalid syntax in "Job" sent to the purpleteam API. Details follow:\n${error.response?.body?.message}` } // error.response.statusCode
+        // { 400: `Invalid syntax in "Job" sent to the purpleteam API. Details follow:\n${error.response?.body?.errors?.reduce((acum, cV) => `${acum}\n${cV.detail}`, '')}` }
+        // Others?
+      ];
+      const knownError = knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.code))
+        ?? knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.message))
+        ?? knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.name))
+        ?? knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.response?.statusCode))
+        ?? { default: `Unknown error. Error follows: ${error}` };
+      log.crit(`Error occurred while attempting to communicate with the purpleteam API. Error was: ${Object.values(knownError)[0]}`, { tags: ['apiDecoratingAdapter'] });
+    }
   });
   return result;
 };
-
-const getOutcomesFromApi = async () => {
-  await {
-    cloud: getOutcomesFromCloudApi,
-    local: getOutcomesFromLocalApi
-  }[process.env.NODE_ENV]();
-};
-
-
-const getStatusFromCloudApi = async () => {
-  apiStage = config.get('purpleteamApi.stage');
-  customerId = config.get('purpleteamApi.customerId');
-  apiKey = config.get('purpleteamApi.apiKey');
-
-  await refreshAccessToken();
-
-  await request({
-    uri: `${apiUrl}/${apiStage}/${customerId}/status`,
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, Authorization: `Bearer ${accessToken}` }
-  }).then(async (answer) => {
-    apiResponse = answer;
-  }).catch(async (err) => {
-    (err.statusCode === 500) && (apiResponse = 'purpleteam Cloud API responded with "orchestrator is down."');
-    (err.message.includes('getaddrinfo ENOTFOUND')) && (apiResponse = 'purpleteam Cloud API is down.');
-  });
-};
-// Todo: The following will need to be tested once stage 2 containers are done in AWS.
-const getStatusFromLocalApi = async () => {
-  await request({
-    uri: `${apiUrl}/status`,
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  }).then(async (answer) => {
-    apiResponse = answer;
-  }).catch((err) => {
-    // Todo: Work out what we need here.
-    apiResponse = `Failed: ${err}`;
-  });
-};
-
-
-const postToCloudApi = async (configFileContents, route) => {
-  apiStage = config.get('purpleteamApi.stage');
-  customerId = config.get('purpleteamApi.customerId');
-  apiKey = config.get('purpleteamApi.apiKey');
-
-  await refreshAccessToken();
-
-  await request({
-    uri: `${apiUrl}/${apiStage}/${customerId}/${route}`,
-    method: 'POST',
-    json: true,
-    body: configFileContents,
-    headers: { 'Content-Type': 'application/vnd.api+json', Accept: 'text/plain', charset: 'utf-8', 'x-api-key': apiKey, Authorization: `Bearer ${accessToken}` }
-  }).then((answer) => {
-    apiResponse = answer;
-  }).catch((err) => {
-    const handle = {
-      errorMessageFrame: (innerMessage) => `Error occurred while attempting to communicate with the purpleteam Cloud API. Error was: ${innerMessage}`,
-      backendTookToLong: '"The purpleteam backend took to long to respond".',
-      backendUnreachable: '"The purpleteam API service is currently unreachable. Check the URL you are using".',
-      validationError: `Validation of the supplied build user config failed. Errors: ${err.error.message}.`,
-      syntaxError: `SyntaxError: ${err.error.message}.`,
-      500: err.message,
-      unknown: 'Unknown',
-      testPlanFetchFailure: () => {
-        if (err.message.includes('socket hang up')) return 'backendTookToLong'; // Not sure if this error is relevant?
-        if (err.message.includes('getaddrinfo ENOTFOUND')) return 'backendUnreachable';
-        if (err.error.name === 'ValidationError') return 'validationError';
-        if (err.error.name === 'SyntaxError') return 'syntaxError';
-        if (err.statusCode === 500) return '500';
-        return 'unknown';
-      }
-    };
-    log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['apiDecoratingAdapter'] });
-  });
-};
-
-const postToLocalApi = async (configFileContents, route) => {
-  await request({
-    // For debugging your request, add the below and start your http intercepting proxy (burp, zap, etc) bound to the same:
-    // proxy: 'http://127.0.0.1:8080',
-    uri: `${apiUrl}/${route}`,
-    method: 'POST',
-    json: true,
-    body: configFileContents,
-    headers: { 'Content-Type': 'application/vnd.api+json', Accept: 'text/plain', charset: 'utf-8' }
-  }).then((answer) => {
-    apiResponse = answer;
-  }).catch((err) => {
-    const handle = {
-      errorMessageFrame: (innerMessage) => `Error occurred while attempting to communicate with the purpleteam orchestrator. Error was: ${innerMessage}`,
-      backendTookToLong: '"The purpleteam backend took to long to respond".',
-      backendUnreachable: '"The purpleteam backend is currently unreachable".',
-      validationError: `Validation of the supplied build user config failed. Errors: ${err.error.message}.`,
-      syntaxError: `SyntaxError: ${err.error.message}.`,
-      unknown: '"Unknown"',
-      testPlanFetchFailure: () => {
-        if (err.message.includes('socket hang up')) return 'backendTookToLong';
-        if (err.message.includes('connect EHOSTUNREACH')) return 'backendUnreachable'; // Is 'connect EHOSTUNREACH' still correct?
-        if (err.error.name === 'ValidationError') return 'validationError';
-        if (err.error.name === 'SyntaxError') return 'syntaxError';
-        return 'unknown';
-      }
-    };
-    log.crit(handle.errorMessageFrame(handle[handle.testPlanFetchFailure()]), { tags: ['apiDecoratingAdapter'] });
-  });
-};
-
-const postToApi = async (configFileContents, route) => {
-  await {
-    cloud: postToCloudApi,
-    local: postToLocalApi
-  }[process.env.NODE_ENV](configFileContents, route);
-};
-
+const requestTest = async (configFileContents) => requestTestOrTestPlan(configFileContents, 'test');
+const requestTestPlan = async (configFileContents) => requestTestOrTestPlan(configFileContents, 'testplan');
 
 const handleServerSentTesterEvents = async (event, model, testerNameAndSession) => {
   if (event.origin === apiUrl) {
     const eventDataPropPascalCase = event.type.replace('tester', '');
     const eventDataProp = `${eventDataPropPascalCase.charAt(0).toLowerCase()}${eventDataPropPascalCase.substring(1)}`;
-    let message = JSON.parse(event.data)[eventDataProp];
+    let message = Bourne.parse(event.data)[eventDataProp];
     if (message != null) {
       if (event.type === 'testerProgress' && message.startsWith('All test sessions of all testers are finished')) {
-        message = message.concat(`\n${await getOutcomesFromApi()}`);
+        message = message.concat(`\n${await requestOutcomes()}`);
       }
       model.propagateTesterMessage({
         testerType: testerNameAndSession.testerType,
@@ -237,8 +212,7 @@ const handleServerSentTesterEvents = async (event, model, testerNameAndSession) 
   }
 };
 
-
-const subscribeToTesterProgress = (model) => {
+const subscribeToTesterProgress = (model, testerStatuses) => {
   const { testerNamesAndSessions } = model;
   testerNamesAndSessions.forEach((testerNameAndSession) => {
     // Todo: KC: Add test for the following logging.
@@ -246,7 +220,7 @@ const subscribeToTesterProgress = (model) => {
     const { transports, dirname } = config.get('loggers.testerProgress');
     ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}` });
 
-    const testerRepresentative = apiResponse.find((element) => element.name === testerNameAndSession.testerType);
+    const testerRepresentative = testerStatuses.find((element) => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
       model.propagateTesterMessage({
         testerType: testerNameAndSession.testerType,
@@ -277,38 +251,43 @@ const subscribeToTesterProgress = (model) => {
   });
 };
 
-
-const getTestPlans = async (configFileContents) => {
-  const route = 'testplan';
-  await postToApi(configFileContents, route);
-  apiResponse && dashboard.testPlan(apiResponse);
-};
-
-
-const handleModelTesterEvents = (eventName, testerType, sessionId, message) => {
-  dashboard[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`](testerType, sessionId, message);
-  if (eventName === 'testerProgress') ptLogger.get(`${testerType}-${sessionId}`).notice(message); // Todo: this line is not tested.
-};
-
-
-const test = async (configFileContents) => {
+const getInitialisedModel = (configFileContents) => {
   let model;
   try {
     model = new Model(configFileContents);
   } catch (error) {
-    if (error.name === 'SyntaxError') throw new Error(`Syntax error in the build user config: ${error.message}`);
+    if (error.name === 'SyntaxError') {
+      log.crit(`Invalid syntax in "Job": ${error.message}`, { tags: ['apiDecoratingAdapter'] });
+      return undefined;
+    }
     throw error;
   }
-  const route = 'test';
-  await postToApi(configFileContents, route);
+  return model;
+};
 
-  if (apiResponse) {
+const testPlans = async (configFileContents) => {
+  if (!getInitialisedModel(configFileContents)) return;
+  const resultingTestPlans = await requestTestPlan(configFileContents);
+  resultingTestPlans && dashboard.testPlan(resultingTestPlans);
+};
+
+const handleModelTesterEvents = (eventName, testerType, sessionId, message) => {
+  dashboard[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`](testerType, sessionId, message);
+  if (eventName === 'testerProgress') ptLogger.get(`${testerType}-${sessionId}`).notice(message);
+};
+
+const test = async (configFileContents) => {
+  const model = getInitialisedModel(configFileContents);
+  if (!model) return;
+  const testerStatuses = await requestTest(configFileContents);
+
+  if (testerStatuses) {
     dashboard.test(model.testerSessions());
     model.eventNames.forEach((eN) => {
       model.on(eN, (testerType, sessionId, message) => { handleModelTesterEvents(eN, testerType, sessionId, message); });
     });
 
-    subscribeToTesterProgress(model);
+    subscribeToTesterProgress(model, testerStatuses);
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
     //    https://www.html5rocks.com/en/tutorials/eventsource/basics/#toc-canceling
@@ -316,20 +295,11 @@ const test = async (configFileContents) => {
   }
 };
 
-
-const getStatus = async () => {
-  await {
-    cloud: getStatusFromCloudApi,
-    local: getStatusFromLocalApi
-  }[process.env.NODE_ENV]();
-
-  apiResponse && dashboard.status(log, apiResponse);
-};
-
+const status = async () => { await requestStatus(); };
 
 module.exports = {
   getBuildUserConfigFile,
-  getTestPlans,
+  testPlans,
   test,
-  getStatus
+  status
 };

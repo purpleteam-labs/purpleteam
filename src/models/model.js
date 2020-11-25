@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+const Bourne = require('@hapi/bourne');
 
 let job;
 const events = { testerProgress: [], testerPctComplete: [], testerBugCount: [] };
@@ -7,7 +8,7 @@ const events = { testerProgress: [], testerPctComplete: [], testerBugCount: [] }
 class Model extends EventEmitter {
   constructor(options) {
     super();
-    job = JSON.parse(options);
+    job = Bourne.parse(options);
     this.eventNames.forEach((e) => this.initTesterMessages(e));
   }
 

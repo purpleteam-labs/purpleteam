@@ -21,6 +21,7 @@ module.exports = {
     'no-multiple-empty-lines': ['error', { max: 2, maxBOF: 0, maxEOF: 1 }]
   },
   env: { node: true },
+  parserOptions: { ecmaVersion: 2021 },
   // This is to support requires from the app root dir with the likes of app-module-path.
   // https://github.com/airbnb/javascript/issues/859
   // https://github.com/benmosher/eslint-plugin-import/tree/master/resolvers/node

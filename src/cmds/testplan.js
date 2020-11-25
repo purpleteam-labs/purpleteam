@@ -21,7 +21,7 @@ exports.setup = (sywac) => {
 exports.run = async (parsedArgv, context) => {
   if (parsedArgv.c) {
     const configFileContents = await api.getBuildUserConfigFile(parsedArgv.c);
-    await api.getTestPlans(configFileContents);
+    await api.testPlans(configFileContents);
   } else {
     context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }
