@@ -178,7 +178,6 @@ const requestTestOrTestPlan = async (configFileContents, route) => {
         ?? knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.response?.statusCode))
         ?? { default: `Unknown error. Error follows: ${error}` };
       log.crit(`Error occurred while attempting to communicate with the purpleteam API. Error was: ${Object.values(knownError)[0]}`, { tags: ['apiDecoratingAdapter'] });
-      console.log(Object.values(knownError)[0]); // eslint-disable-line
     }
   });
   return result;
