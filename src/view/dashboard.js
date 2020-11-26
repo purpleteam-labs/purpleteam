@@ -145,7 +145,7 @@ const handleTesterPctComplete = (testerType, sessionId, message) => {
   infoOuts[testerType].statTable.records.find((r) => r.sessionId === sessionId).pctComplete = Math.round(message);
   // testerPctComplete
   infoOuts[testerType].testerPctComplete.percent = infoOuts[testerType]
-    .statTable.records.reduce((accum, curr) => accum.pctComplete + curr.pctComplete) / infoOuts[testerType].statTable.records.length;
+    .statTable.records.reduce((accum, curr) => accum + curr.pctComplete, 0) / infoOuts[testerType].statTable.records.length;
   infoOuts[testerType].testerPctComplete.color = colourOfDonut(infoOuts[testerType].testerPctComplete.percent);
   // totalProgress
   const pctsComplete = [];
