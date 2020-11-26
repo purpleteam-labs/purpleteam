@@ -25,6 +25,7 @@ describe('apiDecoratingAdapter', () => {
     flags.context.buildUserJobFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
   });
   describe('testPlans', () => {
+    // fail in gitlab ...................................................................................................................................
     it('- should provide the dashboard with the test plan to display', async (flags) => {
       const { context: { buildUserJobFileContent } } = flags;
       config.set('env', 'local'); // For got hooks only.
@@ -123,7 +124,7 @@ describe('apiDecoratingAdapter', () => {
     //   // Todo: KC: Need to reproduce error state.
     // });
 
-
+    // fail in gitlab ...................................................................................................................................
     it('- on - connect EHOSTUNREACH - should print message - orchestrator is down...', async (flags) => {
       const { context: { buildUserJobFileContent, rewiredApi, critStub } } = flags;
       const jobFileContents = await buildUserJobFileContent;
@@ -189,8 +190,8 @@ describe('apiDecoratingAdapter', () => {
       expect(critStub.getCall(1)).to.equal(null);
     });
 
-
-    it('- on - unknown error - should print unknown error', async (flags) => {
+    // fail in gitlab ...................................................................................................................................
+    it.only('- on - unknown error - should print unknown error', async (flags) => {
       const { context: { buildUserJobFileContent, rewiredApi, critStub } } = flags;
       const jobFileContents = await buildUserJobFileContent;
 
@@ -235,7 +236,7 @@ describe('apiDecoratingAdapter', () => {
       context.jobFileContents = await context.buildUserJobFileContent;
     });
 
-
+    // fail in gitlab ...................................................................................................................................
     it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model - then verify event flow back through presenter and then to view', async (flags) => {
       const { context: { jobFileContents, rewiredApi } } = flags;
       const apiResponse = [
@@ -306,7 +307,7 @@ describe('apiDecoratingAdapter', () => {
       expect(handleTesterProgressStub.getCall(3).args).to.equal(['tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
     });
 
-
+    // fail in gitlab ...................................................................................................................................
     it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model, even if app tester is offline - then verify event flow back through presenter and then to view', async (flags) => {
       const { context: { jobFileContents, rewiredApi } } = flags;
       const apiResponse = [
