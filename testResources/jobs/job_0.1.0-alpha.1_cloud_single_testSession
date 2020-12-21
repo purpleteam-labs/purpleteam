@@ -13,7 +13,7 @@
       "sutIp": "nodegoat.sut.purpleteam-labs.com",
       "sutPort": 443,
       "sutProtocol": "https",
-      "browser": "chrome",
+      "browser": "firefox",
       "loggedInIndicator": "<p>Found. Redirecting to <a href=\"\/dashboard\">\/dashboard<\/a><\/p>",
       "reportFormats": ["html", "json", "md"]
     },

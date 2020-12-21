@@ -9,9 +9,9 @@
     "update:deps": "npm-check -u",
     "test": "lab --assert @hapi/code --coverage",
     "test:nolint": "lab --assert @hapi/code --coverage",
-    "test:debug": "node --inspect-brk ./node_modules/.bin/lab --assert @hapi/code --timeout 0",
+    "test:debug": "node --inspect-brk=localhost:9230 ./node_modules/.bin/lab --assert @hapi/code --timeout 0",
     "pretest": "npm run lint",
-    "debug": "node --inspect-brk ./bin/purpleteam",
+    "debug": "node --inspect-brk=localhost:9230 ./bin/purpleteam",
     "start": "node ./bin/purpleteam"
   },
   "repository": {

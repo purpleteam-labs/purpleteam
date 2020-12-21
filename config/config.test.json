@@ -9,7 +9,7 @@
     "host": "127.0.0.1"
   },
   "buildUserConfig": {
-    "fileUri": "./testResources/jobs/job_0.1.0-alpha.1"
+    "fileUri": "./testResources/jobs/job_0.1.0-alpha.1_local"
   },
   "modulePaths": {
     "blessed": "testResources/blessedFake"

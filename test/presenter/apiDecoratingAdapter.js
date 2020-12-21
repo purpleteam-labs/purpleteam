@@ -16,7 +16,7 @@ const apiUrl = config.get('purpleteamApi.url');
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
 const dashboard = require('src/view/dashboard');
 const { MockEvent, EventSource } = require('mocksse');
-const { TesterProgressRoutePrefix } = require('src/strings');
+const { TesterFeedbackRoutePrefix } = require('src/strings');
 const Model = require('src/models/model');
 
 // As stored in the `request` object body from file: /testResources/jobs/job_0.1.0-alpha.1
@@ -139,7 +139,7 @@ describe('apiDecoratingAdapter', () => {
 
     it('- on - invalid JSON syntax - should print useful error message', async (flags) => {
       const { context: { rewiredApi, critStub } } = flags;
-      const jobFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_0.1.0-alpha.1_missing_comma`, { encoding: 'utf8' }))();
+      const jobFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_0.1.0-alpha.1_local_missing_comma`, { encoding: 'utf8' }))();
 
       const expectedPrintedErrorMessage = 'Invalid syntax in "Job": Unexpected string in JSON at position 845';
 
@@ -154,7 +154,7 @@ describe('apiDecoratingAdapter', () => {
     it('- on - invalid job based on purpleteam schema - should print useful error message', async (flags) => {
       // Lots of checking around the validation on the server side will be required.
       const { context: { rewiredApi, critStub } } = flags;
-      const jobFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_0.1.0-alpha.1_missing_type_of_testSession`, { encoding: 'utf8' }))();
+      const jobFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_0.1.0-alpha.1_local_missing_type_of_testSession`, { encoding: 'utf8' }))();
 
       const expectedResponseBodyMessage = `[
         {
@@ -226,7 +226,7 @@ describe('apiDecoratingAdapter', () => {
   //
 
 
-  describe('test and subscribeToTesterProgress', /* async */ () => {
+  describe('test and subscribeToTesterFeedback', /* async */ () => {
     beforeEach(async (flags) => {
       const { context } = flags;
       config.set('env', 'local'); // For got hooks only.
@@ -376,7 +376,7 @@ describe('apiDecoratingAdapter', () => {
   });
 
 
-  describe('subscribeToTesterProgress SSE and handlers', /* async */ () => {
+  describe('subscribeToTesterFeedback SSE and handlers', /* async */ () => {
     before(async (flags) => {
       flags.context.testerStatuses = [
         {
@@ -403,16 +403,16 @@ describe('apiDecoratingAdapter', () => {
       const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
 
       context.revertRewiredApiEventSource = rewiredApi.__set__('EventSource', EventSource);
-      context.rewiredSubscribeToTesterProgress = rewiredApi.__get__('subscribeToTesterProgress');
+      context.rewiredSubscribeToTesterFeedback = rewiredApi.__get__('subscribeToTesterFeedback');
       context.rewiredApi = rewiredApi;
     });
 
 
     it('- given a mock event for each of the available testers sessions - given invocation of all the tester events - relevant handler instances should be run', async (flags) => {
-      const { context: { model, rewiredSubscribeToTesterProgress, rewiredApi, testerStatuses } } = flags;
+      const { context: { model, rewiredSubscribeToTesterFeedback, rewiredApi, testerStatuses } } = flags;
       const numberOfEvents = 6;
       new MockEvent({ // eslint-disable-line no-new
-        url: `${apiUrl}/${TesterProgressRoutePrefix}/app/lowPrivUser`,
+        url: `${apiUrl}/${TesterFeedbackRoutePrefix}/app/lowPrivUser`,
         setInterval: 1,
         responses: [
           { lastEventId: 'one', type: 'testerProgress', data: { progress: 'Initialising subscription to "app-lowPrivUser" channel for the event "testerProgress"' } },
@@ -421,7 +421,7 @@ describe('apiDecoratingAdapter', () => {
         ]
       });
       new MockEvent({ // eslint-disable-line no-new
-        url: `${apiUrl}/${TesterProgressRoutePrefix}/app/adminUser`,
+        url: `${apiUrl}/${TesterFeedbackRoutePrefix}/app/adminUser`,
         setInterval: 1,
         responses: [
           { lastEventId: 'four', type: 'testerProgress', data: { progress: 'Initialising subscription to "app-adminUser" channel for the event "testerProgress"' } },
@@ -496,7 +496,7 @@ describe('apiDecoratingAdapter', () => {
 
         rewiredApi.__set__('handleServerSentTesterEvents', handleServerSentTesterEvents);
 
-        rewiredSubscribeToTesterProgress(model, testerStatuses);
+        rewiredSubscribeToTesterFeedback(model, testerStatuses);
       });
 
       flags.onCleanup = () => {

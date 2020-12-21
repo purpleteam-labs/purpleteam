@@ -1,7 +1,9 @@
+const config = require('config/config');
+
 const TesterUnavailable = (tester) => `No ${tester} testing available currently. The ${tester} tester is currently in-active.`;
 const TestPlanUnavailable = (tester) => `No test plan available for the ${tester} tester. The ${tester} tester is currently in-active.`;
 
-const TesterProgressRoutePrefix = (() => ({ local: 'tester-progress', cloud: 'poll-tester-progress' }[process.env.NODE_ENV]))();
+const TesterFeedbackRoutePrefix = (() => ({ sse: 'tester-feedback', lp: 'poll-tester-feedback' }[config.get('testerFeedbackComms.medium')]))();
 
 // Also used in the app tester.
 const NowAsFileName = () => {
@@ -13,6 +15,6 @@ const NowAsFileName = () => {
 module.exports = {
   TesterUnavailable,
   TestPlanUnavailable,
-  TesterProgressRoutePrefix,
+  TesterFeedbackRoutePrefix,
   NowAsFileName
 };

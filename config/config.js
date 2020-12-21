@@ -70,22 +70,22 @@ const schema = {
     url: {
       doc: 'The URL of the purpleteam authorisation server.',
       format: 'url',
-      url: 'https://set-me'
+      url: 'https://set-below'
     }
   },
   purpleteamApi: {
     protocol: {
-      doc: 'The protocol of the purpleteam Cloud API.',
+      doc: 'The protocol of the purpleteam Cloud API. If using local env please use the existing value in the example config, if using cloud env, you will be given this when you sign-up for a purpleteam account.',
       format: ['https', 'http'],
       default: 'https'
     },
     host: {
-      doc: 'The IP address or hostname of the purpleteam Cloud API.',
+      doc: 'The IP address of the hostname of the purpleteam cloud API or local orchestrator. If using local env please use the existing value in the example config, if using cloud env, you will be given this when you sign-up for a purpleteam account.',
       format: String,
       default: '240.0.0.0'
     },
     port: {
-      doc: 'The port of the purpleteam Cloud API or Local orchestrator.',
+      doc: 'The port of the purpleteam cloud API or local orchestrator. If using local env please use the existing value, if using cloud env, you will be given this when you sign-up for a purpleteam account.',
       format: 'port',
       default: 2000,
       env: 'PORT'
@@ -93,24 +93,38 @@ const schema = {
     url: {
       doc: 'The URL of the purpleteam API.',
       format: 'url',
-      default: 'https://set-me'
+      default: 'https://set-below'
     },
     stage: {
-      doc: 'The API stage of the purpleteam Cloud API, only used in the cloud.',
+      doc: 'The API stage of the purpleteam cloud API. If using local env this is not required, if using cloud env, you will be given this when you sign-up for a purpleteam account.',
       format: String,
       default: 'customer to set if using purpleteam in the cloud'
     },
     customerId: {
-      doc: 'Your customer id if using purpleteam with the Cloud service.',
+      doc: 'Your customer id if using purpleteam with the cloud service. If using local env this is not required, if using cloud env, you will be given this when you sign-up for a purpleteam account.',
       format: String,
       default: 'customer to set if using purpleteam in the cloud'
     },
     apiKey: {
-      doc: 'Your API key to interact with the purpleteam Cloud service.',
+      doc: 'Your API key to interact with the purpleteam cloud service. If using local env this is not required, if using cloud env, you will be given this when you sign-up for a purpleteam account.',
       format: String,
       default: 'customer to set if using purpleteam in the cloud',
       env: 'PURPLETEAM_API_KEY',
       sensitive: true
+    }
+  },
+  testerFeedbackComms: {
+    medium: {
+      doc: 'The messaging medium used for tester[feedback] events. Server Sent Events or Long Polling. See the configuration docs for further details.',
+      format: ['sse', 'lp'],
+      default: 'sse'
+    },
+    longPoll: {
+      nullProgressMaxRetries: {
+        doc: 'The number of times (sequentially receiving an event with a data object containing a property with a null value) to poll the backend when the orchestrator is not receiving feedback from the testers.',
+        format: 'int',
+        default: 5
+      }
     }
   },
   outcomes: {
@@ -134,7 +148,7 @@ const schema = {
     fileUri: {
       doc: 'The location of the build user config file.',
       format: String,
-      default: '/testing/buildUserConfigFile'
+      default: './testResources/jobs/buildUserConfigFile-AKA-Job'
     }
   },
   modulePaths: {

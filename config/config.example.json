@@ -1,10 +1,24 @@
 {
+  "loggers": {
+    "def": {
+      "level": "debug"
+    },
+    "testerProgress": {
+      "dirname": "/<absolute-path-to/purpleteam/cli_logs/>"
+    }
+  },
   "purpleteamApi": {
     "protocol": "http",
-    "host": "127.0.0.1"
+    "host": "172.25.0.110"
+  },
+  "testerFeedbackComms": {
+    "medium": "lp"
   },
   "buildUserConfig": {
-    "fileUri": "/home/user/Documents/purpleteam/requests/builduser-config"
+    "fileUri": "./testResources/jobs/job_0.1.0-alpha.1_local"
+  },
+  "outcomes": {
+    "dir": "/<absolute-path-to/purpleteam/outcomes_transfered_to_cli/>"    
   }
 }
 
