@@ -6,7 +6,7 @@
   <br/>
   <br/>
   <h2>purpleteam CLI</h2><br/>
-    Currently in alpha
+    CLI component of <a href="https://purpleteam-labs.com/" title="purpleteam">purpleteam</a> - Currently in alpha
   <br/><br/>
 
   <a href="https://gitlab.com/purpleteam-labs/purpleteam/commits/main" title="pipeline status">
