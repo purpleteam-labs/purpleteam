@@ -4,7 +4,7 @@
       "level": "debug"
     },
     "testerProgress": {
-      "dirname": "/<absolute-path-to/purpleteam/cli_logs/>"
+      "dirname": "</absolute-path-to/purpleteam/cli_logs/>"
     }
   },
   "purpleteamApi": {
@@ -18,7 +18,7 @@
     "fileUri": "./testResources/jobs/job_0.1.0-alpha.1_local"
   },
   "outcomes": {
-    "dir": "/<absolute-path-to/purpleteam/outcomes_transfered_to_cli/>"    
+    "dir": "</absolute-path-to/purpleteam/outcomes_transfered_to_cli/>"    
   }
 }
 
