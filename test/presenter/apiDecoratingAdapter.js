@@ -14,7 +14,6 @@ const log = ptLogger.init(config.get('loggers.def'));
 
 const apiUrl = config.get('purpleteamApi.url');
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
-const dashboard = require('src/view/dashboard');
 const { MockEvent, EventSource } = require('mocksse');
 const { TesterFeedbackRoutePrefix } = require('src/strings');
 const Model = require('src/models/model');
@@ -32,6 +31,7 @@ describe('apiDecoratingAdapter', () => {
   describe('testPlans', () => {
     it('- should provide the dashboard with the test plan to display', async (flags) => {
       const { context: { buildUserJobFileContent } } = flags;
+      const dashboard = rewire('src/view/dashboard');
       config.set('env', 'local'); // For got hooks only.
       const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
       const jobFileContents = await buildUserJobFileContent;
@@ -96,6 +96,7 @@ describe('apiDecoratingAdapter', () => {
         dashboard.testPlan.restore();
         revertRewiredApiDashboard();
         config.set('env', 'test');
+        nock.cleanAll();
       };
 
       await rewiredApi.testPlans(jobFileContents);
@@ -211,6 +212,7 @@ describe('apiDecoratingAdapter', () => {
       context.revertRewiredApiLog();
       context.log.crit.restore();
       config.set('env', 'test'); // For got hooks only.
+      nock.cleanAll();
     });
   });
 
@@ -237,6 +239,10 @@ describe('apiDecoratingAdapter', () => {
 
     it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model - then verify event flow back through presenter and then to view', async (flags) => {
       const { context: { jobFileContents, rewiredApi } } = flags;
+      // Make dashboard a local test identifier because the error event listener of subscribeToTesterFeedback in apiDecoratingAdapter
+      // is still executing after the test finishes.
+      // If we restore the dashboard, the logger of handleTesterProgress in the dashboard.js is undefined
+      const dashboard = rewire('src/view/dashboard');
       const apiResponse = [
         {
           name: 'app',
@@ -264,16 +270,17 @@ describe('apiDecoratingAdapter', () => {
       const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
       dashboard.handleTesterProgress = handleTesterProgressStub;
 
-      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      /* const revertRewiredApiDashboard = */ rewiredApi.__set__('dashboard', dashboard);
       const revertRewiredApiApiUrl = rewiredApi.__set__('apiUrl', `${apiUrl}`);
 
       flags.onCleanup = () => {
-        dashboard.test.restore();
-        dashboard.handleTesterProgress.restore();
+        // dashboard.test.restore();
+        // dashboard.handleTesterProgress.restore();
         revertRewiredApiHandleModelTesterEvents();
-        revertRewiredApiDashboard();
+        // revertRewiredApiDashboard();
         revertRewiredApiApiUrl();
         config.set('env', 'test'); // For got hooks only.
+        nock.cleanAll();
       };
 
       await rewiredApi.test(jobFileContents);
@@ -306,6 +313,10 @@ describe('apiDecoratingAdapter', () => {
 
     it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model, even if app tester is offline - then verify event flow back through presenter and then to view', async (flags) => {
       const { context: { jobFileContents, rewiredApi } } = flags;
+      // Make dashboard a local test identifier because the error event listener of subscribeToTesterFeedback in apiDecoratingAdapter
+      // is still executing after the test finishes.
+      // If we restore the dashboard, the logger of handleTesterProgress in the dashboard.js is undefined
+      const dashboard = rewire('src/view/dashboard');
       const apiResponse = [
         // Simulate no response from app tester to orchestrator.
         // {
@@ -334,16 +345,17 @@ describe('apiDecoratingAdapter', () => {
       const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
       dashboard.handleTesterProgress = handleTesterProgressStub;
 
-      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      /* const revertRewiredApiDashboard = */ rewiredApi.__set__('dashboard', dashboard);
       const revertRewiredApiApiUrl = rewiredApi.__set__('apiUrl', `${apiUrl}`);
 
       flags.onCleanup = () => {
-        dashboard.test.restore();
-        dashboard.handleTesterProgress.restore();
+        // dashboard.test.restore();
+        // dashboard.handleTesterProgress.restore();
         revertRewiredApiHandleModelTesterEvents();
-        revertRewiredApiDashboard();
+        // revertRewiredApiDashboard();
         revertRewiredApiApiUrl();
         config.set('env', 'test'); // For got hooks only.
+        nock.cleanAll();
       };
 
       await rewiredApi.test(jobFileContents);
@@ -542,6 +554,7 @@ describe('apiDecoratingAdapter', () => {
     });
     it('- given event `testerProgress` handleTesterProgress of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
+      const dashboard = rewire('src/view/dashboard');
       const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
       dashboard.handleTesterProgress = handleTesterProgressStub;
       const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
@@ -578,6 +591,7 @@ describe('apiDecoratingAdapter', () => {
 
     it('- given event `testerPctComplete` handleTesterPctComplete of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
+      const dashboard = rewire('src/view/dashboard');
       const handleTesterPctCompleteStub = sinon.stub(dashboard, 'handleTesterPctComplete');
       dashboard.handleTesterPctComplete = handleTesterPctCompleteStub;
       const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
@@ -614,6 +628,7 @@ describe('apiDecoratingAdapter', () => {
 
     it('- given event `testerBugCount` handleTesterBugCount of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
+      const dashboard = rewire('src/view/dashboard');
       const handleTesterBugCountStub = sinon.stub(dashboard, 'handleTesterBugCount');
       dashboard.handleTesterBugCount = handleTesterBugCountStub;
       const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
