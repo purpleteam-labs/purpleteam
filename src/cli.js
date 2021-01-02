@@ -1,8 +1,28 @@
+// Copyright (C) 2017-2021 BinaryMist Limited. All rights reserved.
+
+// This file is part of purpleteam.
+
+// purpleteam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation version 3.
+
+// purpleteam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+
+// You should have received a copy of the GNU Affero General Public License
+// along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
+
 const sywac = require('sywac');
 const chalk = require('chalk');
 const figlet = require('figlet');
 const pkg = require('package.json');
 const log = require('purpleteam-logger').get();
+
+const epilogue = `For more information, find the manual at https://docs.purpleteam-labs.com
+Copyright (C) 2017-2021 BinaryMist Limited. All rights reserved.
+Use of this source code is governed by a license that can be found in the LICENSE.md file.`;
 
 const processCommands = async (options) => { // eslint-disable-line no-unused-vars
   log.debug('Configuring sywac\n', { tags: ['cli'] });
@@ -14,7 +34,7 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
     .version('-v, --version', { desc: 'Show version number' })
     .help('-h, --help')
     .preface(figlet.textSync(pkg.name, 'Chunky'), chalk.bgHex('#9961ed')(pkg.description))
-    .epilogue('For more information, find the manual at https://docs.purpleteam-labs.com')
+    .epilogue(epilogue)
     .style({
       // usagePrefix: str => chalk.hex('#9961ed').bold(str),
       flags: (str) => chalk.bold(str),
