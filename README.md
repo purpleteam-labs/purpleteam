@@ -9,12 +9,12 @@
     CLI component of <a href="https://purpleteam-labs.com/" title="purpleteam">purpleteam</a> - Currently in alpha
   <br/><br/>
 
-  <a href="https://gitlab.com/purpleteam-labs/purpleteam/commits/main" title="pipeline status">
-     <img src="https://github.com/purpleteam-labs/purpleteam/workflows/Node.js%20CI/badge.svg" alt="pipeline status">
+  <a href="https://github.com/purpleteam-labs/purpleteam/commits/main" title="pipeline status">
+    <img src="https://github.com/purpleteam-labs/purpleteam/workflows/Node.js%20CI/badge.svg" alt="pipeline status">
   </a>
 
-  <a href="https://gitlab.com/purpleteam-labs/purpleteam/commits/main" title="test coverage">
-     <img src="https://gitlab.com/purpleteam-labs/purpleteam/badges/main/coverage.svg" alt="test coverage">
+  <a href='https://coveralls.io/github/purpleteam-labs/purpleteam?branch=main'>
+    <img src='https://coveralls.io/repos/github/purpleteam-labs/purpleteam/badge.svg?branch=main' alt='test coverage'>
   </a>
 
   <a href="https://snyk.io/test/github/purpleteam-labs/purpleteam?targetFile=package.json" title="known vulnerabilities">
@@ -22,7 +22,7 @@
   </a>
   <br/><br/>
   <a href="https://purpleteam-labs.com" title="purpleteam">
-    <img width=900px src="https://gitlab.com/purpleteam-labs/purpleteam/uploads/2101d9c56556f77490c696fb4d39c742/EndOfTestRun.png" alt="purpleteam test run">
+    <img width=900px src="https://user-images.githubusercontent.com/2862029/104117134-a93b7780-5383-11eb-8270-bfc46f310a24.png" alt="purpleteam test run">
   </a>
 
 <br/><br/>
