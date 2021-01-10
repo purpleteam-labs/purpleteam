@@ -6,6 +6,7 @@ config.*.json
 .vscode
 *.code-workspace
 logs
+coverage/
 
 testResources/jobs/*
 !testResources/jobs/job_0.1.0-alpha.1_cloud
