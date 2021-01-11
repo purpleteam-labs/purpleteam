@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/purpleteam-labs/purpleteam.git"
+    "url": "git+https://github.com/purpleteam-labs/purpleteam.git"
   },
   "keywords": [
     "agile",
@@ -60,7 +60,7 @@
   "license": "AGPL-3.0-only",
   "homepage": "https://purpleteam-labs.com",
   "bugs": {
-    "url": "https://gitlab.com/purpleteam-labs/purpleteam/issues"
+    "url": "https://github.com/purpleteam-labs/purpleteam/issues"
   },
   "dependencies": {
     "@hapi/bourne": "^2.0.0",
