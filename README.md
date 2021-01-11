@@ -65,3 +65,21 @@ So long as the initial CLI request for tester feedback is made immediatly after 
 **`buildUserConfig.fileUri`** Configure this value if you do not want to manually pass it as an arguement to the CLI. This is the _Job_ file you have configured to specify your System Under Test (SUT) details.
 
 **`outcomes.dir`** Configure this value. This is a directory of your choosing that outcomes files from the orchestrator (if running in `local` env), or API (if running in `cloud` env) will be persisted to.
+
+<br>
+
+Purpleteam uses the convict package for it's configuration.
+
+## Sensitive Values (`cloud` environment only)
+
+There are several ways you can handle the sensitive values that need to be read into the purpleteam CLI to access your instance of the purpleteam Cloud service:
+
+* Place sensitive values inline in the `config.cloud.json` file, providing you are confident that you have sufficiently locked down file, directory permissions and access to the host that will be running the purpleteam CLI
+* Place sensitive values in a similarly structured file but in some other directory that the purpleteam CLI has access to and is sufficiently locked down as previously mentioned. The path of which said file can be [added to the array](https://github.com/mozilla/node-convict/tree/master/packages/convict#configloadfilefile-or-filearray) as an element that is feed to `config.loadFile` in the main `config.js` file
+* Place sensitive values in environment variables yourself, or pass them as environment variables in the current shell to the purpleteam CLI:  
+  ```js
+  env PURPLETEAM_APP_CLIENT_ID="<app-client-id>" env PURPLETEAM_APP_CLIENT_SECRET="<app-client-secret>" env PURPLETEAM_API_KEY="<api-key>" purpleteam test
+  ```
+
+The precedence order of where values will be read from is defined by [convict](https://github.com/mozilla/node-convict/tree/master/packages/convict#precedence-order).
+
