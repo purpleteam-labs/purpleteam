@@ -42,7 +42,7 @@ exports.run = async (parsedArgv, context) => {
     await api.test(configFileContents);
 
     //  stream tester log           Print each tester to a table row, and to log file
-    //  stream slave log            To artifacts dir
+    //  stream emissary log            To artifacts dir
   } else {
     context.cliMessage('You must provide a valid build user configuration file that exists on the local file system.');
   }
