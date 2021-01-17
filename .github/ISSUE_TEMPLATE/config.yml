@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/purpleteam-labs/purpleteam/discussions
+    about: Please ask and answer questions here.
+  - name: BinaryMist
+    url: https://binarymist.io/#contact
+    about: If you need to contact us directly.
