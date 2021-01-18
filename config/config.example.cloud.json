@@ -1,0 +1,34 @@
+{
+  "loggers": {
+    "def": {
+      "level": "debug"
+    },
+    "testerProgress": {
+      "dirname": "</absolute-path-to/purpleteam/cli_logs/>"
+    }
+  },
+  "purpleteamApi": {
+    "protocol": "https",
+    "host": "api.purpleteam-labs.com",
+    "port": 443,    
+    "stage": "alpha",
+    "customerId": "<your-customer-id>",
+    "apiKey": "<your-api-key>"
+  },
+  "testerFeedbackComms": {
+    "medium": "lp"
+  },
+  "purpleteamAuth": {
+    "protocol": "https",
+    "host": "auth.purpleteam-labs.com",
+    "appClientId": "<your-app-client-id>",
+    "appClientSecret": "<your-app-client-secret>",
+    "custnSubdomain": "<your-customer-subdomain>"
+  },
+  "buildUserConfig": {
+    "fileUri": "./testResources/jobs/<your_job_file>"
+  },
+  "outcomes": {
+    "dir": "</absolute-path-to/purpleteam/outcomes_transfered_to_cli/>"    
+  }
+}

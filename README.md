@@ -44,8 +44,10 @@ Clone this repository.
 
 # Configuration
 
-Copy the config/config.example.json to either config/config.local.json or config/config.cloud.json depending on which environment you are planning on using.  
-Use the config/config.js for documentation and further examples.  
+If you are planning on using the `cloud` environment copy the config/config.example.cloud.json to config/config.cloud.json and make the necessary changes.
+If you are planning on using the `local` environment copy the config/config.example.local.json to config/config.local.json and make the necessary changes.
+
+Use the config/config.js for documentation and further examples.
 
 **`loggers.testerProgress.dirname`** Configure this value.
 
@@ -64,7 +66,7 @@ So long as the initial CLI request for tester feedback is made immediatly after 
 
 **`buildUserConfig.fileUri`** Configure this value if you do not want to manually pass it as an arguement to the CLI. This is the _Job_ file you have configured to specify your System Under Test (SUT) details.
 
-**`outcomes.dir`** Configure this value. This is a directory of your choosing that outcomes files from the orchestrator (if running in `local` env), or API (if running in `cloud` env) will be persisted to.
+**`outcomes.dir`** Configure this value. This is a directory of your choosing that outcome files from the orchestrator (if running in `local` env), or API (if running in `cloud` env) will be persisted to.
 
 <br>
 

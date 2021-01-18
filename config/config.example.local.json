@@ -15,7 +15,7 @@
     "medium": "lp"
   },
   "buildUserConfig": {
-    "fileUri": "./testResources/jobs/job_0.1.0-alpha.1_local"
+    "fileUri": "./testResources/jobs/<your_job_file>"
   },
   "outcomes": {
     "dir": "</absolute-path-to/purpleteam/outcomes_transfered_to_cli/>"    
