@@ -6,7 +6,7 @@ Contributions from community are key to making purpleteam a high quality compreh
 
 Depending on your preference, you can contribute in various ways.
 
-Often the best approach is to discus what you're thinking of or planning first. You can do this by:
+Often the best approach is to discuss what you're thinking of or planning first. You can do this by:
 
 * Starting a [Github Discussion](https://github.com/purpleteam-labs/purpleteam/discussions) in the purpleteam repository
 * Having a chat about it on the purpleteam-labs [Slack](https://purpleteam-labs.slack.com). If you need an invite DM us on Twitter [@purpleteamlabs](https://twitter.com/purpleteamlabs), or reach out via the BinaryMist website [contact section](https://binarymist.io/#contact)
@@ -18,8 +18,6 @@ You can also [open an issue](https://github.com/purpleteam-labs/purpleteam/issue
 We also have a [Roadmap](https://github.com/purpleteam-labs/purpleteam/projects/1) for Epics a little further out.
 
 If you are OK with creating a PR that may never be accepted, then go ahead and just create the PR and use the description to provide context and motivation, as you would for an issue.
-If you want to start a discussion first or have already created an issue, once a pull request is created, we will close the issue as superseded by the pull request,
-and the discussion about the issue will continue under the pull request.
 
 ## Coding
 
@@ -45,13 +43,13 @@ For example: `git commit` will run the `pre-commit` hook, which runs the `test` 
 
 We use npm scripts for most build tasks.
 
-#### What should you, the author of a Pull Request (PR), expect from us (purpleteam-labs Team)?
+#### What should you, the author of a Pull Request (PR) expect from us (purpleteam-labs Team)?
 
 * How much time (maximum) until the first feedback? 1 week
 * And following iterations? 1 week
-* This is a guideline we should normally be able to hit. If it's been more than a week and you haven't heard then please feel free to add a comment to your PR and @ mention the team (@purpleteam-labs/team-purpleteam-labs)
+* This is a deadline we should normally be able to hit. If it's been more than a week and you haven't heard then please feel free to add a comment to your PR and @ mention the team (@purpleteam-labs/team-purpleteam-labs)
 
-#### What we (purpleteam-labs Team), expect from you?
+#### What do we (purpleteam-labs Team) expect from you?
 
 * Choose the granularity of your commits consciously and squash commits that represent multiple edits or corrections of the same logical change. "Atomic commits" (logical changes to be in a single commit). Please don't group disjointed changes into a single commit/PR
 * Descriptive commits (subject and message)
