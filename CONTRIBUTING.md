@@ -52,7 +52,7 @@ We use npm scripts for most build tasks.
 #### What do we (purpleteam-labs Team) expect from you?
 
 * Choose the granularity of your commits consciously and squash commits that represent multiple edits or corrections of the same logical change. "Atomic commits" (logical changes to be in a single commit). Please don't group disjointed changes into a single commit/PR
-* Descriptive commits (subject and message)
+* Descriptive commits (subject and message). Please follow "[The seven rules of a great Git commit message](https://chris.beams.io/posts/git-commit/#seven-rules)"
 * Discussion about the changes:
   * If there is a prior issue, reference the GitHub issue number in the description of the PR
   * Should be done in/on the PR or via the [Github Discussions](https://github.com/purpleteam-labs/purpleteam/discussions) and a link to that Discussion thread added to the PR comments. (i.e.: Shared information is important, if something happens via [Slack](https://purpleteam-labs.slack.com/) or private email please ensure a summary makes it to the PR)
