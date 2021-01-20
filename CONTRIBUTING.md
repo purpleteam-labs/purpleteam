@@ -74,6 +74,7 @@ We use npm scripts for most build tasks.
 * All PRs must be approved by a minimum of two members (if they exist) of the purpleteam-labs Core Team (other than the author) and anyone who is flagged as a reviewer on the PR
 * The PR author can optionally specify any reviewer they would like to review their PR and any member of the Core Team can add themselves as a reviewer. This will effectively prevent the PR from being merged until they approve it
 * Any member of the Core Team can merge a PR as long as the above conditions are met
+* When merging a PR make sure to close any related issues that have no outstanding PRs referencing them. This [can be done](https://github.blog/2013-03-18-closing-issues-across-repositories/) from the PR within the commit message
 * Reviews by people outside of the Core Team are still appreciated :)  
   Helping to review PR is another great way to contribute. Your feedback can help to shape the implementation of new features. When reviewing PRs, however, please refrain from approving or rejecting a PR unless you are a purpleteam-labs Core Team member
 
