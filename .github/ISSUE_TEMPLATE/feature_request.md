@@ -17,6 +17,6 @@ The enhancement may already be reported! Please search for the enhancement befor
 
 ...
 
-## How It Would Benefit You:
+### How It Would Benefit You:
 
 ...
