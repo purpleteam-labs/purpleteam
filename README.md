@@ -56,6 +56,8 @@ You may notice that this example exports the `local` `NODE_ENV` environment vari
 
 Using the above mentioned example build project files, assuming your NodeJS build project has the same following files:
 
+<div id="purpleteam-build-test-cli"></div>
+
 [**package.json**](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/main/package.json)
 
 ```json
@@ -187,9 +189,11 @@ The precedence order of where values will be read from is defined by [convict](h
 
 # Run
 
-There are several ways you can run the purpleteam CLI. The following list some. Make sure you have configured purpleteam correctly before running:
+There are several ways you can run the purpleteam CLI. The following list some. Make sure you have [installed](#install) and [configured](#configure) purpleteam correctly before running:
 
 ## Clone the git repository option
+
+For those that chose to [clone](#clone-the-git-repository) the purpleteam CLI:
 
 ### Run the bin/purpleteam file via npm script
 
@@ -255,7 +259,9 @@ There are several ways you can run the purpleteam CLI. The following list some. 
 
 ## NPM install locally option
 
-Providing your package.json and the JavaScript file (index.js in the above example) that is going to run the purpleteam CLI is similar to those configured in the above file examples, you should be able to successfully run the following commands from the root directory of your NodeJS CI/nightly build/build pipeline project.
+For those that chose to [install locally via npm](#npm-install-locally):
+
+Providing your package.json and the JavaScript file (index.js in the [above example](#purpleteam-build-test-cli)) that is going to run the purpleteam CLI is similar to those configured in the above file examples, you should be able to successfully run the following commands from the root directory of your NodeJS CI/nightly build/build pipeline project.
 
 ### Run the purpleteam CLI directly
 
@@ -295,7 +301,7 @@ npm run purpleteam test -- --help
 
 ### Run your app
 
-Run your NodeJS CI/nightly build/build pipeline project. This will start the NodeJS application we defined above which will `spawn` the `purpleteam test` command.
+Run your NodeJS CI/nightly build/build pipeline project. This will start the NodeJS application we [defined above](#purpleteam-build-test-cli) which will [`spawn`](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/189d2f42de46b1484d6195a048505da61cfcd201/index.js#L12-L18) the [`purpleteam test`](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/189d2f42de46b1484d6195a048505da61cfcd201/index.js#L8) command.
 
 You could change the `const purpleteamArgs = ['purpleteam', 'test'];` to use any other purpleteam CLI commands, options, or neither. 
 
