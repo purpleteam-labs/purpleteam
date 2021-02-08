@@ -52,9 +52,9 @@ If you are planning on running/debugging purpleteam from another NodeJS process,
 
 For the locally installed via NPM option the purpleteam-labs Team uses the [purpleteam-build-test-cli](https://github.com/purpleteam-labs/purpleteam-build-test-cli) project as an example to test that this option works as expected. The following example [package.json](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/main/package.json) and [index.js](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/main/index.js) files are from the purpleteam-build-test-cli example project.
 
-You may notice that this example exports the `local` `NODE_ENV` environment variable. That means that purpleteam will be using the local [configuration](#configure). If instead you have signed up for a cloud license, you will want to be targeting the `cloud` environment instead.
+You may notice that this example exports the `local` `NODE_ENV` environment variable. That means that purpleteam will be using the `local` [configuration](#configure). If instead you have signed up for a cloud license, you will want to be targeting the `cloud` environment instead.
 
-Using the above mentioned example build project files, assuming your NodeJS build project has the same following files:
+Using the above mentioned example build project files, and for the sake of this example, let's assume your NodeJS build project has the same following files:
 
 <div id="purpleteam-build-test-cli"></div>
 
