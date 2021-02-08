@@ -17,10 +17,10 @@
 const sywac = require('sywac');
 const chalk = require('chalk');
 const figlet = require('figlet');
-const pkg = require('package.json');
 const log = require('purpleteam-logger').get();
+const pkg = require('../package.json');
 
-const epilogue = `For more information, find the manual at https://docs.purpleteam-labs.com
+const epilogue = `For more information, find the manual at https://doc.purpleteam-labs.com
 Copyright (C) 2017-2021 BinaryMist Limited. All rights reserved.
 Use of this source code is governed by a license that can be found in the LICENSE.md file.`;
 

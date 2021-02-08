@@ -22,6 +22,8 @@ const { expect } = require('@hapi/code');
 const sinon = require('sinon');
 const rewire = require('rewire');
 
+const dashboardPath = '../../src/view/dashboard';
+
 // const dashboard = require('src/view/dashboard');
 
 describe('dashboard', () => {
@@ -35,7 +37,7 @@ describe('dashboard', () => {
 
     it('- testerType `app`, sessionId `lowPrivUser` should log provided message', (flags) => {
       const { context: { log0, log1 } } = flags;
-      const rewiredDashboard = rewire('src/view/dashboard');
+      const rewiredDashboard = rewire(dashboardPath);
 
       const logger0 = { sessionId: 'lowPrivUser', instance: { log: log0 } };
       const logger1 = { sessionId: 'adminUser', instance: { log: log1 } };
@@ -54,7 +56,7 @@ describe('dashboard', () => {
 
     it('- testerType `app`, sessionId `adminUser` should log provided message', (flags) => {
       const { context: { log0, log1 } } = flags;
-      const rewiredDashboard = rewire('src/view/dashboard');
+      const rewiredDashboard = rewire(dashboardPath);
 
       const logger0 = { sessionId: 'lowPrivUser', instance: { log: log0 } };
       const logger1 = { sessionId: 'adminUser', instance: { log: log1 } };
@@ -75,7 +77,7 @@ describe('dashboard', () => {
 
   describe('handleTesterPctComplete', () => {
     it('- should handle testerPctComplete event as expected', (flags) => {
-      const rewiredDashboard = rewire('src/view/dashboard');
+      const rewiredDashboard = rewire(dashboardPath);
       const testerType = 'app';
       const sessionId = 'lowPrivUser';
       const message = 17;
@@ -116,7 +118,7 @@ describe('dashboard', () => {
 
   describe('handleTesterBugCount', () => {
     it('- should handle testerBugCount event as expected', (flags) => {
-      const rewiredDashboard = rewire('src/view/dashboard');
+      const rewiredDashboard = rewire(dashboardPath);
       const testerType = 'app';
       const sessionId = 'lowPrivUser';
       const message = 14;

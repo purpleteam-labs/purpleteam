@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-require('app-module-path/cwd');
 const root = require('..');
 
 async function main() {

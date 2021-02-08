@@ -15,7 +15,7 @@
 // along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
 
 const log = require('purpleteam-logger').get();
-const pkg = require('package.json');
+const pkg = require('../../package.json');
 
 exports.flags = 'about';
 exports.desc = 'About purpleteam';

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
 
-const api = require('src/presenter/apiDecoratingAdapter');
+const api = require('../presenter/apiDecoratingAdapter');
 
 exports.flags = 'status';
 exports.desc = 'Check whether the purpleteam orchestrator is up.';

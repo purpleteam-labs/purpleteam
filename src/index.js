@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
 
-const config = require('config/config');
-const log = require('purpleteam-logger').init(config.get('loggers.def'));
+const config = require('../config/config');
+const log = require('purpleteam-logger').init(config.get('loggers.def')); // eslint-disable-line import/order
 
-const { processCommands } = require('src/cli');
+const { processCommands } = require('./cli');
 
 exports.start = async (options) => {
   log.debug('Starting the CLI', { tags: ['index'] });

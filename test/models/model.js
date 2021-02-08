@@ -22,10 +22,10 @@ const { expect, fail } = require('@hapi/code');
 // const sinon = require('sinon');
 // const rewire = require('rewire');
 
-const config = require('config/config');
-
-const Model = require('src/models/model');
 const readFileAsync = require('util').promisify(require('fs').readFile);
+
+const config = require('../../config/config');
+const Model = require('../../src/models/model');
 
 
 const newModel = async () => {

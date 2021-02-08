@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
 
-const config = require('config/config'); // eslint-disable-line no-unused-vars
-const api = require('src/presenter/apiDecoratingAdapter');
+const config = require('../../config/config'); // eslint-disable-line no-unused-vars
+const api = require('../presenter/apiDecoratingAdapter');
 
 
 exports.flags = 'testplan';

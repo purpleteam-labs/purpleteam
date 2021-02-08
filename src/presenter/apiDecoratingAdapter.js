@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
 
-const config = require('config/config');
+const config = require('../../config/config'); // eslint-disable-line import/order
 const fs = require('fs');
 const { promisify } = require('util');
 
@@ -24,11 +24,12 @@ const writeFileAsync = promisify(fs.writeFile);
 const got = require('got');
 const EventSource = require('eventsource');
 const Bourne = require('@hapi/bourne');
-const Model = require('src/models/model');
-const dashboard = require('src/view/dashboard');
-const { TesterUnavailable, TesterFeedbackRoutePrefix, NowAsFileName } = require('src/strings');
-const pkg = require('package.json');
+
 const ptLogger = require('purpleteam-logger');
+const Model = require('../models/model');
+const dashboard = require('../view/dashboard');
+const pkg = require('../../package.json');
+const { TesterUnavailable, TesterFeedbackRoutePrefix, NowAsFileName } = require('../strings');
 
 const log = ptLogger.init(config.get('loggers.def'));
 const apiUrl = config.get('purpleteamApi.url');

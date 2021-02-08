@@ -23,7 +23,7 @@ const sinon = require('sinon');
 const rewire = require('rewire');
 const nock = require('nock');
 const readFileAsync = require('util').promisify(require('fs').readFile);
-const config = require('config/config');
+const config = require('../../config/config'); // eslint-disable-line import/order
 const ptLogger = require('purpleteam-logger');
 
 const log = ptLogger.init(config.get('loggers.def'));
@@ -31,8 +31,11 @@ const log = ptLogger.init(config.get('loggers.def'));
 const apiUrl = config.get('purpleteamApi.url');
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
 const { MockEvent, EventSource } = require('mocksse');
-const { TesterFeedbackRoutePrefix } = require('src/strings');
-const Model = require('src/models/model');
+const { TesterFeedbackRoutePrefix } = require('../../src/strings');
+const Model = require('../../src/models/model');
+
+const dashboardPath = '../../src/view/dashboard';
+const apiDecoratingAdapterPath = '../../src/presenter/apiDecoratingAdapter';
 
 // As stored in the `request` object body from file: /testResources/jobs/job_0.1.0-alpha.1
 const expectedJob = '\"{\\n  \\\"data\\\": {\\n    \\\"type\\\": \\\"testRun\\\",\\n    \\\"attributes\\\": {      \\n      \\\"version\\\": \\\"0.1.0-alpha.1\\\",\\n      \\\"sutAuthentication\\\": {\\n        \\\"route\\\": \\\"/login\\\",\\n        \\\"usernameFieldLocater\\\": \\\"userName\\\",\\n        \\\"passwordFieldLocater\\\": \\\"password\\\",\\n        \\\"submit\\\": \\\"btn btn-danger\\\",\\n        \\\"expectedPageSourceSuccess\\\": \\\"Log Out\\\"\\n      },\\n      \\\"sutIp\\\": \\\"pt-sut-cont\\\",\\n      \\\"sutPort\\\": 4000,\\n      \\\"sutProtocol\\\": \\\"http\\\",\\n      \\\"browser\\\": \\\"chrome\\\",\\n      \\\"loggedInIndicator\\\": \\\"<p>Found. Redirecting to <a href=\\\\\\\"\\\\/dashboard\\\\\\\">\\\\/dashboard<\\\\/a><\\\\/p>\\\",\\n      \\\"reportFormats\\\": [\\\"html\\\", \\\"json\\\", \\\"md\\\"]\\n    },\\n    \\\"relationships\\\": {\\n      \\\"data\\\": [{\\n        \\\"type\\\": \\\"testSession\\\",\\n        \\\"id\\\": \\\"lowPrivUser\\\"\\n      },\\n      {\\n        \\\"type\\\": \\\"testSession\\\",\\n        \\\"id\\\": \\\"adminUser\\\"\\n      }]\\n    }\\n  },\\n  \\\"included\\\": [\\n    {\\n      \\\"type\\\": \\\"testSession\\\",\\n      \\\"id\\\": \\\"lowPrivUser\\\",\\n      \\\"attributes\\\": {\\n        \\\"username\\\": \\\"user1\\\",\\n        \\\"password\\\": \\\"User1_123\\\",\\n        \\\"aScannerAttackStrength\\\": \\\"HIGH\\\",\\n        \\\"aScannerAlertThreshold\\\": \\\"LOW\\\",\\n        \\\"alertThreshold\\\": 12\\n      },\\n      \\\"relationships\\\": {\\n        \\\"data\\\": [{\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/profile\\\"\\n        }]\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"testSession\\\",\\n      \\\"id\\\": \\\"adminUser\\\",\\n      \\\"attributes\\\": {\\n        \\\"username\\\": \\\"admin\\\",\\n        \\\"password\\\": \\\"Admin_123\\\"\\n      },\\n      \\\"relationships\\\": {\\n        \\\"data\\\": [{\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/memos\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/profile\\\"\\n        }]\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"route\\\",\\n      \\\"id\\\": \\\"/profile\\\",\\n      \\\"attributes\\\": {\\n        \\\"attackFields\\\": [\\n          {\\\"name\\\": \\\"firstName\\\", \\\"value\\\": \\\"PurpleJohn\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"lastName\\\", \\\"value\\\": \\\"PurpleDoe\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"ssn\\\", \\\"value\\\": \\\"PurpleSSN\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"dob\\\", \\\"value\\\": \\\"12235678\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"bankAcc\\\", \\\"value\\\": \\\"PurpleBankAcc\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"bankRouting\\\", \\\"value\\\": \\\"0198212#\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"address\\\", \\\"value\\\": \\\"PurpleAddress\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"website\\\", \\\"value\\\": \\\"https://purpleteam-labs.com\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"_csrf\\\", \\\"value\\\": \\\"\\\"},\\n          {\\\"name\\\": \\\"submit\\\", \\\"value\\\": \\\"\\\"}\\n        ],\\n        \\\"method\\\": \\\"POST\\\",\\n        \\\"submit\\\": \\\"submit\\\"\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"route\\\",\\n      \\\"id\\\": \\\"/memos\\\",\\n      \\\"attributes\\\": {\\n        \\\"attackFields\\\": [\\n          {\\\"name\\\": \\\"memo\\\", \\\"value\\\": \\\"PurpleMemo\\\", \\\"visible\\\": true}\\n        ],\\n        \\\"method\\\": \\\"POST\\\",\\n        \\\"submit\\\": \\\"btn btn-primary\\\"\\n      }\\n    }\\n  ]\\n}\\n\"'; // eslint-disable-line no-useless-escape
@@ -47,9 +50,9 @@ describe('apiDecoratingAdapter', () => {
   describe('testPlans', () => {
     it('- should provide the dashboard with the test plan to display', async (flags) => {
       const { context: { buildUserJobFileContent } } = flags;
-      const dashboard = rewire('src/view/dashboard');
+      const dashboard = rewire(dashboardPath);
       config.set('env', 'local'); // For got hooks only.
-      const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      const rewiredApi = rewire(apiDecoratingAdapterPath);
       const jobFileContents = await buildUserJobFileContent;
 
       const expectedArgPasssedToTestPlan = [{
@@ -126,7 +129,7 @@ describe('apiDecoratingAdapter', () => {
     beforeEach(async (flags) => {
       const { context } = flags;
       config.set('env', 'local'); // For got hooks only.
-      context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      context.rewiredApi = rewire(apiDecoratingAdapterPath);
 
       context.log = log;
       context.critStub = sinon.stub(context.log, 'crit');
@@ -248,7 +251,7 @@ describe('apiDecoratingAdapter', () => {
     beforeEach(async (flags) => {
       const { context } = flags;
       config.set('env', 'local'); // For got hooks only.
-      context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      context.rewiredApi = rewire(apiDecoratingAdapterPath);
       context.jobFileContents = await context.buildUserJobFileContent;
     });
 
@@ -258,7 +261,7 @@ describe('apiDecoratingAdapter', () => {
       // Make dashboard a local test identifier because the error event listener of subscribeToTesterFeedback in apiDecoratingAdapter
       // is still executing after the test finishes.
       // If we restore the dashboard, the logger of handleTesterProgress in the dashboard.js is undefined
-      const dashboard = rewire('src/view/dashboard');
+      const dashboard = rewire(dashboardPath);
       const apiResponse = [
         {
           name: 'app',
@@ -332,7 +335,7 @@ describe('apiDecoratingAdapter', () => {
       // Make dashboard a local test identifier because the error event listener of subscribeToTesterFeedback in apiDecoratingAdapter
       // is still executing after the test finishes.
       // If we restore the dashboard, the logger of handleTesterProgress in the dashboard.js is undefined
-      const dashboard = rewire('src/view/dashboard');
+      const dashboard = rewire(dashboardPath);
       const apiResponse = [
         // Simulate no response from app tester to orchestrator.
         // {
@@ -428,7 +431,7 @@ describe('apiDecoratingAdapter', () => {
       const jobFileContents = await context.buildUserJobFileContent;
       context.model = new Model(jobFileContents);
       config.set('env', 'local'); // For got hooks only.
-      const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      const rewiredApi = rewire(apiDecoratingAdapterPath);
 
       context.revertRewiredApiEventSource = rewiredApi.__set__('EventSource', EventSource);
       context.rewiredSubscribeToTesterFeedback = rewiredApi.__get__('subscribeToTesterFeedback');
@@ -555,7 +558,7 @@ describe('apiDecoratingAdapter', () => {
       config.set('env', 'local'); // For got hooks only.
 
       flags.onCleanup = () => { config.set('env', 'test'); };
-      const rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      const rewiredApi = rewire(apiDecoratingAdapterPath);
       const buildUserJobFileContents = await rewiredApi.getBuildUserConfigFile(buildUserConfigFilePath);
       expect(buildUserJobFileContents).to.equal(buildUserJobFileContent);
     });
@@ -566,11 +569,11 @@ describe('apiDecoratingAdapter', () => {
     beforeEach(async (flags) => {
       const { context } = flags;
       config.set('env', 'local'); // For got hooks only.
-      context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      context.rewiredApi = rewire(apiDecoratingAdapterPath);
     });
     it('- given event `testerProgress` handleTesterProgress of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
-      const dashboard = rewire('src/view/dashboard');
+      const dashboard = rewire(dashboardPath);
       const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
       dashboard.handleTesterProgress = handleTesterProgressStub;
       const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
@@ -607,7 +610,7 @@ describe('apiDecoratingAdapter', () => {
 
     it('- given event `testerPctComplete` handleTesterPctComplete of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
-      const dashboard = rewire('src/view/dashboard');
+      const dashboard = rewire(dashboardPath);
       const handleTesterPctCompleteStub = sinon.stub(dashboard, 'handleTesterPctComplete');
       dashboard.handleTesterPctComplete = handleTesterPctCompleteStub;
       const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
@@ -644,7 +647,7 @@ describe('apiDecoratingAdapter', () => {
 
     it('- given event `testerBugCount` handleTesterBugCount of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
-      const dashboard = rewire('src/view/dashboard');
+      const dashboard = rewire(dashboardPath);
       const handleTesterBugCountStub = sinon.stub(dashboard, 'handleTesterBugCount');
       dashboard.handleTesterBugCount = handleTesterBugCountStub;
       const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
@@ -687,7 +690,7 @@ describe('apiDecoratingAdapter', () => {
       context.model = new Model(jobFileContents);
       context.modelPropagateTesterMessageStub = sinon.stub(context.model, 'propagateTesterMessage');
       config.set('env', 'local'); // For got hooks only.
-      context.rewiredApi = rewire('src/presenter/apiDecoratingAdapter');
+      context.rewiredApi = rewire(apiDecoratingAdapterPath);
       context.rewiredHandleServerSentTesterEvents = context.rewiredApi.__get__('handleServerSentTesterEvents');
     });
 

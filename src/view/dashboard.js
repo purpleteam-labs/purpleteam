@@ -14,12 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
 
-const config = require('config/config');
+const config = require('../../config/config');
 // blessed breaks tests, so fake it.
 const blessed = require(config.get('modulePaths.blessed')); // eslint-disable-line import/no-dynamic-require
-const contrib = require('blessed-contrib');
-const { name: projectName } = require('package.json');
-const { testerViewTypes, testerPctCompleteType, statTableType, newBugsType, totalProgressType } = require('src/view/types');
+const contrib = require('blessed-contrib'); // eslint-disable-line import/order
+const { name: projectName } = require('../../package.json');
+const { testerViewTypes, testerPctCompleteType, statTableType, newBugsType, totalProgressType } = require('./types');
 
 const testerNames = testerViewTypes.map((tv) => tv.testOpts.args.name);
 

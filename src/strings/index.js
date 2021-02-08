@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
 
-const config = require('config/config');
+const config = require('../../config/config');
 
 const TesterUnavailable = (tester) => `No ${tester} testing available currently. The ${tester} tester is currently in-active.`;
 const TestPlanUnavailable = (tester) => `No test plan available for the ${tester} tester. The ${tester} tester is currently in-active.`;
