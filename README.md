@@ -128,7 +128,7 @@ From within your NodeJS build project run the following command to install the p
 npm install
 ```
 
-### NPM install globally
+## NPM install globally
 
 For example, you may have a build project/pipeline that is written in some language besides JavaScript. In this case the most suitable install technique may be to install the purpleteam CLI globally.
 
@@ -138,6 +138,12 @@ To do so, run the following command:
 npm install -g purpleteam
 ```
 Now the purpleteam CLI is installed and on your path to invoke from anywhere on your system.
+
+```shell
+which purpleteam
+# Will print where purpleteam is located.
+# You will need this to configure it if you choose to install globally.
+```
 
 # Configure
 
@@ -161,6 +167,8 @@ So long as the initial CLI request for tester feedback is made immediately after
 
 **`purpleteamAuth`** If you are planning on using the `local` environment you can stick with the default property values. If you are planning on using the `cloud` environment you will be given this information when you sign-up for a purpleteam account.
 
+<div id="buildUserConfig_fileUri"></div>
+
 **`buildUserConfig.fileUri`** Configure this value if you do not want to manually pass it as an arguement to the CLI. This is the _Job_ file you have configured to specify your System Under Test (SUT) details.
 
 If you installed the purpleteam CLI via `git clone` (You are intending to run purpleteam CLI standalone), then a relative directory path from the root of the repository ("./testResources/jobs/your_job_file") is acceptable.  
@@ -178,7 +186,7 @@ Purpleteam uses the convict package for it's configuration.
 
 There are several ways you can handle the sensitive values that need to be read into the purpleteam CLI to access your instance of the purpleteam Cloud service:
 
-* Place sensitive values in-line in the `config.cloud.json` file, providing you are confident that you have sufficiently locked down file, directory permissions and access to the host that will be running the purpleteam CLI
+* Place sensitive values in-line in the `config.cloud.json` file, providing you are confident that you have sufficiently locked down [file, directory permissions](https://f1.holisticinfosecforwebdevelopers.com/chap03.html#vps-identify-risks-unnecessary-and-vulnerable-services-overly-permissive-file-permissions-ownership-and-lack-of-segmentation) and access to the host that will be running the purpleteam CLI
 * Place sensitive values in a similarly structured file but in some other directory that the purpleteam CLI has access to and is sufficiently locked down as previously mentioned. The path of which said file can be [added to the array](https://github.com/mozilla/node-convict/tree/master/packages/convict#configloadfilefile-or-filearray) as an element that is feed to `config.loadFile` in the main `config.js` file
 * Place sensitive values in environment variables yourself, or pass them as environment variables in the current shell to the purpleteam CLI:  
   ```js
@@ -195,6 +203,8 @@ There are several ways you can run the purpleteam CLI. The following list some. 
 
 For those that chose to [clone](#clone-the-git-repository) the purpleteam CLI:
 
+You can choose to export the `NODE_ENV` environment variable before running the following commands, or simply do so as part of running the commands. For the following examples we are using the `local` environment.
+
 ### Run the bin/purpleteam file via npm script
 
 1. From the root directory of the purpleteam repository
@@ -204,6 +214,7 @@ For those that chose to [clone](#clone-the-git-repository) the purpleteam CLI:
      env NODE_ENV="local" npm start
      # Should print out the purpleteam top level help
      ```
+     <div id="purpleteam-top-level-help"></div>
      <img width=900px src="https://user-images.githubusercontent.com/2862029/107207208-e9664680-6a64-11eb-9ea9-48f40e8ef155.png" alt="purpleteam top level help">
    * To start the CLI and pass commands (`status` for example):  
      ```shell
@@ -261,6 +272,8 @@ For those that chose to [clone](#clone-the-git-repository) the purpleteam CLI:
 
 For those that chose to [install locally via npm](#npm-install-locally):
 
+The `NODE_ENV` environment variable is exported as part of the NPM [scripts](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/e259b68d70610379d4a01c4b8357d453d556361d/package.json#L9) for the following examples, again we are using the `local` environment.
+
 Providing your package.json and the JavaScript file (index.js in the [above example](#purpleteam-build-test-cli)) that is going to run the purpleteam CLI is similar to those configured in the above file examples, you should be able to successfully run the following commands from the root directory of your NodeJS CI/nightly build/build pipeline project.
 
 ### Run the purpleteam CLI directly
@@ -311,6 +324,8 @@ npm start
 # ✖  critical   [apiDecoratingAdapter] orchestrator is down, or an incorrect URL has been specified in the CLI config.
 ```
 
+If you get a blank screen, please confirm you have [configured](#buildUserConfig_fileUri) purpleteam correctly. For example: if the `buildUserConfig.fileUrl` is a relative path, where ever the purpleteam bin file is executing from may not be able to find your Job file. Try an absolute path.
+
 ### Debug your app
 
 If you need to debug your NodeJS CI/nightly build/build pipeline project, run the following command:
@@ -339,3 +354,14 @@ If you need to debug your NodeJS CI/nightly build/build pipeline project as well
 
 
 ## NPM install globally option
+
+For those that chose to [install globally via npm](#npm-install-globally):
+
+You can choose to export the `NODE_ENV` environment variable before running the following commands, or simply do so as part of running the commands. For the following examples we are using the `local` environment.
+
+```shell
+env NODE_ENV=local purpleteam
+# Should print out the purpleteam top level help
+```
+
+Run any of the [purpleteam CLI commands](#purpleteam-top-level-help) as you would with the install of any other system wide binary.
