@@ -178,6 +178,7 @@ const requestOutcomes = async () => {
   await gotPt.get('outcomes', {
     responseType: 'buffer',
     resolveBodyOnly: true,
+    headers: { Accept: 'application/zip' },
     retry: {
       // Outcomes file may not be ready yet, so retry
       statusCodes: [...options.retry.statusCodes, 404],
