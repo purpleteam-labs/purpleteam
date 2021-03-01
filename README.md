@@ -184,6 +184,8 @@ Use the config/config.js for documentation and further examples.
 
 **`testerFeedbackComms.medium`** Long Polling (`lp`) is supported in both `local` and `cloud` environments. Server Sent Events (`sse`) is only supported in the `local` environment due to AWS limitations. Both `lp` and `sse` are real-time. Both implementations have their pros and cons.
 
+Which ever option you choose, the same option must be applied to both the orchestrator and the purpleteam CLI.
+
 Using `sse` is one way communications after the initial subscription from the CLI to the orchestrator. Redis pub/sub is used between the testers and the orchestrator to publish tester feedback. If the CLI is stopped (not subscribed) at any point while the back-end is in a test run, events will be lost.
 
 Using `lp` is request-response communications. A request is made and only answered when there are tester feedback messages available, or the application specific (rather than AWS Api Gateway) time-out is exceeded. As soon as the CLI receives a set (one to many) of tester feedback messages, it makes another request to the orchestrator (if running in `local` env), or API (if running in `cloud` env). Redis pub/sub is used between the testers and the orchestrator to publish tester feedback.  
