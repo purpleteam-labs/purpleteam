@@ -56,6 +56,12 @@ From a directory that you would like the CLI cloned to run the following command
 git clone https://github.com/purpleteam-labs/purpleteam.git
 ```
 
+Install the dependencies with the following command:
+
+```
+npm install
+```
+
 ## NPM install locally
 
 If you are planning on running/debugging purpleteam from another NodeJS process, for example a CI/nightly build/build pipeline project of your own, installing via NPM is a good option.
