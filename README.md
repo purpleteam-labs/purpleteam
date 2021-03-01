@@ -62,6 +62,12 @@ Install the dependencies with the following command:
 npm install
 ```
 
+Another option with cloning if you want the purpleteam CLI to be available as a system wide command is to use the following command from the repositories root directory:
+
+```
+npm link
+```
+
 ## NPM install locally
 
 If you are planning on running/debugging purpleteam from another NodeJS process, for example a CI/nightly build/build pipeline project of your own, installing via NPM is a good option.
@@ -160,6 +166,8 @@ which purpleteam
 # Will print where purpleteam is located.
 # You will need this to configure it if you choose to install globally.
 ```
+
+As mentioned under the [Clone](#clone-the-git-repository) section, another option for a system wide install is to use `npm link`.
 
 # Configure
 
@@ -286,6 +294,12 @@ You can choose to export the `NODE_ENV` environment variable before running the 
      # Should print the available options for the test command:
      ```
 
+Or if you chose to clone the purpleteam CLI repository and `npm link` it, you can run it as a first class citizen:
+
+```
+purpleteam
+```
+
 ## NPM install locally option
 
 For those that chose to [install locally via npm](#npm-install-locally):
@@ -376,11 +390,16 @@ If you need to debug your NodeJS CI/nightly build/build pipeline project as well
 
 For those that chose to [install globally via npm](#npm-install-globally):
 
-You can choose to export the `NODE_ENV` environment variable before running the following commands, or simply do so as part of running the commands. For the following examples we are using the `local` environment.
+You can choose to export the `NODE_ENV` environment variable before running the following commands, or simply do so as part of running the commands.
 
 ```shell
-env NODE_ENV=local purpleteam
+NODE_ENV=local purpleteam
+# Or export NODE_ENV then just run:
+purpleteam
 # Should print out the purpleteam top level help
 ```
 
 Run any of the [purpleteam CLI commands](#purpleteam-top-level-help) as you would with the install of any other system wide binary.
+
+If you choose to clone the purpleteam CLI repository and run `npm link` from it's root directory, the same applies. Plus you get to continue to modify the purpleteam CLI config without reinstalling.
+
