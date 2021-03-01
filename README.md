@@ -36,6 +36,12 @@
 <br/><br/>
 </div>
 
+If you are planning on running the `local` environment, once you have installed, configured and are ready to run the purpleteam CLI, head back to the [local setup](https://doc.purpleteam-labs.com/local/local-setup.html) documentation and make sure all of the otther purpleteam components are also set-up and ready to run. After that work through the [local workflow](https://doc.purpleteam-labs.com/local/local-workflow) documentation.
+
+If you are planning on targeting the `cloud` environment, the purpleteam CLI is all you need to have set-up.
+
+If you have any issues with the set-up, be sure to check the [trouble shooting](https://doc.purpleteam-labs.com/local/workflow/trouble-shooting.html) page.
+
 # Install
 
 There are several options.
@@ -71,13 +77,13 @@ Using the above mentioned example build project files, and for the sake of this 
   "scripts": {
     "// Don't forget to export any required env vars before running the purpleteam CLI. For example": "env NODE_ENV='local' ",
     "// Invoke purpleteam binary from NPM script": "npm run purpleteam",
-    "purpleteam": "env NODE_ENV='local' purpleteam",
+    "purpleteam": "NODE_ENV=local purpleteam",
     "// Start your node app": "npm start",
-    "start": "env NODE_ENV='local' node index.js",
+    "start": "NODE_ENV=local node index.js",
     "// Debug your node app": "npm run debugApp",
-    "debugApp": "env NODE_ENV='local' node --inspect-brk=localhost:9230 index.js",
+    "debugApp": "NODE_ENV=local node --inspect-brk=localhost:9230 index.js",
     "// Debug your node app and the purpleteam CLI": "npm run debugAppAndCli",
-    "debugAppAndCli": "env NODE_ENV='local' env DEBUG_PURPLETEAM='true' node --inspect-brk=localhost:9230 index.js"
+    "debugAppAndCli": "NODE_ENV=local DEBUG_PURPLETEAM=true node --inspect-brk=localhost:9230 index.js"
   },
   "dependencies": {
     "purpleteam": "*"
@@ -151,6 +157,8 @@ which purpleteam
 
 # Configure
 
+No matter which install option you decide on the purpleteam CLI will require configuration.
+
 If you are planning on using the `cloud` environment copy the config/config.example.cloud.json to config/config.cloud.json and make the necessary changes.
 If you are planning on using the `local` environment copy the config/config.example.local.json to config/config.local.json and make the necessary changes.
 
@@ -194,7 +202,7 @@ There are several ways you can handle the sensitive values that need to be read 
 * Place sensitive values in a similarly structured file but in some other directory that the purpleteam CLI has access to and is sufficiently locked down as previously mentioned. The path of which said file can be [added to the array](https://github.com/mozilla/node-convict/tree/master/packages/convict#configloadfilefile-or-filearray) as an element that is feed to `config.loadFile` in the main `config.js` file
 * Place sensitive values in environment variables yourself, or pass them as environment variables in the current shell to the purpleteam CLI:  
   ```js
-  env PURPLETEAM_APP_CLIENT_ID="<app-client-id>" env PURPLETEAM_APP_CLIENT_SECRET="<app-client-secret>" env PURPLETEAM_API_KEY="<api-key>" purpleteam test
+  PURPLETEAM_APP_CLIENT_ID=<app-client-id> PURPLETEAM_APP_CLIENT_SECRET=<app-client-secret> PURPLETEAM_API_KEY=<api-key> purpleteam test
   ```
 
 The precedence order of where values will be read from is defined by [convict](https://github.com/mozilla/node-convict/tree/master/packages/convict#precedence-order).
@@ -207,7 +215,7 @@ There are several ways you can run the purpleteam CLI. The following list some. 
 
 For those that chose to [clone](#clone-the-git-repository) the purpleteam CLI:
 
-You can choose to export the `NODE_ENV` environment variable before running the following commands, or simply do so as part of running the commands. For the following examples we are using the `local` environment.
+You can choose to export the `NODE_ENV` environment variable before running the following commands, or simply do so as part of running the commands. For example: `NODE_ENV=local` or `NODE_ENV=cloud`.
 
 ### Run the bin/purpleteam file via npm script
 
@@ -215,31 +223,31 @@ You can choose to export the `NODE_ENV` environment variable before running the 
 2. Run one of the following commands
    * To start the CLI:  
      ```shell
-     env NODE_ENV="local" npm start
+     npm start
      # Should print out the purpleteam top level help
      ```
      <div id="purpleteam-top-level-help"></div>
      <img width=900px src="https://user-images.githubusercontent.com/2862029/107207208-e9664680-6a64-11eb-9ea9-48f40e8ef155.png" alt="purpleteam top level help">
    * To start the CLI and pass commands (`status` for example):  
      ```shell
-     env NODE_ENV="local" npm start status
+     npm start status
      # Should print the following message if the orchestrator is not running:
      # ☰  notice     [dashboard] orchestrator is down, or an incorrect URL has been specified in the CLI config.
      ```
    * To start the CLI and pass commands (`test` for example):  
      ```shell
-     env NODE_ENV="local" npm start test
+     npm start test
      # Should print the following message if the orchestrator is not running:
      # ✖  critical   [apiDecoratingAdapter] orchestrator is down, or an incorrect URL has been specified in the CLI config.
      ```
    * To start the CLI and pass commands (`test` for example) with options:  
      ```shell
-     env NODE_ENV="local" npm start test -- --help
+     npm start test -- --help
      # Should print the available options for the test command:
      ```
    * To debug the CLI (passing the `status` command for example):  
      ```shell
-     env NODE_ENV="local" npm run debug status
+     npm run debug status
      # Amongst other messages, you should see the following message:
      # Debugger listening on ws://localhost:9230/...
      ```
@@ -251,24 +259,24 @@ You can choose to export the `NODE_ENV` environment variable before running the 
 2. Run one of the following commands
    * To start the CLI:  
      ```shell
-     env NODE_ENV="local" bin/purpleteam
+     bin/purpleteam
      # Should print out the purpleteam top level help
      ```
    * To start the CLI and pass commands (`status` for example):  
      ```shell
-     env NODE_ENV="local" bin/purpleteam status
+     bin/purpleteam status
      # Should print the following message if the orchestrator is not running:
      # ☰  notice     [dashboard] orchestrator is down, or an incorrect URL has been specified in the CLI config.
      ```
    * To start the CLI and pass commands (`test` for example):  
      ```shell
-     env NODE_ENV="local" bin/purpleteam test
+     bin/purpleteam test
      # Should print the following message if the orchestrator is not running:
      # ✖  critical   [apiDecoratingAdapter] orchestrator is down, or an incorrect URL has been specified in the CLI config.
      ```
    * To start the CLI and pass commands (`test` for example) with options:  
      ```shell
-     env NODE_ENV="local" bin/purpleteam test --help
+     bin/purpleteam test --help
      # Should print the available options for the test command:
      ```
 
@@ -276,7 +284,7 @@ You can choose to export the `NODE_ENV` environment variable before running the 
 
 For those that chose to [install locally via npm](#npm-install-locally):
 
-The `NODE_ENV` environment variable is exported as part of the NPM [scripts](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/e259b68d70610379d4a01c4b8357d453d556361d/package.json#L9) for the following examples, again we are using the `local` environment.
+The `NODE_ENV` environment variable needs to be exported so that the purpleteam CLI knows whether it's targeting the `cloud` or `local` environment and configuration. In the example build project we have used, `NODE_ENV` is exported as part of the NPM [scripts](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/c750f89de31848496fa6ce082ee201b171ec7398/package.json#L9), and it is using the `local` environment.
 
 Providing your package.json and the JavaScript file (index.js in the [above example](#purpleteam-build-test-cli)) that is going to run the purpleteam CLI is similar to those configured in the above file examples, you should be able to successfully run the following commands from the root directory of your NodeJS CI/nightly build/build pipeline project.
 
@@ -293,7 +301,7 @@ Run the purpleteam CLI directly but pass the `status` command to `purpleteam`:
 
 ```shell
 npm run purpleteam status
-# Should print the following message if the orchestrator is not running:
+# Should print the following message if the orchestrator is not yet running:
 # ☰  notice     [dashboard] orchestrator is down, or an incorrect URL has been specified in the CLI config.
 ```
 
@@ -303,7 +311,7 @@ Run the purpleteam CLI directly but pass the `test` command to `purpleteam`:
 
 ```shell
 npm run purpleteam test
-# Should print the following message if the orchestrator is not running:
+# Should print the following message if the orchestrator is not yet running:
 # ✖  critical   [apiDecoratingAdapter] orchestrator is down, or an incorrect URL has been specified in the CLI config.
 ```
 
@@ -324,6 +332,7 @@ You could change the `const purpleteamArgs = ['purpleteam', 'test'];` to use any
 
 ```shell
 npm start
+# If the orchestrator is not yet running:
 # Should print the following via the purpleteam.stdout.on('data'... handler
 # ✖  critical   [apiDecoratingAdapter] orchestrator is down, or an incorrect URL has been specified in the CLI config.
 ```
