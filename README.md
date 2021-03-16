@@ -323,7 +323,7 @@ Run the purpleteam CLI directly but pass the `status` command to `purpleteam`:
 
 ```shell
 npm run purpleteam status
-# Should print the following message if the orchestrator is not yet running:
+# Should print the following message if the orchestrator is not yet running. Be patient, purpleteam CLI retries:
 # ☰  notice     [dashboard] orchestrator is down, or an incorrect URL has been specified in the CLI config.
 ```
 
@@ -359,7 +359,12 @@ npm start
 # ✖  critical   [apiDecoratingAdapter] orchestrator is down, or an incorrect URL has been specified in the CLI config.
 ```
 
-If you get a blank screen, please confirm you have [configured](#buildUserConfig_fileUri) purpleteam correctly. For example: if the `buildUserConfig.fileUrl` is a relative path, where ever the purpleteam bin file is executing from may not be able to find your Job file. Try an absolute path.
+If you get a blank screen or purpleteam help text with an error or warning via a `?⃝  warning` logged to your terminal, please confirm you have [configured](#buildUserConfig_fileUri) purpleteam correctly.
+
+When running the purpleteam CLI embedded, if everything runs as expected you shouldn't see any output from purpleteam CLI being printed to the terminal, but a log file for each tester should be streamed to the directory (`loggers.testerProgress.dirname`) you configured.
+On a successful test run, an outcomes zip file will be written to the directory (`outcomes.dir`) you configured.
+
+If for example purpleteam CLI can not find the file path (`buildUserConfig.fileUrl`) you configured, for example where ever the purpleteam bin file is executing from may not be able to find your Job file if it is a relative path. Try an absolute path.
 
 ### Debug your app
 
