@@ -61,7 +61,7 @@ If you have any issues with the set-up, be sure to check the [trouble shooting](
     * [Run your app (build pipeline)](#run-your-app-build-pipeline)
     * [Debug your app (build pipeline)](#debug-your-app-build-pipeline)
     * [Debug your app and purpleteam CLI](#debug-your-app-and-purpleteam-cli)
-    * [NPM install globally option](#npm-install-globally-option)
+  * [NPM install globally option](#npm-install-globally-option)
 * [Usage](#usage)
 
 
@@ -100,7 +100,7 @@ For the locally installed via NPM option the purpleteam-labs Team uses the [purp
 This example exports two environment variables:
 
 * `NODE_ENV=local`: Means that purpleteam will be using the `local` [configuration](#configure). If instead you have signed up for a cloud license, you will want to be targeting the `cloud` environment instead
-* `PURPLETEAM_UI=noUi`: As discussed in the [Configure](#configure) sub-section
+* `PURPLETEAM_UI=noUi`: As detailed in the [Configure](#configure) sub-section
 
 Using the above mentioned example build project files, and for the sake of this example, let's assume your NodeJS build project has the same following files:
 
@@ -114,7 +114,7 @@ Using the above mentioned example build project files, and for the sake of this 
   "description": "Used to test that the purpleteam CLI runs within a build pipeline successfully",
   "main": "index.js",
   "scripts": {
-    "// Don't forget to export any required env vars before running the purpleteam CLI. For example": "env NODE_ENV='local' and PURPLETEAM_UI=noUi",
+    "// Don't forget to export any required env vars before running the purpleteam CLI. For example": "NODE_ENV=local and PURPLETEAM_UI=noUi",
     "// Invoke purpleteam binary from NPM script": "npm run purpleteam",
     "purpleteam": "NODE_ENV=local purpleteam",
     "// Start your node app": "npm start",
@@ -468,7 +468,7 @@ If you are running the purpleteam CLI in the default [character user interface (
 The following commands have the associated interactions available:
 
 * `test`: Once testing is under way, you can:
-  * [right-arrow], [left-arrow] through the terminal screens to view the testing progress in real-time courtesy of the purpleteam API
+  * [right-arrow], [left-arrow] through the terminal screens to view the testing progress of each of the [_Testers_](https://doc.purpleteam-labs.com/definitions.html) in real-time courtesy of the purpleteam API
   * [down-arrow], [up-arrow] to highlight the different Running Statistics of the testers as they are provided in real-time courtesy of the purpleteam API
-* `testplan`: Once the test plans have been retreived, you can [right-arrow], [left-arrow] through the terminal screens to view the test plans
+* `testplan`: Once the test plans have been retreived, you can [right-arrow], [left-arrow] through the terminal screens to view the test plans of each specific [_Tester_](https://doc.purpleteam-labs.com/definitions.html)
 
