@@ -19,7 +19,7 @@ const config = require('../../config/config');
 const blessed = require(config.get('modulePaths.blessed')); // eslint-disable-line import/no-dynamic-require
 const contrib = require('blessed-contrib'); // eslint-disable-line import/order
 const { name: projectName } = require('../../package.json');
-const { testerViewTypes, testerPctCompleteType, statTableType, newBugsType, totalProgressType } = require('./types');
+const { testerViewTypes, testerPctCompleteType, statTableType, newBugsType, totalProgressType } = require('./blessedTypes');
 
 const testerNames = testerViewTypes.map((tv) => tv.testOpts.args.name);
 
@@ -70,7 +70,6 @@ const internals = {
 };
 
 const screen = blessed.screen({
-  // dump: `${process.cwd()}/logs/dashboard/log.log`,
   smartCSR: true,
   autoPadding: false,
   warnings: true,
@@ -142,7 +141,7 @@ const setDataOnAllPageWidgets = () => {
 };
 
 
-const handleTesterProgress = (testerType, sessionId, message) => {
+const handleTesterProgress = ({ testerType, sessionId, message, ptLogger }) => {
   const logger = internals.infoOuts[testerType].loggers.find((l) => l.sessionId === sessionId);
   if (logger.instance !== 'To be assigned') {
     try {
@@ -152,10 +151,11 @@ const handleTesterProgress = (testerType, sessionId, message) => {
       throw new Error(`An error occurred while attempting to split a testerProgress event message. The message was "${message}", the error was "${e}"`);
     }
   }
+  ptLogger.get(`${testerType}-${sessionId}`).notice(message);
 };
 
 
-const handleTesterPctComplete = (testerType, sessionId, message) => {
+const handleTesterPctComplete = ({ testerType, sessionId, message }) => {
   const { infoOuts } = internals;
   // statTable
   infoOuts[testerType].statTable.records.find((r) => r.sessionId === sessionId).pctComplete = Math.round(message);
@@ -176,7 +176,7 @@ const handleTesterPctComplete = (testerType, sessionId, message) => {
 };
 
 
-const handleTesterBugCount = (testerType, sessionId, message) => {
+const handleTesterBugCount = ({ testerType, sessionId, message }) => {
   const { infoOuts } = internals;
   // statTable
   const statTableRecord = infoOuts[testerType].statTable.records.find((r) => r.sessionId === sessionId);
@@ -448,7 +448,7 @@ const setupInfoOutsForTest = (testerSessions) => {
 };
 
 
-const testPlan = (testPlans) => {
+const testPlan = ({ testPlans }) => {
   initTPCarousel(testPlans);
 };
 
@@ -458,8 +458,8 @@ const test = (testerSessions) => {
   initCarousel();
 };
 
-const status = (log, statusOfPurpleteamApi) => {
-  log.notice(statusOfPurpleteamApi, { tags: ['dashboard'] });
+const status = (cUiLogger, statusOfPurpleteamApi) => {
+  cUiLogger.notice(statusOfPurpleteamApi, { tags: ['cUi'] });
 };
 
 module.exports = {

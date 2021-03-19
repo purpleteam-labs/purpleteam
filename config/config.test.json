@@ -1,6 +1,6 @@
 {
   "loggers": {
-    "def": {
+    "cUi": {
       "level": "debug"
     }
   },

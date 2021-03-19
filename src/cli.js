@@ -17,7 +17,7 @@
 const sywac = require('sywac');
 const chalk = require('chalk');
 const figlet = require('figlet');
-const log = require('purpleteam-logger').get();
+const cUiLogger = require('purpleteam-logger').get();
 const pkg = require('../package.json');
 
 const epilogue = `For more information, find the manual at https://doc.purpleteam-labs.com
@@ -25,7 +25,7 @@ Copyright (C) 2017-2021 BinaryMist Limited. All rights reserved.
 Use of this source code is governed by a license that can be found in the LICENSE.md file.`;
 
 const processCommands = async (options) => { // eslint-disable-line no-unused-vars
-  log.debug('Configuring sywac\n', { tags: ['cli'] });
+  cUiLogger.debug('Configuring sywac\n', { tags: ['cli'] });
   const api = sywac // eslint-disable-line no-unused-vars
     .usage('Usage: $0 [command] [option(s)]')
     .commandDirectory('cmds')
@@ -56,8 +56,12 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
 
   const cliArgs = shouldParseAndexit(options.argv) ? await api.parseAndExit() : await api.parse();
 
-  typeof cliArgs.errors !== 'undefined' && cliArgs.errors.length && log.error(cliArgs.errors) && process.exit(cliArgs.code);
-  cliArgs.code > 0 && log.warning(cliArgs.output) && process.exit(cliArgs.code);
+  // api.parse needs a short-circut for errors.
+  // Unexpected errors are included in cliArgs.errors
+  typeof cliArgs.errors !== 'undefined' && cliArgs.errors.length && cUiLogger.error(cliArgs.errors) && process.exit(cliArgs.code);
+  // a non-zero cliArgs.code value means at least one validation or unexpected error occurred
+  // Doc: https://sywac.io/docs/async-parsing.html
+  cliArgs.code > 0 && cUiLogger.warning(cliArgs.output) && process.exit(cliArgs.code);
 };
 
 module.exports = { processCommands };

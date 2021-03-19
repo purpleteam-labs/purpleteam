@@ -21,12 +21,13 @@ const { describe, beforeEach, it } = exports.lab;
 const { expect } = require('@hapi/code');
 const sinon = require('sinon');
 const rewire = require('rewire');
+const ptLogger = require('purpleteam-logger');
 
-const dashboardPath = '../../src/view/dashboard';
+const cUiPath = '../../src/view/cUi';
 
-// const dashboard = require('src/view/dashboard');
+// const cUi = require('src/view/cUi');
 
-describe('dashboard', () => {
+describe('cUi', () => {
   describe('handleTesterProgress', () => {
     beforeEach((flags) => {
       const { context } = flags;
@@ -37,47 +38,72 @@ describe('dashboard', () => {
 
     it('- testerType `app`, sessionId `lowPrivUser` should log provided message', (flags) => {
       const { context: { log0, log1 } } = flags;
-      const rewiredDashboard = rewire(dashboardPath);
+      const rewiredCui = rewire(cUiPath);
 
       const logger0 = { sessionId: 'lowPrivUser', instance: { log: log0 } };
       const logger1 = { sessionId: 'adminUser', instance: { log: log1 } };
       const testerType = 'app';
-      const revertRewiredDashboardInternalsInfoOutsAppLoggers = rewiredDashboard.__set__(`internals.infoOuts.${testerType}.loggers`, [logger0, logger1]);
+      const sessionId = 'lowPrivUser';
+      const message = 'App tests are now running.';
 
-      rewiredDashboard.handleTesterProgress(testerType, 'lowPrivUser', 'App tests are now running.');
+      const revertRewiredCuiInternalsInfoOutsAppLoggers = rewiredCui.__set__(`internals.infoOuts.${testerType}.loggers`, [logger0, logger1]);
 
-      flags.onCleanup = () => { revertRewiredDashboardInternalsInfoOutsAppLoggers(); };
+      const ptLoggerAppLowPrivUser = { notice: () => {} };
+      const ptLoggerAppLowPrivUserNoticeSpy = sinon.spy(ptLoggerAppLowPrivUser, 'notice');
+      const ptLoggerGetAppLowPrivUserStub = sinon.stub(ptLogger, 'get').returns(ptLoggerAppLowPrivUser);
+
+      rewiredCui.handleTesterProgress({ testerType, sessionId: 'lowPrivUser', message: 'App tests are now running.', ptLogger });
+
+      flags.onCleanup = () => {
+        revertRewiredCuiInternalsInfoOutsAppLoggers();
+        ptLoggerAppLowPrivUser.notice.restore();
+        ptLogger.get.restore();
+      };
 
       expect(log0.callCount).to.equal(1);
       expect(log1.callCount).to.equal(0);
       expect(log0.getCall(0).args).to.equal(['App tests are now running.']);
+      expect(ptLoggerGetAppLowPrivUserStub.calledOnceWith(`${testerType}-${sessionId}`)).to.be.true();
+      expect(ptLoggerAppLowPrivUserNoticeSpy.calledOnceWith(message)).to.be.true();
     });
 
 
     it('- testerType `app`, sessionId `adminUser` should log provided message', (flags) => {
       const { context: { log0, log1 } } = flags;
-      const rewiredDashboard = rewire(dashboardPath);
+      const rewiredCui = rewire(cUiPath);
 
       const logger0 = { sessionId: 'lowPrivUser', instance: { log: log0 } };
       const logger1 = { sessionId: 'adminUser', instance: { log: log1 } };
       const testerType = 'app';
+      const sessionId = 'adminUser';
+      const message = 'App tests are now running.';
 
-      const revertRewiredDashboardInternalsInfoOutsAppLoggers = rewiredDashboard.__set__(`internals.infoOuts.${testerType}.loggers`, [logger0, logger1]);
+      const revertRewiredCuiInternalsInfoOutsAppLoggers = rewiredCui.__set__(`internals.infoOuts.${testerType}.loggers`, [logger0, logger1]);
 
-      rewiredDashboard.handleTesterProgress(testerType, 'adminUser', 'App tests are now running.');
+      const ptLoggerAppAdminUser = { notice: () => {} };
+      const ptLoggerAppAdminUserNoticeSpy = sinon.spy(ptLoggerAppAdminUser, 'notice');
+      const ptLoggerGetAppAdminUserStub = sinon.stub(ptLogger, 'get').returns(ptLoggerAppAdminUser);
 
-      flags.onCleanup = () => { revertRewiredDashboardInternalsInfoOutsAppLoggers(); };
+      rewiredCui.handleTesterProgress({ testerType, sessionId: 'adminUser', message: 'App tests are now running.', ptLogger });
+
+      flags.onCleanup = () => {
+        revertRewiredCuiInternalsInfoOutsAppLoggers();
+        ptLoggerAppAdminUser.notice.restore();
+        ptLogger.get.restore();
+      };
 
       expect(log0.callCount).to.equal(0);
       expect(log1.callCount).to.equal(1);
       expect(log1.getCall(0).args).to.equal(['App tests are now running.']);
+      expect(ptLoggerGetAppAdminUserStub.calledOnceWith(`${testerType}-${sessionId}`)).to.be.true();
+      expect(ptLoggerAppAdminUserNoticeSpy.calledOnceWith(message)).to.be.true();
     });
   });
 
 
   describe('handleTesterPctComplete', () => {
     it('- should handle testerPctComplete event as expected', (flags) => {
-      const rewiredDashboard = rewire(dashboardPath);
+      const rewiredCui = rewire(cUiPath);
       const testerType = 'app';
       const sessionId = 'lowPrivUser';
       const message = 17;
@@ -85,16 +111,16 @@ describe('dashboard', () => {
       const appStatTableRecords = [{ sessionId: 'lowPrivUser', threshold: 12, bugs: 0, pctComplete: 0 }, { sessionId: 'adminUser', threshold: 0, bugs: 0, pctComplete: 0 }];
       const serverStatTableRecords = [{ sessionId: 'NA', threshold: 0, bugs: 0, pctComplete: 0 }];
       const tlsStatTableRecords = [{ sessionId: 'NA', threshold: 0, bugs: 0, pctComplete: 0 }];
-      const revertRewiredDashboardInternalsInfoOutsAppStatTableRecords = rewiredDashboard.__set__(`internals.infoOuts.${testerType}.statTable.records`, appStatTableRecords);
-      const revertRewiredDashboardInternalsInfoOutsServerStatTableRecords = rewiredDashboard.__set__(`internals.infoOuts.${'server'}.statTable.records`, serverStatTableRecords);
-      const revertRewiredDashboardInternalsInfoOutsTlsStatTableRecords = rewiredDashboard.__set__(`internals.infoOuts.${'tls'}.statTable.records`, tlsStatTableRecords);
+      const revertRewiredCuiInternalsInfoOutsAppStatTableRecords = rewiredCui.__set__(`internals.infoOuts.${testerType}.statTable.records`, appStatTableRecords);
+      const revertRewiredCuiInternalsInfoOutsServerStatTableRecords = rewiredCui.__set__(`internals.infoOuts.${'server'}.statTable.records`, serverStatTableRecords);
+      const revertRewiredCuiInternalsInfoOutsTlsStatTableRecords = rewiredCui.__set__(`internals.infoOuts.${'tls'}.statTable.records`, tlsStatTableRecords);
 
       const setDataOnAllPageWidgetsStub = sinon.stub();
-      const revertRewiredDashboardSetDataOnAllPageWidgets = rewiredDashboard.__set__('setDataOnAllPageWidgets', setDataOnAllPageWidgetsStub);
+      const revertRewiredCuiSetDataOnAllPageWidgets = rewiredCui.__set__('setDataOnAllPageWidgets', setDataOnAllPageWidgetsStub);
 
-      rewiredDashboard.handleTesterPctComplete(testerType, sessionId, message);
+      rewiredCui.handleTesterPctComplete({ testerType, sessionId, message });
 
-      const rewiredInfoOuts = rewiredDashboard.__get__('internals.infoOuts');
+      const rewiredInfoOuts = rewiredCui.__get__('internals.infoOuts');
 
       expect(rewiredInfoOuts[testerType].statTable.records[0].pctComplete).to.equal(17);
       expect(rewiredInfoOuts[testerType].testerPctComplete.percent).to.equal(8.5);
@@ -107,10 +133,10 @@ describe('dashboard', () => {
       expect(setDataOnAllPageWidgetsStub.callCount).to.equal(1);
 
       flags.onCleanup = () => {
-        revertRewiredDashboardInternalsInfoOutsAppStatTableRecords();
-        revertRewiredDashboardInternalsInfoOutsServerStatTableRecords();
-        revertRewiredDashboardInternalsInfoOutsTlsStatTableRecords();
-        revertRewiredDashboardSetDataOnAllPageWidgets();
+        revertRewiredCuiInternalsInfoOutsAppStatTableRecords();
+        revertRewiredCuiInternalsInfoOutsServerStatTableRecords();
+        revertRewiredCuiInternalsInfoOutsTlsStatTableRecords();
+        revertRewiredCuiSetDataOnAllPageWidgets();
       };
     });
   });
@@ -118,7 +144,7 @@ describe('dashboard', () => {
 
   describe('handleTesterBugCount', () => {
     it('- should handle testerBugCount event as expected', (flags) => {
-      const rewiredDashboard = rewire(dashboardPath);
+      const rewiredCui = rewire(cUiPath);
       const testerType = 'app';
       const sessionId = 'lowPrivUser';
       const message = 14;
@@ -126,16 +152,16 @@ describe('dashboard', () => {
       const appStatTableRecords = [{ sessionId: 'lowPrivUser', threshold: 12, bugs: 0, pctComplete: 0 }, { sessionId: 'adminUser', threshold: 0, bugs: 0, pctComplete: 0 }];
       const serverStatTableRecords = [{ sessionId: 'NA', threshold: 0, bugs: 0, pctComplete: 0 }];
       const tlsStatTableRecords = [{ sessionId: 'NA', threshold: 0, bugs: 0, pctComplete: 0 }];
-      const revertRewiredDashboardInternalsInfoOutsAppStatTableRecords = rewiredDashboard.__set__(`internals.infoOuts.${testerType}.statTable.records`, appStatTableRecords);
-      const revertRewiredDashboardInternalsInfoOutsServerStatTableRecords = rewiredDashboard.__set__(`internals.infoOuts.${'server'}.statTable.records`, serverStatTableRecords);
-      const revertRewiredDashboardInternalsInfoOutsTlsStatTableRecords = rewiredDashboard.__set__(`internals.infoOuts.${'tls'}.statTable.records`, tlsStatTableRecords);
+      const revertRewiredCuiInternalsInfoOutsAppStatTableRecords = rewiredCui.__set__(`internals.infoOuts.${testerType}.statTable.records`, appStatTableRecords);
+      const revertRewiredCuiInternalsInfoOutsServerStatTableRecords = rewiredCui.__set__(`internals.infoOuts.${'server'}.statTable.records`, serverStatTableRecords);
+      const revertRewiredCuiInternalsInfoOutsTlsStatTableRecords = rewiredCui.__set__(`internals.infoOuts.${'tls'}.statTable.records`, tlsStatTableRecords);
 
       const setDataOnAllPageWidgetsStub = sinon.stub();
-      const revertRewiredDashboardSetDataOnAllPageWidgets = rewiredDashboard.__set__('setDataOnAllPageWidgets', setDataOnAllPageWidgetsStub);
+      const revertRewiredCuiSetDataOnAllPageWidgets = rewiredCui.__set__('setDataOnAllPageWidgets', setDataOnAllPageWidgetsStub);
 
-      rewiredDashboard.handleTesterBugCount(testerType, sessionId, message);
+      rewiredCui.handleTesterBugCount({ testerType, sessionId, message });
 
-      const rewiredInfoOuts = rewiredDashboard.__get__('internals.infoOuts');
+      const rewiredInfoOuts = rewiredCui.__get__('internals.infoOuts');
 
       expect(rewiredInfoOuts[testerType].statTable.records[0].bugs).to.equal(14);
       expect(rewiredInfoOuts.app.newBugs.color).to.equal('red');
@@ -147,10 +173,10 @@ describe('dashboard', () => {
       expect(setDataOnAllPageWidgetsStub.callCount).to.equal(1);
 
       flags.onCleanup = () => {
-        revertRewiredDashboardInternalsInfoOutsAppStatTableRecords();
-        revertRewiredDashboardInternalsInfoOutsServerStatTableRecords();
-        revertRewiredDashboardInternalsInfoOutsTlsStatTableRecords();
-        revertRewiredDashboardSetDataOnAllPageWidgets();
+        revertRewiredCuiInternalsInfoOutsAppStatTableRecords();
+        revertRewiredCuiInternalsInfoOutsServerStatTableRecords();
+        revertRewiredCuiInternalsInfoOutsTlsStatTableRecords();
+        revertRewiredCuiSetDataOnAllPageWidgets();
       };
     });
   });

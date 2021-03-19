@@ -26,7 +26,7 @@ const readFileAsync = require('util').promisify(require('fs').readFile);
 const config = require('../../config/config'); // eslint-disable-line import/order
 const ptLogger = require('purpleteam-logger');
 
-const log = ptLogger.init(config.get('loggers.def'));
+const cUiLogger = ptLogger.init(config.get('loggers.cUi'));
 
 const apiUrl = config.get('purpleteamApi.url');
 const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
@@ -34,7 +34,7 @@ const { MockEvent, EventSource } = require('mocksse');
 const { TesterFeedbackRoutePrefix } = require('../../src/strings');
 const Model = require('../../src/models/model');
 
-const dashboardPath = '../../src/view/dashboard';
+const cUiPath = '../../src/view/cUi';
 const apiDecoratingAdapterPath = '../../src/presenter/apiDecoratingAdapter';
 
 // As stored in the `request` object body from file: /testResources/jobs/job_0.1.0-alpha.1
@@ -48,9 +48,9 @@ describe('apiDecoratingAdapter', () => {
     flags.context.buildUserJobFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
   });
   describe('testPlans', () => {
-    it('- should provide the dashboard with the test plan to display', async (flags) => {
+    it('- should provide the cUi with the test plan to display', async (flags) => {
       const { context: { buildUserJobFileContent } } = flags;
-      const dashboard = rewire(dashboardPath);
+      const cUi = rewire(cUiPath);
       config.set('env', 'local'); // For got hooks only.
       const rewiredApi = rewire(apiDecoratingAdapterPath);
       const jobFileContents = await buildUserJobFileContent;
@@ -107,20 +107,20 @@ describe('apiDecoratingAdapter', () => {
 
       nock(apiUrl).post('/testplan', expectedJob).reply(200, expectedArgPasssedToTestPlan);
 
-      const testPlanStub = sinon.stub(dashboard, 'testPlan');
-      dashboard.testPlan = testPlanStub;
-      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      const testPlanStub = sinon.stub(cUi, 'testPlan');
+      cUi.testPlan = testPlanStub;
+      const revertRewiredApiCui = rewiredApi.__set__('view', cUi);
 
       flags.onCleanup = () => {
-        dashboard.testPlan.restore();
-        revertRewiredApiDashboard();
+        cUi.testPlan.restore();
+        revertRewiredApiCui();
         config.set('env', 'test');
         nock.cleanAll();
       };
 
       await rewiredApi.testPlans(jobFileContents);
 
-      expect(testPlanStub.getCall(0).args[0]).to.equal(expectedArgPasssedToTestPlan);
+      expect(testPlanStub.getCall(0).args[0]).to.equal({ testPlans: expectedArgPasssedToTestPlan, ptLogger });
     });
   });
 
@@ -131,11 +131,11 @@ describe('apiDecoratingAdapter', () => {
       config.set('env', 'local'); // For got hooks only.
       context.rewiredApi = rewire(apiDecoratingAdapterPath);
 
-      context.log = log;
+      context.log = cUiLogger;
       context.critStub = sinon.stub(context.log, 'crit');
       context.log.crit = context.critStub;
 
-      context.revertRewiredApiLog = context.rewiredApi.__set__('log', context.log);
+      context.revertRewiredApiLog = context.rewiredApi.__set__('cUiLogger', context.log);
     });
 
 
@@ -258,10 +258,10 @@ describe('apiDecoratingAdapter', () => {
 
     it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model - then verify event flow back through presenter and then to view', async (flags) => {
       const { context: { jobFileContents, rewiredApi } } = flags;
-      // Make dashboard a local test identifier because the error event listener of subscribeToTesterFeedback in apiDecoratingAdapter
+      // Make cUi a local test identifier because the error event listener of subscribeToTesterFeedback in apiDecoratingAdapter
       // is still executing after the test finishes.
-      // If we restore the dashboard, the logger of handleTesterProgress in the dashboard.js is undefined
-      const dashboard = rewire(dashboardPath);
+      // If we restore the cUi, the logger of handleTesterProgress in the cUi.js is undefined
+      const cUi = rewire(cUiPath);
       const apiResponse = [
         {
           name: 'app',
@@ -279,24 +279,24 @@ describe('apiDecoratingAdapter', () => {
 
       nock(apiUrl).post('/test', expectedJob).reply(200, apiResponse);
 
-      const testStub = sinon.stub(dashboard, 'test');
-      dashboard.test = testStub;
+      const testStub = sinon.stub(cUi, 'test');
+      cUi.test = testStub;
 
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
       const handleModelTesterEventsSpy = sinon.spy(rewiredHandleModelTesterEvents);
       const revertRewiredApiHandleModelTesterEvents = rewiredApi.__set__('handleModelTesterEvents', handleModelTesterEventsSpy);
 
-      const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
-      dashboard.handleTesterProgress = handleTesterProgressStub;
+      const handleTesterProgressStub = sinon.stub(cUi, 'handleTesterProgress');
+      cUi.handleTesterProgress = handleTesterProgressStub;
 
-      /* const revertRewiredApiDashboard = */ rewiredApi.__set__('dashboard', dashboard);
+      /* const revertRewiredApiView = */ rewiredApi.__set__('view', cUi);
       const revertRewiredApiApiUrl = rewiredApi.__set__('apiUrl', `${apiUrl}`);
 
       flags.onCleanup = () => {
-        // dashboard.test.restore();
-        // dashboard.handleTesterProgress.restore();
+        // cUi.test.restore();
+        // cUi.handleTesterProgress.restore();
         revertRewiredApiHandleModelTesterEvents();
-        // revertRewiredApiDashboard();
+        // revertRewiredApiCui();
         revertRewiredApiApiUrl();
         config.set('env', 'test'); // For got hooks only.
         nock.cleanAll();
@@ -318,24 +318,24 @@ describe('apiDecoratingAdapter', () => {
       expect(handleTesterProgressStub.callCount).to.equal(4);
 
       expect(handleModelTesterEventsSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', 'App tests are now running.']);
-      expect(handleTesterProgressStub.getCall(0).args).to.equal(['app', 'lowPrivUser', 'App tests are now running.']);
+      expect(handleTesterProgressStub.getCall(0).args).to.equal([{ testerType: 'app', sessionId: 'lowPrivUser', message: 'App tests are now running.', ptLogger }]);
 
       expect(handleModelTesterEventsSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', 'App tests are now running.']);
-      expect(handleTesterProgressStub.getCall(1).args).to.equal(['app', 'adminUser', 'App tests are now running.']);
+      expect(handleTesterProgressStub.getCall(1).args).to.equal([{ testerType: 'app', sessionId: 'adminUser', message: 'App tests are now running.', ptLogger }]);
 
       expect(handleModelTesterEventsSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
-      expect(handleTesterProgressStub.getCall(2).args).to.equal(['server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
+      expect(handleTesterProgressStub.getCall(2).args).to.equal([{ testerType: 'server', sessionId: 'NA', message: 'No server testing available currently. The server tester is currently in-active.', ptLogger }]);
 
       expect(handleModelTesterEventsSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
-      expect(handleTesterProgressStub.getCall(3).args).to.equal(['tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
+      expect(handleTesterProgressStub.getCall(3).args).to.equal([{ testerType: 'tls', sessionId: 'NA', message: 'No tls testing available currently. The tls tester is currently in-active.', ptLogger }]);
     });
 
     it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model, even if app tester is offline - then verify event flow back through presenter and then to view', async (flags) => {
       const { context: { jobFileContents, rewiredApi } } = flags;
-      // Make dashboard a local test identifier because the error event listener of subscribeToTesterFeedback in apiDecoratingAdapter
+      // Make cUi a local test identifier because the error event listener of subscribeToTesterFeedback in apiDecoratingAdapter
       // is still executing after the test finishes.
-      // If we restore the dashboard, the logger of handleTesterProgress in the dashboard.js is undefined
-      const dashboard = rewire(dashboardPath);
+      // If we restore the cUi, the logger of handleTesterProgress in the cUi.js is undefined
+      const cUi = rewire(cUiPath);
       const apiResponse = [
         // Simulate no response from app tester to orchestrator.
         // {
@@ -354,24 +354,24 @@ describe('apiDecoratingAdapter', () => {
 
       nock(apiUrl).post('/test', expectedJob).reply(200, apiResponse);
 
-      const testStub = sinon.stub(dashboard, 'test');
-      dashboard.test = testStub;
+      const testStub = sinon.stub(cUi, 'test');
+      cUi.test = testStub;
 
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
       const handleModelTesterEventsSpy = sinon.spy(rewiredHandleModelTesterEvents);
       const revertRewiredApiHandleModelTesterEvents = rewiredApi.__set__('handleModelTesterEvents', handleModelTesterEventsSpy);
 
-      const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
-      dashboard.handleTesterProgress = handleTesterProgressStub;
+      const handleTesterProgressStub = sinon.stub(cUi, 'handleTesterProgress');
+      cUi.handleTesterProgress = handleTesterProgressStub;
 
-      /* const revertRewiredApiDashboard = */ rewiredApi.__set__('dashboard', dashboard);
+      /* const revertRewiredApiView = */ rewiredApi.__set__('view', cUi);
       const revertRewiredApiApiUrl = rewiredApi.__set__('apiUrl', `${apiUrl}`);
 
       flags.onCleanup = () => {
-        // dashboard.test.restore();
-        // dashboard.handleTesterProgress.restore();
+        // cUi.test.restore();
+        // cUi.handleTesterProgress.restore();
         revertRewiredApiHandleModelTesterEvents();
-        // revertRewiredApiDashboard();
+        // revertRewiredApiCui();
         revertRewiredApiApiUrl();
         config.set('env', 'test'); // For got hooks only.
         nock.cleanAll();
@@ -393,16 +393,16 @@ describe('apiDecoratingAdapter', () => {
       expect(handleTesterProgressStub.callCount).to.equal(4);
 
       expect(handleModelTesterEventsSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', '"app" tester for session with Id "lowPrivUser" doesn\'t currently appear to be online']);
-      expect(handleTesterProgressStub.getCall(0).args).to.equal(['app', 'lowPrivUser', '"app" tester for session with Id "lowPrivUser" doesn\'t currently appear to be online']);
+      expect(handleTesterProgressStub.getCall(0).args).to.equal([{ testerType: 'app', sessionId: 'lowPrivUser', message: '"app" tester for session with Id "lowPrivUser" doesn\'t currently appear to be online', ptLogger }]);
 
       expect(handleModelTesterEventsSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', '"app" tester for session with Id "adminUser" doesn\'t currently appear to be online']);
-      expect(handleTesterProgressStub.getCall(1).args).to.equal(['app', 'adminUser', '"app" tester for session with Id "adminUser" doesn\'t currently appear to be online']);
+      expect(handleTesterProgressStub.getCall(1).args).to.equal([{ testerType: 'app', sessionId: 'adminUser', message: '"app" tester for session with Id "adminUser" doesn\'t currently appear to be online', ptLogger }]);
 
       expect(handleModelTesterEventsSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
-      expect(handleTesterProgressStub.getCall(2).args).to.equal(['server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
+      expect(handleTesterProgressStub.getCall(2).args).to.equal([{ testerType: 'server', sessionId: 'NA', message: 'No server testing available currently. The server tester is currently in-active.', ptLogger }]);
 
       expect(handleModelTesterEventsSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
-      expect(handleTesterProgressStub.getCall(3).args).to.equal(['tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
+      expect(handleTesterProgressStub.getCall(3).args).to.equal([{ testerType: 'tls', sessionId: 'NA', message: 'No tls testing available currently. The tls tester is currently in-active.', ptLogger }]);
     });
   });
 
@@ -573,29 +573,21 @@ describe('apiDecoratingAdapter', () => {
     });
     it('- given event `testerProgress` handleTesterProgress of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
-      const dashboard = rewire(dashboardPath);
-      const handleTesterProgressStub = sinon.stub(dashboard, 'handleTesterProgress');
-      dashboard.handleTesterProgress = handleTesterProgressStub;
-      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      const cUi = rewire(cUiPath);
+      const handleTesterProgressStub = sinon.stub(cUi, 'handleTesterProgress');
+      cUi.handleTesterProgress = handleTesterProgressStub;
+      const revertRewiredApiCui = rewiredApi.__set__('view', cUi);
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
 
       const eventName = 'testerProgress';
       const testerType = 'app';
       const sessionId = 'lowPrivUser';
       const message = 'App tests are now running.';
-      const parameters = [testerType, sessionId, message];
-
-      const ptLoggerAppLowPrivUser = { notice: () => {} };
-      const ptLoggerAppLowPrivUserNoticeSpy = sinon.spy(ptLoggerAppLowPrivUser, 'notice');
-      const ptLoggerGetAppLowPrivUserStub = sinon.stub(ptLogger, 'get').returns(ptLoggerAppLowPrivUser);
-      const revertRewiredApiPtLogger = rewiredApi.__set__('ptLogger', ptLogger);
+      const parameters = [{ testerType, sessionId, message, ptLogger }];
 
       flags.onCleanup = () => {
-        dashboard.handleTesterProgress.restore();
-        ptLoggerAppLowPrivUser.notice.restore();
-        ptLogger.get.restore();
-        revertRewiredApiDashboard();
-        revertRewiredApiPtLogger();
+        cUi.handleTesterProgress.restore();
+        revertRewiredApiCui();
         config.set('env', 'test'); // For got hooks only.
       };
 
@@ -603,36 +595,26 @@ describe('apiDecoratingAdapter', () => {
 
       expect(handleTesterProgressStub.callCount).to.equal(1);
       expect(handleTesterProgressStub.getCall(0).args).to.equal(parameters);
-      expect(ptLoggerGetAppLowPrivUserStub.calledOnceWith(`${testerType}-${sessionId}`)).to.be.true();
-      expect(ptLoggerAppLowPrivUserNoticeSpy.calledOnceWith(message)).to.be.true();
     });
 
 
     it('- given event `testerPctComplete` handleTesterPctComplete of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
-      const dashboard = rewire(dashboardPath);
-      const handleTesterPctCompleteStub = sinon.stub(dashboard, 'handleTesterPctComplete');
-      dashboard.handleTesterPctComplete = handleTesterPctCompleteStub;
-      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      const cUi = rewire(cUiPath);
+      const handleTesterPctCompleteStub = sinon.stub(cUi, 'handleTesterPctComplete');
+      cUi.handleTesterPctComplete = handleTesterPctCompleteStub;
+      const revertRewiredApiCui = rewiredApi.__set__('view', cUi);
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
 
       const eventName = 'testerPctComplete';
       const testerType = 'app';
       const sessionId = 'lowPrivUser';
       const message = 11;
-      const parameters = [testerType, sessionId, message];
-
-      const ptLoggerAppLowPrivUser = { notice: () => {} };
-      const ptLoggerAppLowPrivUserNoticeSpy = sinon.spy(ptLoggerAppLowPrivUser, 'notice');
-      const ptLoggerGetAppLowPrivUserStub = sinon.stub(ptLogger, 'get').returns(ptLoggerAppLowPrivUser);
-      const revertRewiredApiPtLogger = rewiredApi.__set__('ptLogger', ptLogger);
+      const parameters = [{ testerType, sessionId, message, ptLogger }];
 
       flags.onCleanup = () => {
-        dashboard.handleTesterPctComplete.restore();
-        ptLoggerAppLowPrivUser.notice.restore();
-        ptLogger.get.restore();
-        revertRewiredApiDashboard();
-        revertRewiredApiPtLogger();
+        cUi.handleTesterPctComplete.restore();
+        revertRewiredApiCui();
         config.set('env', 'test'); // For got hooks only.
       };
 
@@ -640,36 +622,26 @@ describe('apiDecoratingAdapter', () => {
 
       expect(handleTesterPctCompleteStub.callCount).to.equal(1);
       expect(handleTesterPctCompleteStub.getCall(0).args).to.equal(parameters);
-      expect(ptLoggerGetAppLowPrivUserStub.notCalled).to.be.true();
-      expect(ptLoggerAppLowPrivUserNoticeSpy.notCalled).to.be.true();
     });
 
 
     it('- given event `testerBugCount` handleTesterBugCount of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
-      const dashboard = rewire(dashboardPath);
-      const handleTesterBugCountStub = sinon.stub(dashboard, 'handleTesterBugCount');
-      dashboard.handleTesterBugCount = handleTesterBugCountStub;
-      const revertRewiredApiDashboard = rewiredApi.__set__('dashboard', dashboard);
+      const cUi = rewire(cUiPath);
+      const handleTesterBugCountStub = sinon.stub(cUi, 'handleTesterBugCount');
+      cUi.handleTesterBugCount = handleTesterBugCountStub;
+      const revertRewiredApiCui = rewiredApi.__set__('view', cUi);
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
 
       const eventName = 'testerBugCount';
       const testerType = 'app';
       const sessionId = 'lowPrivUser';
       const message = 56;
-      const parameters = [testerType, sessionId, message];
-
-      const ptLoggerAppLowPrivUser = { notice: () => {} };
-      const ptLoggerAppLowPrivUserNoticeSpy = sinon.spy(ptLoggerAppLowPrivUser, 'notice');
-      const ptLoggerGetAppLowPrivUserStub = sinon.stub(ptLogger, 'get').returns(ptLoggerAppLowPrivUser);
-      const revertRewiredApiPtLogger = rewiredApi.__set__('ptLogger', ptLogger);
+      const parameters = [{ testerType, sessionId, message, ptLogger }];
 
       flags.onCleanup = () => {
-        dashboard.handleTesterBugCount.restore();
-        ptLoggerAppLowPrivUser.notice.restore();
-        ptLogger.get.restore();
-        revertRewiredApiDashboard();
-        revertRewiredApiPtLogger();
+        cUi.handleTesterBugCount.restore();
+        revertRewiredApiCui();
         config.set('env', 'test'); // For got hooks only.
       };
 
@@ -677,8 +649,6 @@ describe('apiDecoratingAdapter', () => {
 
       expect(handleTesterBugCountStub.callCount).to.equal(1);
       expect(handleTesterBugCountStub.getCall(0).args).to.equal(parameters);
-      expect(ptLoggerGetAppLowPrivUserStub.notCalled).to.be.true();
-      expect(ptLoggerAppLowPrivUserNoticeSpy.notCalled).to.be.true();
     });
   });
 
@@ -765,9 +735,9 @@ describe('apiDecoratingAdapter', () => {
 
     it('- given `testerProgress` event with falsy message - should log.warning with appropriate message', (flags) => {
       const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents, rewiredApi } } = flags;
-      const warningStub = sinon.stub(log, 'warning');
-      log.warning = warningStub;
-      const revertRewiredApiLog = rewiredApi.__set__('log', log);
+      const warningStub = sinon.stub(cUiLogger, 'warning');
+      cUiLogger.warning = warningStub;
+      const revertRewiredApiLog = rewiredApi.__set__('cUiLogger', cUiLogger);
 
       const event = {
         type: 'testerProgress',
@@ -778,7 +748,7 @@ describe('apiDecoratingAdapter', () => {
       const testerNameAndSession = { sessionId: 'lowPrivUser', testerType: 'app' };
 
       flags.onCleanup = () => {
-        log.warning.restore();
+        cUiLogger.warning.restore();
         revertRewiredApiLog();
       };
 

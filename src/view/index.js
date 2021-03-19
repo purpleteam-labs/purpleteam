@@ -14,12 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
 
-const config = require('../config/config');
-const cUiLogger = require('purpleteam-logger').init(config.get('loggers.cUi')); // eslint-disable-line import/order
+/* eslint-disable */
+const viewFileName = `./${require('../../config/config').get('uI')}`;
+const view = require(viewFileName);
+module.exports = view;
+/* eslint-enable */
 
-const { processCommands } = require('./cli');
-
-exports.start = async (options) => {
-  cUiLogger.debug('Starting the CLI', { tags: ['index'] });
-  await processCommands({ argv: options.argv });
-};

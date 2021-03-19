@@ -1,9 +1,12 @@
 {
   "loggers": {
-    "def": {
+    "cUi": {
       "level": "debug"
     },
     "testerProgress": {
+      "dirname": "</absolute-path-to/purpleteam/cli_logs/>"
+    },
+    "testPlan": {
       "dirname": "</absolute-path-to/purpleteam/cli_logs/>"
     }
   },

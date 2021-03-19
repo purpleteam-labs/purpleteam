@@ -27,11 +27,11 @@ const Bourne = require('@hapi/bourne');
 
 const ptLogger = require('purpleteam-logger');
 const Model = require('../models/model');
-const dashboard = require('../view/dashboard');
+const view = require('../view');
 const pkg = require('../../package.json');
 const { TesterUnavailable, TesterFeedbackRoutePrefix, NowAsFileName } = require('../strings');
 
-const log = ptLogger.init(config.get('loggers.def'));
+const cUiLogger = ptLogger.init(config.get('loggers.cUi'));
 const apiUrl = config.get('purpleteamApi.url');
 const env = config.get('env');
 
@@ -48,7 +48,7 @@ const getBuildUserConfigFile = async (filePath) => {
     const fileContents = await readFileAsync(filePath, { encoding: 'utf8' });
     return fileContents;
   } catch (err) {
-    log.error(`Could not read file: ${filePath}, the error was: ${err}.`, { tags: ['apiDecoratingAdapter'] });
+    cUiLogger.error(`Could not read file: ${filePath}, the error was: ${err}.`, { tags: ['apiDecoratingAdapter'] });
     throw err;
   }
 };
@@ -77,7 +77,7 @@ const getAccessToken = async () => {
     const knownError = knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.code))
       ?? knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.message))
       ?? { default: `An unknown error occurred while attempting to get the access token. Error follows: ${error}` };
-    log.crit(Object.values(knownError)[0], { tags: ['apiDecoratingAdapter'] });
+    cUiLogger.crit(Object.values(knownError)[0], { tags: ['apiDecoratingAdapter'] });
   });
   return accessToken;
 };
@@ -165,9 +165,9 @@ const gotPt = got.extend({
 
 const requestStatus = async () => {
   await gotPt.get('status').then((response) => {
-    dashboard.status(log, response.body);
+    view.status(cUiLogger, response.body);
   }).catch((error) => {
-    dashboard.status(log, error.processed ? error.message : `An unknown error occurred while attempting to get the status. Error follows: ${error}`);
+    view.status(cUiLogger, error.processed ? error.message : `An unknown error occurred while attempting to get the status. Error follows: ${error}`);
   });
 };
 
@@ -204,7 +204,7 @@ const requestTestOrTestPlan = async (configFileContents, route) => {
     result = response;
   }).catch((error) => {
     if (error.processed) {
-      log.crit(error.message, { tags: ['apiDecoratingAdapter'] });
+      cUiLogger.crit(error.message, { tags: ['apiDecoratingAdapter'] });
     } else {
       const knownErrors = [
         // Server-side will catch invalid job against purpleteam schema and respond with ValidationError.
@@ -219,7 +219,7 @@ const requestTestOrTestPlan = async (configFileContents, route) => {
         ?? knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.name))
         ?? knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.response?.statusCode))
         ?? { default: `Unknown error. Error follows: ${error}` };
-      log.crit(`Error occurred while attempting to communicate with the purpleteam API. Error was: ${Object.values(knownError)[0]}`, { tags: ['apiDecoratingAdapter'] });
+      cUiLogger.crit(`Error occurred while attempting to communicate with the purpleteam API. Error was: ${Object.values(knownError)[0]}`, { tags: ['apiDecoratingAdapter'] });
     }
   });
   // It appears that these need resetting:
@@ -249,7 +249,7 @@ const handleServerSentTesterEvents = async (event, model, testerNameAndSession) 
         event: event.type
       });
     } else {
-      log.warning(`A falsy ${event.type} event message was received from the orchestrator`, { tags: ['apiDecoratingAdapter'] });
+      cUiLogger.warning(`A falsy ${event.type} event message was received from the orchestrator`, { tags: ['apiDecoratingAdapter'] });
     }
   } else {
     model.propagateTesterMessage({
@@ -291,7 +291,7 @@ const subscribeToTesterFeedback = (model, testerStatuses) => {
             // Others?
           ];
           const knownError = knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.status))
-            ?? { default: `Unknown error. Error follows: ${error}` };
+            ?? { default: `Unknown error. Error follows: ${error.message ?? JSON.stringify(error)}` };
           const errorMessage = Object.values(knownError)[0]; // eslint-disable-line prefer-destructuring
           model.propagateTesterMessage({
             testerType: testerNameAndSession.testerType,
@@ -435,7 +435,7 @@ const getInitialisedModel = (configFileContents) => {
     model = new Model(configFileContents);
   } catch (error) {
     if (error.name === 'SyntaxError') {
-      log.crit(`Invalid syntax in "Job": ${error.message}`, { tags: ['apiDecoratingAdapter'] });
+      cUiLogger.crit(`Invalid syntax in "Job": ${error.message}`, { tags: ['apiDecoratingAdapter'] });
       return undefined;
     }
     throw error;
@@ -446,12 +446,11 @@ const getInitialisedModel = (configFileContents) => {
 const testPlans = async (configFileContents) => {
   if (!getInitialisedModel(configFileContents)) return;
   const resultingTestPlans = await requestTestPlan(configFileContents);
-  resultingTestPlans && dashboard.testPlan(resultingTestPlans);
+  resultingTestPlans && view.testPlan({ testPlans: resultingTestPlans, ptLogger });
 };
 
 const handleModelTesterEvents = (eventName, testerType, sessionId, message) => {
-  dashboard[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`](testerType, sessionId, message);
-  if (eventName === 'testerProgress') ptLogger.get(`${testerType}-${sessionId}`).notice(message);
+  view[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`]({ testerType, sessionId, message, ptLogger });
 };
 
 const test = async (configFileContents) => {
@@ -460,7 +459,7 @@ const test = async (configFileContents) => {
   const testerStatuses = await requestTest(configFileContents);
 
   if (testerStatuses) {
-    dashboard.test(model.testerSessions());
+    view.test(model.testerSessions());
     model.eventNames.forEach((eN) => {
       model.on(eN, (testerType, sessionId, message) => { handleModelTesterEvents(eN, testerType, sessionId, message); });
     });
