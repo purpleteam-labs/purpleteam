@@ -117,7 +117,7 @@ const gotPt = got.extend({
             // Save for further requests.
             gotPt.defaults.options = got.mergeOptions(gotPt.defaults.options, optionAugmentations);
             // Make a new retry
-            return retryWithMergedOptions(gotPt.defaults.options);
+            return retryWithMergedOptions(optionAugmentations);
           }
           return response;
         }
@@ -223,10 +223,10 @@ const requestTestOrTestPlan = async (configFileContents, route) => {
     }
   });
   // It appears that these need resetting:
-  gotPt.defaults.options.json = undefined;
-  gotPt.defaults.options.resolveBodyOnly = false;
-  gotPt.defaults.options.headers['content-type'] = undefined;
-  gotPt.defaults.options.headers['content-length'] = undefined;
+  // gotPt.defaults.options.json = undefined;
+  // gotPt.defaults.options.resolveBodyOnly = false;
+  // gotPt.defaults.options.headers['content-type'] = undefined;
+  // gotPt.defaults.options.headers['content-length'] = undefined;
 
   return result;
 };
