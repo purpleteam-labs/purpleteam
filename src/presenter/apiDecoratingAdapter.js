@@ -99,10 +99,12 @@ const gotPt = got.extend({
       local: [],
       cloud: [
         async (options) => {
-          if (!Object.prototype.hasOwnProperty.call(options.headers, 'authorization')) {
-            options.headers.authorization = `Bearer ${await getAccessToken()}`;
-            // Save for further requests.
-            gotPt.defaults.options = got.mergeOptions(gotPt.defaults.options, options);
+          if (!gotPt.defaults.options.headers.authorization) {
+            gotPt.defaults.options.headers = {
+              ...(gotPt.defaults.options.headers ?? {}),
+              authorization: `Bearer ${await getAccessToken()}`
+            };
+            options.headers.authorization = gotPt.defaults.options.headers.authorization;
           }
         }
       ]
@@ -222,12 +224,6 @@ const requestTestOrTestPlan = async (configFileContents, route) => {
       cUiLogger.crit(`Error occurred while attempting to communicate with the purpleteam API. Error was: ${Object.values(knownError)[0]}`, { tags: ['apiDecoratingAdapter'] });
     }
   });
-  // It appears that these need resetting:
-  // gotPt.defaults.options.json = undefined;
-  // gotPt.defaults.options.resolveBodyOnly = false;
-  // gotPt.defaults.options.headers['content-type'] = undefined;
-  // gotPt.defaults.options.headers['content-length'] = undefined;
-
   return result;
 };
 const requestTest = async (configFileContents) => requestTestOrTestPlan(configFileContents, 'test');
