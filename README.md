@@ -40,7 +40,7 @@ If you are planning on running the `local` environment, once you have installed,
 
 If you are planning on targeting the `cloud` environment, the purpleteam CLI is all you need to have set-up.
 
-If you have any issues with the set-up, be sure to check the [trouble shooting](https://doc.purpleteam-labs.com/local/workflow/trouble-shooting.html) page.
+If you have any issues with the set-up, be sure to check the [trouble shooting](https://doc.purpleteam-labs.com/trouble-shooting.html) page.
 
 # Contents
 
@@ -49,6 +49,8 @@ If you have any issues with the set-up, be sure to check the [trouble shooting](
   * [NPM install locally](#npm-install-locally)
   * [NPM install globally](#npm-install-globally)
 * [Configure](#configure)
+  * [Job File](#job-file)
+  * [CLI](#cli)
 * [Run](#run)
   * [Clone the git repository option](#clone-the-git-repository-option)
     * [Run the bin/purpleteam file via npm script](#run-the-binpurpleteam-file-via-npm-script)
@@ -99,8 +101,8 @@ For the locally installed via NPM option the purpleteam-labs Team uses the [purp
 
 This example exports two environment variables:
 
-* `NODE_ENV=local`: Means that purpleteam will be using the `local` [configuration](#configure). If instead you have signed up for a cloud license, you will want to be targeting the `cloud` environment instead
-* `PURPLETEAM_UI=noUi`: As detailed in the [Configure](#configure) sub-section
+* `NODE_ENV=local`: Means that purpleteam will be using the `local` [configuration](#cli). If instead you have signed up for a cloud license, you will want to be targeting the `cloud` environment instead
+* `PURPLETEAM_UI=noUi`: As detailed in the [Configure](#cli) sub-section
 
 Using the above mentioned example build project files, and for the sake of this example, let's assume your NodeJS build project has the same following files:
 
@@ -198,6 +200,21 @@ As mentioned under the [Clone](#clone-the-git-repository) section, another optio
 
 # Configure
 
+## Job File
+
+The [_Job_](https://doc.purpleteam-labs.com/definitions.html) file (also referred to as the `buildUserConfig`) is what purpleteam uses to do the following. Most properties should be self documenting. If you are unsure of any, start a [Github discussion](https://github.com/purpleteam-labs/purpleteam/discussions) or reach out in the [#project-purpleteam channel of OWASP Slack](https://owasp.slack.com/messages/project-purpleteam).
+Examples of _Job_ files that the purpleteam-labs team uses can be found [here](https://github.com/purpleteam-labs/purpleteam/tree/main/testResources/jobs):
+
+* Authenticate to your [System Under Test (_SUT_)](https://doc.purpleteam-labs.com/definitions.html)
+* Locate your SUT
+* Which browser to use to test your application in
+* Define your [_Test Session_](https://doc.purpleteam-labs.com/definitions.html)
+* Alert Threshold
+* Routes to test
+* Fields of each specific route, other fields "may" also be tested
+
+## CLI
+
 No matter which install option you decide on the purpleteam CLI will require configuration.
 
 If you are planning on using the `cloud` environment copy the config/config.example.cloud.json to config/config.cloud.json and make the necessary changes.
@@ -278,7 +295,7 @@ The precedence order of where values will be read from is defined by [convict](h
 
 # Run
 
-There are several ways you can run the purpleteam CLI. The following list some. Make sure you have [installed](#install) and [configured](#configure) purpleteam correctly before running:
+There are several ways you can run the purpleteam CLI. The following list some. Make sure you have [installed](#install) and [configured](#cli) purpleteam correctly before running:
 
 ## Clone the git repository option
 
