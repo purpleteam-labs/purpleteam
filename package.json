@@ -76,7 +76,7 @@
     "eventsource": "^1.1.0",
     "figlet": "^1.5.0",
     "got": "^11.8.2",
-    "purpleteam-logger": "^1.1.0",
+    "purpleteam-logger": "^1.1.2",
     "sywac": "^1.3.0"
   },
   "devDependencies": {
@@ -94,5 +94,10 @@
   },
   "bin": {
     "purpleteam": "./bin/purpleteam"
-  }
+  },
+  "files": [
+    "bin",
+    "config",
+    "src"
+  ]
 }
