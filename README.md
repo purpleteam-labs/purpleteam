@@ -57,6 +57,7 @@ If you have any issues with the set-up, be sure to check the [trouble shooting](
     * [Debug your app and purpleteam CLI](#debug-your-app-and-purpleteam-cli)
   * [NPM install globally option](#npm-install-globally-option)
 * [Usage](#usage)
+* [Trouble-Shooting](#trouble-shooting)
 
 
 # Install
@@ -89,7 +90,7 @@ npm link
 
 If you are planning on running/debugging purpleteam from another NodeJS process, for example a CI/nightly build/build pipeline project of your own, installing via NPM is a good option.
 
-For the locally installed via NPM option the purpleteam-labs Team uses the [purpleteam-build-test-cli](https://github.com/purpleteam-labs/purpleteam-build-test-cli) project as an example to test that this option works as expected. The following example [package.json](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/main/package.json) and [index.js](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/main/index.js) files are from the purpleteam-build-test-cli example project.
+For the locally installed via NPM option the purpleteam-labs Team uses the [purpleteam-build-test-cli](https://github.com/purpleteam-labs/purpleteam-build-test-cli) project as an example to test that this option works as expected. The following example [package.json](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/main/package.json) and [index.js](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/main/index.js) files are from the purpleteam-build-test-cli example project. Feel free to clone it, or use your own project to follow along.
 
 This example exports two environment variables:
 
@@ -257,16 +258,20 @@ This value can be changed in one of the following ways:
 
 * `cUi`: Is well suited to running the purpleteam CLI directly in your terminal.  
    With the `uI` configured to use `cUi` the following putpleteam CLI commands have the associated behaviours:  
-    * `about`: Writes to the console using the [purpleteam-logger](https://www.npmjs.com/package/purpleteam-logger) configured with the `SignaleTransport`  
-    * `status`: Writes to the console using the purpleteam-logger configured with the `SignaleTransport`, via blessed  
-    * `test`: Writes to file using purpleteam-logger configured with the `File` transport. Writes to the console using blessed. On a successful test run, an outcomes zip file will be written to the directory specified by `outcomes.dir`  
+    * `about`: Writes to the console using the [purpleteam-logger](https://www.npmjs.com/package/purpleteam-logger) configured with the `SignaleTransport`
+    * `status`: Writes to the console using the purpleteam-logger configured with the `SignaleTransport`, via blessed
+    * `test`: Writes to file using purpleteam-logger configured with the `File` transport. Writes to the console using blessed. On a successful test run, an outcomes zip file will be written to the directory specified by `outcomes.dir`
     * `testplan`: Writes to the console using blessed
 * `noUi`: Is well suited to running the purpleteam CLI from another process (your build/CI/CD process for example).
-   With the `uI` configured to use `noUi` the following putpleteam CLI commands have the associated behaviours:  
-    * `about`: Writes to the console using the purpleteam-logger configured with the `SignaleTransport`  
-    * `status`: Writes to the console using the purpleteam-logger configured with the `SignaleTransport`  
-    * `test`: Writes to file using purpleteam-logger configured with the `File` transport. On a successful test run, an outcomes zip file will be written to the directory specified by `outcomes.dir`  
+   With the `uI` configured to use `noUi` the following putpleteam CLI commands have the associated behaviours:
+    * `about`: Writes to the console using the purpleteam-logger configured with the `SignaleTransport`. The about screen is written. Exits with code: "0"
+    * `status`: Writes to the console using the purpleteam-logger configured with the `SignaleTransport`. `orchestrator is down`... or `orchestrator is up` is written. Exits with code: "0"
+    * `test`: Writes to file using purpleteam-logger configured with the `File` transport
+      * If the orchestrator/API is down `orchestrator is down`... is written using the `SignaleTransport`. Exits with code: "0"
+      * If the orchestrator/API is up, CLI logs will be written to the directory specified by `loggers.testerProgress.dirname` as the Test Run progresses and an outcomes zip file will be written to the directory specified by `outcomes.dir` on Test Run completion. The CLI does not terminate. If the SUT is not found, it will be obvious in the CLI logs
     * `testplan`: Writes to file using purpleteam-logger configured with the `File` transport
+      * If the orchestrator/API is down `orchestrator is down`... is written using the `SignaleTransport`. Exits with code: "0"
+      * If the orchestrator/API is up, CLI logs will be written to the directory specified by `loggers.testPlan.dirname` on completion. Exits with code: "0"
 
 <br>
 
@@ -274,7 +279,7 @@ Purpleteam uses the convict package for it's configuration.
 
 ## Sensitive Values (`cloud` environment only)
 
-There are several ways you can handle the sensitive values that need to be read into the purpleteam CLI to access your instance of the purpleteam Cloud service:
+There are several ways you can handle the sensitive values that need to be read into the purpleteam CLI to access your instance of the purpleteam `cloud` service:
 
 * Place sensitive values in-line in the `config.cloud.json` file, providing you are confident that you have sufficiently locked down [file, directory permissions](https://f1.holisticinfosecforwebdevelopers.com/chap03.html#vps-identify-risks-unnecessary-and-vulnerable-services-overly-permissive-file-permissions-ownership-and-lack-of-segmentation) and access to the host that will be running the purpleteam CLI
 * Place sensitive values in a similarly structured file but in some other directory that the purpleteam CLI has access to and is sufficiently locked down as previously mentioned. The path of which said file can be [added to the array](https://github.com/mozilla/node-convict/tree/master/packages/convict#configloadfilefile-or-filearray) as an element that is feed to `config.loadFile` in the main `config.js` file
@@ -287,7 +292,7 @@ The precedence order of where values will be read from is defined by [convict](h
 
 # Run
 
-There are several ways you can run the purpleteam CLI. The following list some. Make sure you have [installed](#install) and [configured](#cli) purpleteam correctly before running:
+There are several ways you can run the purpleteam CLI. The following options line up with the [Install](#install) options detailed above. Make sure you have [installed](#install) and [configured](#cli) purpleteam correctly before attempting to run:
 
 ## Clone the git repository option
 
@@ -331,6 +336,8 @@ You can choose to export the `NODE_ENV` environment variable before running the 
      ```
      Now open your debugging UI. If you use the chrome developer tools browse to `chrome://inspect` and click the inspect link and you will be dropped into the purpleteam CLI code-base.
 
+For further details around running and debuging review the [documentation](https://purpleteam-labs.com/doc/local/workflow/).
+
 ### Run the bin/purpleteam file directly
 
 1. From the root directory of the purpleteam repository
@@ -368,7 +375,7 @@ purpleteam
 
 For those that chose to [install locally via npm](#npm-install-locally):
 
-The `NODE_ENV` environment variable needs to be exported so that the purpleteam CLI knows whether it's targeting the `cloud` or `local` environment and configuration. In the example build project we have used, `NODE_ENV` is exported as part of the NPM [scripts](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/main/package.json#L11), and it is using the `local` environment.
+The `NODE_ENV` environment variable needs to be exported so that the purpleteam CLI knows whether it's targeting the `cloud` or `local` environment and configuration. In the example build project we have used, `NODE_ENV` is exported as part of the NPM [scripts](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/main/package.json#L11), and it is using the `local` environment. Feel free to swap the value to `cloud` if you have signed up for a `cloud` account.
 
 Providing your package.json and the JavaScript file (index.js in the [above example](#purpleteam-build-test-cli)) that is going to run the purpleteam CLI is similar to those configured in the above file examples, you should be able to successfully run the following commands from the root directory of your NodeJS CI/nightly build/build pipeline project.
 
@@ -480,4 +487,8 @@ The following commands have the associated interactions available:
   * [right-arrow], [left-arrow] through the terminal screens to view the testing progress of each of the [_Testers_](https://purpleteam-labs.com/doc/definitions/) in real-time courtesy of the purpleteam API
   * [down-arrow], [up-arrow] to highlight the different Running Statistics of the _Testers_ as they are provided in real-time courtesy of the purpleteam API
 * `testplan`: Once the test plans have been retreived, you can [right-arrow], [left-arrow] through the terminal screens to view the test plans of each specific [_Tester_](https://purpleteam-labs.com/doc/definitions/)
+
+# Trouble-Shooting
+
+If you encounter any problems with the CLI set-up and you have read and applied the directions, check the [trouble-shooting](https://purpleteam-labs.com/doc/trouble-shooting/) page.
 
