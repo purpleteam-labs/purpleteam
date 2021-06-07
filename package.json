@@ -97,7 +97,7 @@
   },
   "files": [
     "bin",
-    "config/config",
+    "config/config.js",
     "config/config.example.cloud.json",
     "config/config.example.local.json",
     "src",
