@@ -97,7 +97,9 @@
   },
   "files": [
     "bin",
-    "config",
+    "config/config",
+    "config/config.example.cloud.json",
+    "config/config.example.local.json",
     "src",
     "LEGALNOTICE.md"
   ]

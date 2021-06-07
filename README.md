@@ -28,11 +28,11 @@
 <br/><br/>
 </div>
 
-If you are planning on running the `local` environment, once you have installed, configured and are ready to run the purpleteam CLI, head back to the [local setup](https://doc.purpleteam-labs.com/local/local-setup.html) documentation and make sure all of the otther purpleteam components are also set-up and ready to run. After that work through the [local workflow](https://doc.purpleteam-labs.com/local/local-workflow) documentation.
+If you are planning on running the `local` environment, once you have installed, configured and are ready to run the purpleteam CLI, head back to the [local setup](https://purpleteam-labs.com/doc/local/set-up/) documentation and make sure all of the otther purpleteam components are also set-up and ready to run. After that work through the [local workflow](https://purpleteam-labs.com/doc/local/workflow/) documentation.
 
 If you are planning on targeting the `cloud` environment, the purpleteam CLI is all you need to have set-up.
 
-If you have any issues with the set-up, be sure to check the [trouble shooting](https://doc.purpleteam-labs.com/trouble-shooting.html) page.
+If you have any issues with the set-up, be sure to check the [trouble shooting](https://purpleteam-labs.com/doc/trouble-shooting/) page.
 
 # Contents
 
@@ -194,13 +194,13 @@ As mentioned under the [Clone](#clone-the-git-repository) section, another optio
 
 ## Job File
 
-The [_Job_](https://doc.purpleteam-labs.com/definitions.html) file (also referred to as the `buildUserConfig`) is what purpleteam uses to do the following. Most properties should be self documenting. If you are unsure of any, start a [Github discussion](https://github.com/purpleteam-labs/purpleteam/discussions) or reach out in the [#project-purpleteam channel of OWASP Slack](https://owasp.slack.com/messages/project-purpleteam).
+The [_Job_](https://purpleteam-labs.com/doc/definitions/) file (also referred to as the `buildUserConfig`) is what purpleteam uses to do the following. Most properties should be self documenting. If you are unsure of any, start a [Github discussion](https://github.com/purpleteam-labs/purpleteam/discussions) or reach out in the [#project-purpleteam channel of OWASP Slack](https://owasp.slack.com/messages/project-purpleteam).
 Examples of _Job_ files that the purpleteam-labs team uses can be found [here](https://github.com/purpleteam-labs/purpleteam/tree/main/testResources/jobs):
 
-* Authenticate to your [System Under Test (_SUT_)](https://doc.purpleteam-labs.com/definitions.html)
+* Authenticate to your [System Under Test (_SUT_)](https://purpleteam-labs.com/doc/definitions/)
 * Locate your SUT
 * Which browser to use to test your application in
-* Define your [_Test Session_](https://doc.purpleteam-labs.com/definitions.html)
+* Define your [_Test Session_](https://purpleteam-labs.com/doc/definitions/)
 * Alert Threshold
 * Routes to test
 * Fields of each specific route, other fields "may" also be tested
@@ -222,11 +222,11 @@ Use the config/config.js for documentation and further examples.
 
 **`testerFeedbackComms.medium`**: Long Polling (`lp`) is supported in both `local` and `cloud` environments. Server Sent Events (`sse`) is only supported in the `local` environment due to AWS limitations. Both `lp` and `sse` are real-time. Both implementations have their pros and cons.
 
-Which ever option you choose, the same option must be applied to both the [_orchestrator_](https://doc.purpleteam-labs.com/definitions.html) and the purpleteam CLI.
+Which ever option you choose, the same option must be applied to both the [_orchestrator_](https://purpleteam-labs.com/doc/definitions/) and the purpleteam CLI.
 
 Using `sse` is one way communications after the initial subscription from the CLI to the _orchestrator_. Redis pub/sub is used between the _Testers_ and the _orchestrator_ to publish _Tester_ feedback. If the CLI is stopped (not subscribed) at any point while the back-end is in a test run, events will be lost.
 
-Using `lp` is request-response communications. A request is made and only answered when there are [_Tester_](https://doc.purpleteam-labs.com/definitions.html) feedback messages available, or the application specific (rather than AWS Api Gateway) time-out is exceeded. As soon as the CLI receives a set (one to many) of _Tester_ feedback messages, it makes another request to the _orchestrator_ (if running in `local` env), or API (if running in `cloud` env). Redis pub/sub is used between the _Testers_ and the _orchestrator_ to publish _Tester_ feedback.  
+Using `lp` is request-response communications. A request is made and only answered when there are [_Tester_](https://purpleteam-labs.com/doc/definitions/) feedback messages available, or the application specific (rather than AWS Api Gateway) time-out is exceeded. As soon as the CLI receives a set (one to many) of _Tester_ feedback messages, it makes another request to the _orchestrator_ (if running in `local` env), or API (if running in `cloud` env). Redis pub/sub is used between the _Testers_ and the _orchestrator_ to publish _Tester_ feedback.  
 So long as the initial CLI request for _Tester_ feedback is made immediately after testing has begun, _Tester_ feedback messages will be persisted in memory to Redis lists. This means that if the CLI is stopped momentarily during a test run, when it is restarted it will receive the _Tester_ feedback messages that arrived at the _orchestrator_ when the CLI wasn't running... providing the _orchestrator_ continues running.
 
 > Additional background: This may change in the future, WebSockets is also an option we may implement in the future, but implementing WebSockets would mean we would have to change our entire authn approach. Our chosen cloud infrastructure AWS Api Gateway does not support streaming and it does not support the OAuth Client Credentials Flow with Cognito User Pools.
@@ -477,7 +477,7 @@ If you are running the purpleteam CLI in the default [character user interface (
 The following commands have the associated interactions available:
 
 * `test`: Once testing is under way, you can:
-  * [right-arrow], [left-arrow] through the terminal screens to view the testing progress of each of the [_Testers_](https://doc.purpleteam-labs.com/definitions.html) in real-time courtesy of the purpleteam API
+  * [right-arrow], [left-arrow] through the terminal screens to view the testing progress of each of the [_Testers_](https://purpleteam-labs.com/doc/definitions/) in real-time courtesy of the purpleteam API
   * [down-arrow], [up-arrow] to highlight the different Running Statistics of the _Testers_ as they are provided in real-time courtesy of the purpleteam API
-* `testplan`: Once the test plans have been retreived, you can [right-arrow], [left-arrow] through the terminal screens to view the test plans of each specific [_Tester_](https://doc.purpleteam-labs.com/definitions.html)
+* `testplan`: Once the test plans have been retreived, you can [right-arrow], [left-arrow] through the terminal screens to view the test plans of each specific [_Tester_](https://purpleteam-labs.com/doc/definitions/)
 
