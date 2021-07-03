@@ -1,13 +1,13 @@
 COPYRIGHT
 ---------
 
-purpleteam
+PurpleTeam
 
 The software components under purpleteam-labs are:
 
 > Copyright (C) 2017-2021 BinaryMist Limited
 
-Individual contributions, components, and libraries are copyright of their respective authors.
+Any new or updated code, tests or information sent to purpleteam-labs is assumed free of copyrights. By sending new or updated code, tests or information to purpleteam-labs you relinquish all claims of copyright on the material, and agree that this code can be claimed under the same copyright and license as PurpleTeam.
 
 SOFTWARE LICENSE
 ----------------
@@ -18,5 +18,5 @@ For other licenses [contact us](https://binarymist.io/#contact).
 THIRD-PARTY SOFTWARE LICENSES
 -----------------------------
 
-A list of third party sources can be found [here](https://purpleteam-labs.com/third-party-code)
+A list of third party sources can be found [here](https://purpleteam-labs.com/doc/third-party-sources/)
 
