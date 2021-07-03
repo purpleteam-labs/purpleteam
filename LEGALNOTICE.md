@@ -13,7 +13,7 @@ SOFTWARE LICENSE
 ----------------
 
 The open source software licenses of the purpleteam components are included in their respective repositories.  
-For other licenses [contact us](https://binarymist.io/#contact).
+For other licenses [contact us](https://purpleteam-labs.com/contact/).
 
 THIRD-PARTY SOFTWARE LICENSES
 -----------------------------
