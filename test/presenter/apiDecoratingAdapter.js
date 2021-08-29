@@ -1,18 +1,18 @@
 // Copyright (C) 2017-2021 BinaryMist Limited. All rights reserved.
 
-// This file is part of purpleteam.
+// This file is part of PurpleTeam.
 
-// purpleteam is free software: you can redistribute it and/or modify
+// PurpleTeam is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation version 3.
 
-// purpleteam is distributed in the hope that it will be useful,
+// PurpleTeam is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Affero General Public License for more details.
 
 // You should have received a copy of the GNU Affero General Public License
-// along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
+// along with this PurpleTeam project. If not, see <https://www.gnu.org/licenses/>.
 
 exports.lab = require('@hapi/lab').script();
 
@@ -29,7 +29,7 @@ const ptLogger = require('purpleteam-logger');
 const cUiLogger = ptLogger.init(config.get('loggers.cUi'));
 
 const apiUrl = config.get('purpleteamApi.url');
-const buildUserConfigFilePath = config.get('buildUserConfig.fileUri');
+const jobFilePath = config.get('job.fileUri');
 const { MockEvent, EventSource } = require('mocksse');
 const { TesterFeedbackRoutePrefix } = require('../../src/strings');
 const Model = require('../../src/models/model');
@@ -37,23 +37,23 @@ const Model = require('../../src/models/model');
 const cUiPath = '../../src/view/cUi';
 const apiDecoratingAdapterPath = '../../src/presenter/apiDecoratingAdapter';
 
-// As stored in the `request` object body from file: /testResources/jobs/job_0.1.0-alpha.1
-const expectedJob = '\"{\\n  \\\"data\\\": {\\n    \\\"type\\\": \\\"testRun\\\",\\n    \\\"attributes\\\": {      \\n      \\\"version\\\": \\\"0.1.0-alpha.1\\\",\\n      \\\"sutAuthentication\\\": {\\n        \\\"route\\\": \\\"/login\\\",\\n        \\\"usernameFieldLocater\\\": \\\"userName\\\",\\n        \\\"passwordFieldLocater\\\": \\\"password\\\",\\n        \\\"submit\\\": \\\"btn btn-danger\\\",\\n        \\\"expectedPageSourceSuccess\\\": \\\"Log Out\\\"\\n      },\\n      \\\"sutIp\\\": \\\"pt-sut-cont\\\",\\n      \\\"sutPort\\\": 4000,\\n      \\\"sutProtocol\\\": \\\"http\\\",\\n      \\\"browser\\\": \\\"chrome\\\",\\n      \\\"loggedInIndicator\\\": \\\"<p>Found. Redirecting to <a href=\\\\\\\"\\\\/dashboard\\\\\\\">\\\\/dashboard<\\\\/a><\\\\/p>\\\",\\n      \\\"reportFormats\\\": [\\\"html\\\", \\\"json\\\", \\\"md\\\"]\\n    },\\n    \\\"relationships\\\": {\\n      \\\"data\\\": [{\\n        \\\"type\\\": \\\"testSession\\\",\\n        \\\"id\\\": \\\"lowPrivUser\\\"\\n      },\\n      {\\n        \\\"type\\\": \\\"testSession\\\",\\n        \\\"id\\\": \\\"adminUser\\\"\\n      }]\\n    }\\n  },\\n  \\\"included\\\": [\\n    {\\n      \\\"type\\\": \\\"testSession\\\",\\n      \\\"id\\\": \\\"lowPrivUser\\\",\\n      \\\"attributes\\\": {\\n        \\\"username\\\": \\\"user1\\\",\\n        \\\"password\\\": \\\"User1_123\\\",\\n        \\\"aScannerAttackStrength\\\": \\\"HIGH\\\",\\n        \\\"aScannerAlertThreshold\\\": \\\"LOW\\\",\\n        \\\"alertThreshold\\\": 12\\n      },\\n      \\\"relationships\\\": {\\n        \\\"data\\\": [{\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/profile\\\"\\n        }]\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"testSession\\\",\\n      \\\"id\\\": \\\"adminUser\\\",\\n      \\\"attributes\\\": {\\n        \\\"username\\\": \\\"admin\\\",\\n        \\\"password\\\": \\\"Admin_123\\\"\\n      },\\n      \\\"relationships\\\": {\\n        \\\"data\\\": [{\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/memos\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/profile\\\"\\n        }]\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"route\\\",\\n      \\\"id\\\": \\\"/profile\\\",\\n      \\\"attributes\\\": {\\n        \\\"attackFields\\\": [\\n          {\\\"name\\\": \\\"firstName\\\", \\\"value\\\": \\\"PurpleJohn\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"lastName\\\", \\\"value\\\": \\\"PurpleDoe\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"ssn\\\", \\\"value\\\": \\\"PurpleSSN\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"dob\\\", \\\"value\\\": \\\"12235678\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"bankAcc\\\", \\\"value\\\": \\\"PurpleBankAcc\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"bankRouting\\\", \\\"value\\\": \\\"0198212#\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"address\\\", \\\"value\\\": \\\"PurpleAddress\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"website\\\", \\\"value\\\": \\\"https://purpleteam-labs.com\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"_csrf\\\", \\\"value\\\": \\\"\\\"},\\n          {\\\"name\\\": \\\"submit\\\", \\\"value\\\": \\\"\\\"}\\n        ],\\n        \\\"method\\\": \\\"POST\\\",\\n        \\\"submit\\\": \\\"submit\\\"\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"route\\\",\\n      \\\"id\\\": \\\"/memos\\\",\\n      \\\"attributes\\\": {\\n        \\\"attackFields\\\": [\\n          {\\\"name\\\": \\\"memo\\\", \\\"value\\\": \\\"PurpleMemo\\\", \\\"visible\\\": true}\\n        ],\\n        \\\"method\\\": \\\"POST\\\",\\n        \\\"submit\\\": \\\"btn btn-primary\\\"\\n      }\\n    }\\n  ]\\n}\\n\"'; // eslint-disable-line no-useless-escape
-// As stored in the `request` object body from file: /testResources/jobs/job_0.1.0-alpha.1_missing_type_of_testSession
-const expectedJobMissingTypeTestSession = '\"{\\n  \\\"data\\\": {\\n    \\\"type\\\": \\\"testRun\\\",\\n    \\\"attributes\\\": {      \\n      \\\"version\\\": \\\"0.1.0-alpha.1\\\",\\n      \\\"sutAuthentication\\\": {\\n        \\\"route\\\": \\\"/login\\\",\\n        \\\"usernameFieldLocater\\\": \\\"userName\\\",\\n        \\\"passwordFieldLocater\\\": \\\"password\\\",\\n        \\\"submit\\\": \\\"btn btn-danger\\\",\\n        \\\"expectedPageSourceSuccess\\\": \\\"Log Out\\\"\\n      },\\n      \\\"sutIp\\\": \\\"pt-sut-cont\\\",\\n      \\\"sutPort\\\": 4000,\\n      \\\"sutProtocol\\\": \\\"http\\\",\\n      \\\"browser\\\": \\\"chrome\\\",\\n      \\\"loggedInIndicator\\\": \\\"<p>Found. Redirecting to <a href=\\\\\\\"\\\\/dashboard\\\\\\\">\\\\/dashboard<\\\\/a><\\\\/p>\\\",\\n      \\\"reportFormats\\\": [\\\"html\\\", \\\"json\\\", \\\"md\\\"]\\n    },\\n    \\\"relationships\\\": {\\n      \\\"data\\\": [{\\n        \\\"type\\\": \\\"testSession\\\",\\n        \\\"id\\\": \\\"lowPrivUser\\\"\\n      },\\n      {\\n        \\\"type\\\": \\\"testSession\\\",\\n        \\\"id\\\": \\\"adminUser\\\"\\n      }]\\n    }\\n  },\\n  \\\"included\\\": [\\n    {\\n      \\\"id\\\": \\\"lowPrivUser\\\",\\n      \\\"attributes\\\": {\\n        \\\"username\\\": \\\"user1\\\",\\n        \\\"password\\\": \\\"User1_123\\\",\\n        \\\"aScannerAttackStrength\\\": \\\"HIGH\\\",\\n        \\\"aScannerAlertThreshold\\\": \\\"LOW\\\",\\n        \\\"alertThreshold\\\": 12\\n      },\\n      \\\"relationships\\\": {\\n        \\\"data\\\": [{\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/profile\\\"\\n        }]\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"testSession\\\",\\n      \\\"id\\\": \\\"adminUser\\\",\\n      \\\"attributes\\\": {\\n        \\\"username\\\": \\\"admin\\\",\\n        \\\"password\\\": \\\"Admin_123\\\"\\n      },\\n      \\\"relationships\\\": {\\n        \\\"data\\\": [{\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/memos\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/profile\\\"\\n        }]\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"route\\\",\\n      \\\"id\\\": \\\"/profile\\\",\\n      \\\"attributes\\\": {\\n        \\\"attackFields\\\": [\\n          {\\\"name\\\": \\\"firstName\\\", \\\"value\\\": \\\"PurpleJohn\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"lastName\\\", \\\"value\\\": \\\"PurpleDoe\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"ssn\\\", \\\"value\\\": \\\"PurpleSSN\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"dob\\\", \\\"value\\\": \\\"12235678\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"bankAcc\\\", \\\"value\\\": \\\"PurpleBankAcc\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"bankRouting\\\", \\\"value\\\": \\\"0198212#\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"address\\\", \\\"value\\\": \\\"PurpleAddress\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"website\\\", \\\"value\\\": \\\"https://purpleteam-labs.com\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"_csrf\\\", \\\"value\\\": \\\"\\\"},\\n          {\\\"name\\\": \\\"submit\\\", \\\"value\\\": \\\"\\\"}\\n        ],\\n        \\\"method\\\": \\\"POST\\\",\\n        \\\"submit\\\": \\\"submit\\\"\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"route\\\",\\n      \\\"id\\\": \\\"/memos\\\",\\n      \\\"attributes\\\": {\\n        \\\"attackFields\\\": [\\n          {\\\"name\\\": \\\"memo\\\", \\\"value\\\": \\\"PurpleMemo\\\", \\\"visible\\\": true}\\n        ],\\n        \\\"method\\\": \\\"POST\\\",\\n        \\\"submit\\\": \\\"btn btn-primary\\\"\\n      }\\n    }\\n  ]\\n}\\n\"'; // eslint-disable-line no-useless-escape
+// As stored in the `request` object body from file: /testResources/jobs/job_1.0.0-alpha.3
+const expectedJob = '\"{\\n  \\\"data\\\": {\\n    \\\"type\\\": \\\"job\\\",\\n    \\\"attributes\\\": {\\n      \\\"version\\\": \\\"1.0.0-alpha.3\\\",\\n      \\\"sutAuthentication\\\": {\\n        \\\"route\\\": \\\"/login\\\",\\n        \\\"usernameFieldLocater\\\": \\\"userName\\\",\\n        \\\"passwordFieldLocater\\\": \\\"password\\\",\\n        \\\"submit\\\": \\\"btn btn-danger\\\",\\n        \\\"expectedPageSourceSuccess\\\": \\\"Log Out\\\"\\n      },\\n      \\\"sutIp\\\": \\\"pt-sut-cont\\\",\\n      \\\"sutPort\\\": 4000,\\n      \\\"sutProtocol\\\": \\\"http\\\",\\n      \\\"browser\\\": \\\"chrome\\\",\\n      \\\"loggedInIndicator\\\": \\\"<p>Found. Redirecting to <a href=\\\\\\\"\\\\/dashboard\\\\\\\">\\\\/dashboard<\\\\/a><\\\\/p>\\\"\\n    },\\n    \\\"relationships\\\": {\\n      \\\"data\\\": [{\\n        \\\"type\\\": \\\"tlsScanner\\\",\\n        \\\"id\\\": \\\"NA\\\"\\n      },\\n      {\\n        \\\"type\\\": \\\"appScanner\\\",\\n        \\\"id\\\": \\\"lowPrivUser\\\"\\n      },\\n      {\\n        \\\"type\\\": \\\"appScanner\\\",\\n        \\\"id\\\": \\\"adminUser\\\"\\n      }]\\n    }\\n  },\\n  \\\"included\\\": [\\n    {\\n      \\\"type\\\": \\\"tlsScanner\\\",\\n      \\\"id\\\": \\\"NA\\\",\\n      \\\"attributes\\\": {\\n        \\\"tlsScannerSeverity\\\": \\\"LOW\\\",\\n        \\\"alertThreshold\\\": 3\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"appScanner\\\",\\n      \\\"id\\\": \\\"lowPrivUser\\\",\\n      \\\"attributes\\\": {\\n        \\\"username\\\": \\\"user1\\\",\\n        \\\"password\\\": \\\"User1_123\\\",\\n        \\\"aScannerAttackStrength\\\": \\\"HIGH\\\",\\n        \\\"aScannerAlertThreshold\\\": \\\"LOW\\\",\\n        \\\"alertThreshold\\\": 12\\n      },\\n      \\\"relationships\\\": {\\n        \\\"data\\\": [{\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/profile\\\"\\n        }]\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"appScanner\\\",\\n      \\\"id\\\": \\\"adminUser\\\",\\n      \\\"attributes\\\": {\\n        \\\"username\\\": \\\"admin\\\",\\n        \\\"password\\\": \\\"Admin_123\\\"\\n      },\\n      \\\"relationships\\\": {\\n        \\\"data\\\": [{\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/memos\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/profile\\\"\\n        }]\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"route\\\",\\n      \\\"id\\\": \\\"/profile\\\",\\n      \\\"attributes\\\": {\\n        \\\"attackFields\\\": [\\n          {\\\"name\\\": \\\"firstName\\\", \\\"value\\\": \\\"PurpleJohn\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"lastName\\\", \\\"value\\\": \\\"PurpleDoe\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"ssn\\\", \\\"value\\\": \\\"PurpleSSN\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"dob\\\", \\\"value\\\": \\\"12235678\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"bankAcc\\\", \\\"value\\\": \\\"PurpleBankAcc\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"bankRouting\\\", \\\"value\\\": \\\"0198212#\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"address\\\", \\\"value\\\": \\\"PurpleAddress\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"website\\\", \\\"value\\\": \\\"https://purpleteam-labs.com\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"_csrf\\\", \\\"value\\\": \\\"\\\"},\\n          {\\\"name\\\": \\\"submit\\\", \\\"value\\\": \\\"\\\"}\\n        ],\\n        \\\"method\\\": \\\"POST\\\",\\n        \\\"submit\\\": \\\"submit\\\"\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"route\\\",\\n      \\\"id\\\": \\\"/memos\\\",\\n      \\\"attributes\\\": {\\n        \\\"attackFields\\\": [\\n          {\\\"name\\\": \\\"memo\\\", \\\"value\\\": \\\"PurpleMemo\\\", \\\"visible\\\": true}\\n        ],\\n        \\\"method\\\": \\\"POST\\\",\\n        \\\"submit\\\": \\\"btn btn-primary\\\"\\n      }\\n    }\\n  ]\\n}\\n\"'; // eslint-disable-line no-useless-escape
+// As stored in the `request` object body from file: /testResources/jobs/job_1.0.0-alpha.3_missing_type_of_appScanner
+const expectedJobMissingTypeAppScanner = '\"{\\n  \\\"data\\\": {\\n    \\\"type\\\": \\\"job\\\",\\n    \\\"attributes\\\": {\\n      \\\"version\\\": \\\"1.0.0-alpha.3\\\",\\n      \\\"sutAuthentication\\\": {\\n        \\\"route\\\": \\\"/login\\\",\\n        \\\"usernameFieldLocater\\\": \\\"userName\\\",\\n        \\\"passwordFieldLocater\\\": \\\"password\\\",\\n        \\\"submit\\\": \\\"btn btn-danger\\\",\\n        \\\"expectedPageSourceSuccess\\\": \\\"Log Out\\\"\\n      },\\n      \\\"sutIp\\\": \\\"pt-sut-cont\\\",\\n      \\\"sutPort\\\": 4000,\\n      \\\"sutProtocol\\\": \\\"http\\\",\\n      \\\"browser\\\": \\\"chrome\\\",\\n      \\\"loggedInIndicator\\\": \\\"<p>Found. Redirecting to <a href=\\\\\\\"\\\\/dashboard\\\\\\\">\\\\/dashboard<\\\\/a><\\\\/p>\\\"\\n    },\\n    \\\"relationships\\\": {\\n      \\\"data\\\": [{\\n        \\\"type\\\": \\\"appScanner\\\",\\n        \\\"id\\\": \\\"lowPrivUser\\\"\\n      },\\n      {\\n        \\\"type\\\": \\\"appScanner\\\",\\n        \\\"id\\\": \\\"adminUser\\\"\\n      }]\\n    }\\n  },\\n  \\\"included\\\": [\\n    {\\n      \\\"type\\\": \\\"tlsScanner\\\",\\n      \\\"id\\\": \\\"NA\\\",\\n      \\\"attributes\\\": {\\n        \\\"tlsScannerSeverity\\\": \\\"LOW\\\",\\n        \\\"alertThreshold\\\": 3\\n      }\\n    },\\n    {\\n      \\\"id\\\": \\\"lowPrivUser\\\",\\n      \\\"attributes\\\": {\\n        \\\"username\\\": \\\"user1\\\",\\n        \\\"password\\\": \\\"User1_123\\\",\\n        \\\"aScannerAttackStrength\\\": \\\"HIGH\\\",\\n        \\\"aScannerAlertThreshold\\\": \\\"LOW\\\",\\n        \\\"alertThreshold\\\": 12\\n      },\\n      \\\"relationships\\\": {\\n        \\\"data\\\": [{\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/profile\\\"\\n        }]\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"appScanner\\\",\\n      \\\"id\\\": \\\"adminUser\\\",\\n      \\\"attributes\\\": {\\n        \\\"username\\\": \\\"admin\\\",\\n        \\\"password\\\": \\\"Admin_123\\\"\\n      },\\n      \\\"relationships\\\": {\\n        \\\"data\\\": [{\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/memos\\\"\\n        },\\n        {\\n          \\\"type\\\": \\\"route\\\",\\n          \\\"id\\\": \\\"/profile\\\"\\n        }]\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"route\\\",\\n      \\\"id\\\": \\\"/profile\\\",\\n      \\\"attributes\\\": {\\n        \\\"attackFields\\\": [\\n          {\\\"name\\\": \\\"firstName\\\", \\\"value\\\": \\\"PurpleJohn\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"lastName\\\", \\\"value\\\": \\\"PurpleDoe\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"ssn\\\", \\\"value\\\": \\\"PurpleSSN\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"dob\\\", \\\"value\\\": \\\"12235678\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"bankAcc\\\", \\\"value\\\": \\\"PurpleBankAcc\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"bankRouting\\\", \\\"value\\\": \\\"0198212#\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"address\\\", \\\"value\\\": \\\"PurpleAddress\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"website\\\", \\\"value\\\": \\\"https://purpleteam-labs.com\\\", \\\"visible\\\": true},\\n          {\\\"name\\\": \\\"_csrf\\\", \\\"value\\\": \\\"\\\"},\\n          {\\\"name\\\": \\\"submit\\\", \\\"value\\\": \\\"\\\"}\\n        ],\\n        \\\"method\\\": \\\"POST\\\",\\n        \\\"submit\\\": \\\"submit\\\"\\n      }\\n    },\\n    {\\n      \\\"type\\\": \\\"route\\\",\\n      \\\"id\\\": \\\"/memos\\\",\\n      \\\"attributes\\\": {\\n        \\\"attackFields\\\": [\\n          {\\\"name\\\": \\\"memo\\\", \\\"value\\\": \\\"PurpleMemo\\\", \\\"visible\\\": true}\\n        ],\\n        \\\"method\\\": \\\"POST\\\",\\n        \\\"submit\\\": \\\"btn btn-primary\\\"\\n      }\\n    }\\n  ]\\n}\\n\"'; // eslint-disable-line no-useless-escape
 
 
 describe('apiDecoratingAdapter', () => {
   before(async (flags) => {
-    flags.context.buildUserJobFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
+    flags.context.jobFileContent = await (async () => readFileAsync(jobFilePath, { encoding: 'utf8' }))();
   });
   describe('testPlans', () => {
     it('- should provide the cUi with the test plan to display', async (flags) => {
-      const { context: { buildUserJobFileContent } } = flags;
+      const { context: { jobFileContent } } = flags;
       const cUi = rewire(cUiPath);
       config.set('env', 'local'); // For got hooks only.
       const rewiredApi = rewire(apiDecoratingAdapterPath);
-      const jobFileContents = await buildUserJobFileContent;
+      const jobFileContents = await jobFileContent;
 
       const expectedArgPasssedToTestPlan = [{
         name: 'app',
@@ -63,18 +63,18 @@ describe('apiDecoratingAdapter', () => {
         # Before hooks are run before Background
         
         Background:
-          Given a new test session based on each build user supplied testSession
-          And each build user supplied route of each testSession is navigated
-          And a new scanning session based on each build user supplied testSession
-          And the application is spidered for each testSession
+          Given a new Test Session based on each Build User supplied appScanner resourceObject
+          And each Build User supplied route of each appScanner resourceObject is navigated
+          And a new scanning session based on each Build User supplied appScanner resourceObject
+          And the application is spidered for each appScanner resourceObject
           And all active scanners are disabled
         
-        Scenario: The application should not contain vulnerabilities known to Zap that exceed the build user defined threshold
+        Scenario: The application should not contain vulnerabilities known to Zap that exceed the Build User defined threshold
           Given all active scanners are enabled 
           When the active scan is run
-          Then the vulnerability count should not exceed the build user defined threshold of vulnerabilities known to Zap
+          Then the vulnerability count should not exceed the Build User defined threshold of vulnerabilities known to Zap
         
-          
+        
         
         @simple_math
         Feature: Simple maths
@@ -96,13 +96,27 @@ describe('apiDecoratingAdapter', () => {
               | var | increment | result |
               | 100 |         5 |    105 |
               |  99 |      1234 |   1333 |
-              |  12 |         5 |     17 |`
+              |  12 |         5 |     17 |
+        
+        `
       }, {
         name: 'server',
         message: 'No test plan available for the server tester. The server tester is currently in-active.'
       }, {
         name: 'tls',
-        message: 'No test plan available for the tls tester. The tls tester is currently in-active.'
+        message: `@tls_scan
+        Feature: Web application free of TLS vulnerabilities known to the TLS Emissary
+        
+        # Before hooks are run before Background
+        # Todo update app_scan.feature and docs around tester session wording
+        Background:
+          Given a new TLS Test Session based on the Build User supplied tlsScanner resourceObject
+        
+        Scenario: The application should not contain vulnerabilities known to the TLS Emissary that exceed the Build User defined threshold
+          Given the TLS Emissary is run with arguments
+          Then the vulnerability count should not exceed the Build User defined threshold of vulnerabilities known to the TLS Emissary
+        
+          `
       }];
 
       nock(apiUrl).post('/testplan', expectedJob).reply(200, expectedArgPasssedToTestPlan);
@@ -144,8 +158,8 @@ describe('apiDecoratingAdapter', () => {
     // });
 
     it('- on - connect EHOSTUNREACH - should print message - orchestrator is down...', async (flags) => {
-      const { context: { buildUserJobFileContent, rewiredApi, critStub } } = flags;
-      const jobFileContents = await buildUserJobFileContent;
+      const { context: { jobFileContent, rewiredApi, critStub } } = flags;
+      const jobFileContents = await jobFileContent;
 
       nock(apiUrl).post('/testplan', expectedJob).replyWithError({ code: 'EHOSTUNREACH' });
 
@@ -159,9 +173,9 @@ describe('apiDecoratingAdapter', () => {
 
     it('- on - invalid JSON syntax - should print useful error message', async (flags) => {
       const { context: { rewiredApi, critStub } } = flags;
-      const jobFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_0.1.0-alpha.1_local_missing_comma`, { encoding: 'utf8' }))();
+      const jobFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_1.0.0-alpha.3_local_missing_comma`, { encoding: 'utf8' }))();
 
-      const expectedPrintedErrorMessage = 'Invalid syntax in "Job": Unexpected string in JSON at position 845';
+      const expectedPrintedErrorMessage = 'Error occurred while instantiating the model. Details follow: Invalid syntax in "Job": Unexpected string in JSON at position 1005';
 
       await rewiredApi.testPlans(jobFileContents);
 
@@ -174,32 +188,55 @@ describe('apiDecoratingAdapter', () => {
     it('- on - invalid job based on purpleteam schema - should print useful error message', async (flags) => {
       // Lots of checking around the validation on the server side will be required.
       const { context: { rewiredApi, critStub } } = flags;
-      const jobFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_0.1.0-alpha.1_local_missing_type_of_testSession`, { encoding: 'utf8' }))();
+      const jobFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_1.0.0-alpha.3_local_missing_type_of_appScanner`, { encoding: 'utf8' }))();
 
-      const expectedResponseBodyMessage = `[
+      const expectedResponseBodyMessage = '';// Doesn't matter what this is, we don't check it.
+      /* eslint-disable no-useless-escape */
+      const expectedPrintedErrorMessage = `Error occurred while instantiating the model. Details follow: An error occurred while validating the Job. Details follow:
+name: ValidationError
+message. Errors: [
+  {
+    "instancePath": "/included/1",
+    "schemaPath": "#/if",
+    "keyword": "if",
+    "params": {
+      "failingKeyword": "then"
+    },
+    "message": "must match \\"then\\" schema"
+  },
+  {
+    "instancePath": "/included/1",
+    "schemaPath": "#/required",
+    "keyword": "required",
+    "params": {
+      "missingProperty": "type"
+    },
+    "message": "must have required property 'type'"
+  },
+  {
+    "instancePath": "/included/1/id",
+    "schemaPath": "#/errorMessage",
+    "keyword": "errorMessage",
+    "params": {
+      "errors": [
         {
-          "keyword": "required",
-          "dataPath": "/included/0",
-          "schemaPath": "#/required",
+          "instancePath": "/included/1/id",
+          "schemaPath": "#/then/properties/id/pattern",
+          "keyword": "pattern",
           "params": {
-            "missingProperty": "type"
+            "pattern": "NA"
           },
-          "message": "should have required property 'type'"
+          "message": "must match pattern \\"NA\\"",
+          "emUsed": true
         }
-      ]`;
-      const expectedPrintedErrorMessage = `Error occurred while attempting to communicate with the purpleteam API. Error was: Invalid syntax in "Job" sent to the purpleteam API. Details follow:\n[
-        {
-          "keyword": "required",
-          "dataPath": "/included/0",
-          "schemaPath": "#/required",
-          "params": {
-            "missingProperty": "type"
-          },
-          "message": "should have required property 'type'"
-        }
-      ]`;
+      ]
+    },
+    "message": "If type is tlsScanner, the id should be NA. If type is appScanner, the id should be a valid appScanner. If type is route, the id should be a valid route."
+  }
+]`;
+      /* eslint-enable no-useless-escape */
 
-      nock(apiUrl).post('/testplan', expectedJobMissingTypeTestSession).reply(400, { message: expectedResponseBodyMessage });
+      nock(apiUrl).post('/testplan', expectedJobMissingTypeAppScanner).reply(400, { message: expectedResponseBodyMessage });
 
       await rewiredApi.testPlans(jobFileContents);
 
@@ -210,8 +247,8 @@ describe('apiDecoratingAdapter', () => {
 
 
     it('- on - unknown error - should print unknown error', async (flags) => {
-      const { context: { buildUserJobFileContent, rewiredApi, critStub } } = flags;
-      const jobFileContents = await buildUserJobFileContent;
+      const { context: { jobFileContent, rewiredApi, critStub } } = flags;
+      const jobFileContents = await jobFileContent;
 
       const expectedResponse = 'is this a useful error message';
       const expectedPrintedErrorMessage = `Error occurred while attempting to communicate with the purpleteam API. Error was: Unknown error. Error follows: RequestError: ${expectedResponse}`;
@@ -252,7 +289,7 @@ describe('apiDecoratingAdapter', () => {
       const { context } = flags;
       config.set('env', 'local'); // For got hooks only.
       context.rewiredApi = rewire(apiDecoratingAdapterPath);
-      context.jobFileContents = await context.buildUserJobFileContent;
+      context.jobFileContents = await context.jobFileContent;
     });
 
 
@@ -262,20 +299,23 @@ describe('apiDecoratingAdapter', () => {
       // is still executing after the test finishes.
       // If we restore the cUi, the logger of handleTesterProgress in the cUi.js is undefined
       const cUi = rewire(cUiPath);
-      const apiResponse = [
-        {
-          name: 'app',
-          message: 'App tests are now running.'
-        },
-        {
-          name: 'server',
-          message: 'No server testing available currently. The server tester is currently in-active.'
-        },
-        {
-          name: 'tls',
-          message: 'No tls testing available currently. The tls tester is currently in-active.'
-        }
-      ];
+      const apiResponse = {
+        testerStatuses: [
+          {
+            name: 'app',
+            message: 'Tester initialised.'
+          },
+          {
+            name: 'server',
+            message: 'No server testing available currently. The server tester is currently in-active.'
+          },
+          {
+            name: 'tls',
+            message: 'Tester initialised.'
+          }
+        ],
+        testerFeedbackCommsMedium: 'sse'
+      };
 
       nock(apiUrl).post('/test', expectedJob).reply(200, apiResponse);
 
@@ -308,7 +348,7 @@ describe('apiDecoratingAdapter', () => {
         { testerType: 'app', sessionId: 'lowPrivUser', threshold: 12 },
         { testerType: 'app', sessionId: 'adminUser', threshold: 0 },
         { testerType: 'server', sessionId: 'NA', threshold: 0 },
-        { testerType: 'tls', sessionId: 'NA', threshold: 0 }
+        { testerType: 'tls', sessionId: 'NA', threshold: 3 }
       ];
 
       expect(testStub.getCall(0).args[0]).to.equal(expectedTesterSessions);
@@ -317,17 +357,17 @@ describe('apiDecoratingAdapter', () => {
       expect(handleModelTesterEventsSpy.callCount).to.equal(4);
       expect(handleTesterProgressStub.callCount).to.equal(4);
 
-      expect(handleModelTesterEventsSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', 'App tests are now running.']);
-      expect(handleTesterProgressStub.getCall(0).args).to.equal([{ testerType: 'app', sessionId: 'lowPrivUser', message: 'App tests are now running.', ptLogger }]);
+      expect(handleModelTesterEventsSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', 'Tester initialised.']);
+      expect(handleTesterProgressStub.getCall(0).args).to.equal([{ testerType: 'app', sessionId: 'lowPrivUser', message: 'Tester initialised.', ptLogger }]);
 
-      expect(handleModelTesterEventsSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', 'App tests are now running.']);
-      expect(handleTesterProgressStub.getCall(1).args).to.equal([{ testerType: 'app', sessionId: 'adminUser', message: 'App tests are now running.', ptLogger }]);
+      expect(handleModelTesterEventsSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', 'Tester initialised.']);
+      expect(handleTesterProgressStub.getCall(1).args).to.equal([{ testerType: 'app', sessionId: 'adminUser', message: 'Tester initialised.', ptLogger }]);
 
       expect(handleModelTesterEventsSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
       expect(handleTesterProgressStub.getCall(2).args).to.equal([{ testerType: 'server', sessionId: 'NA', message: 'No server testing available currently. The server tester is currently in-active.', ptLogger }]);
 
-      expect(handleModelTesterEventsSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
-      expect(handleTesterProgressStub.getCall(3).args).to.equal([{ testerType: 'tls', sessionId: 'NA', message: 'No tls testing available currently. The tls tester is currently in-active.', ptLogger }]);
+      expect(handleModelTesterEventsSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'Tester initialised.']);
+      expect(handleTesterProgressStub.getCall(3).args).to.equal([{ testerType: 'tls', sessionId: 'NA', message: 'Tester initialised.', ptLogger }]);
     });
 
     it('- should subscribe to models tester events - should propagate initial tester responses from each tester to model, even if app tester is offline - then verify event flow back through presenter and then to view', async (flags) => {
@@ -336,21 +376,24 @@ describe('apiDecoratingAdapter', () => {
       // is still executing after the test finishes.
       // If we restore the cUi, the logger of handleTesterProgress in the cUi.js is undefined
       const cUi = rewire(cUiPath);
-      const apiResponse = [
+      const apiResponse = {
+        testerStatuses: [
         // Simulate no response from app tester to orchestrator.
         // {
         //   name: 'app',
-        //   message: 'App tests are now running.'
+        //   message: 'Tester initialised.'
         // },
-        {
-          name: 'server',
-          message: 'No server testing available currently. The server tester is currently in-active.'
-        },
-        {
-          name: 'tls',
-          message: 'No tls testing available currently. The tls tester is currently in-active.'
-        }
-      ];
+          {
+            name: 'server',
+            message: 'No server testing available currently. The server tester is currently in-active.'
+          },
+          {
+            name: 'tls',
+            message: 'Tester initialised.'
+          }
+        ],
+        testerFeedbackCommsMedium: 'sse'
+      };
 
       nock(apiUrl).post('/test', expectedJob).reply(200, apiResponse);
 
@@ -383,7 +426,7 @@ describe('apiDecoratingAdapter', () => {
         { testerType: 'app', sessionId: 'lowPrivUser', threshold: 12 },
         { testerType: 'app', sessionId: 'adminUser', threshold: 0 },
         { testerType: 'server', sessionId: 'NA', threshold: 0 },
-        { testerType: 'tls', sessionId: 'NA', threshold: 0 }
+        { testerType: 'tls', sessionId: 'NA', threshold: 3 }
       ];
 
       expect(testStub.getCall(0).args[0]).to.equal(expectedTesterSessions);
@@ -392,17 +435,17 @@ describe('apiDecoratingAdapter', () => {
       expect(handleModelTesterEventsSpy.callCount).to.equal(4);
       expect(handleTesterProgressStub.callCount).to.equal(4);
 
-      expect(handleModelTesterEventsSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', '"app" tester for session with Id "lowPrivUser" doesn\'t currently appear to be online']);
-      expect(handleTesterProgressStub.getCall(0).args).to.equal([{ testerType: 'app', sessionId: 'lowPrivUser', message: '"app" tester for session with Id "lowPrivUser" doesn\'t currently appear to be online', ptLogger }]);
+      expect(handleModelTesterEventsSpy.getCall(0).args).to.equal(['testerProgress', 'app', 'lowPrivUser', '"app" Tester for session with Id "lowPrivUser" doesn\'t currently appear to be online']);
+      expect(handleTesterProgressStub.getCall(0).args).to.equal([{ testerType: 'app', sessionId: 'lowPrivUser', message: '"app" Tester for session with Id "lowPrivUser" doesn\'t currently appear to be online', ptLogger }]);
 
-      expect(handleModelTesterEventsSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', '"app" tester for session with Id "adminUser" doesn\'t currently appear to be online']);
-      expect(handleTesterProgressStub.getCall(1).args).to.equal([{ testerType: 'app', sessionId: 'adminUser', message: '"app" tester for session with Id "adminUser" doesn\'t currently appear to be online', ptLogger }]);
+      expect(handleModelTesterEventsSpy.getCall(1).args).to.equal(['testerProgress', 'app', 'adminUser', '"app" Tester for session with Id "adminUser" doesn\'t currently appear to be online']);
+      expect(handleTesterProgressStub.getCall(1).args).to.equal([{ testerType: 'app', sessionId: 'adminUser', message: '"app" Tester for session with Id "adminUser" doesn\'t currently appear to be online', ptLogger }]);
 
       expect(handleModelTesterEventsSpy.getCall(2).args).to.equal(['testerProgress', 'server', 'NA', 'No server testing available currently. The server tester is currently in-active.']);
       expect(handleTesterProgressStub.getCall(2).args).to.equal([{ testerType: 'server', sessionId: 'NA', message: 'No server testing available currently. The server tester is currently in-active.', ptLogger }]);
 
-      expect(handleModelTesterEventsSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'No tls testing available currently. The tls tester is currently in-active.']);
-      expect(handleTesterProgressStub.getCall(3).args).to.equal([{ testerType: 'tls', sessionId: 'NA', message: 'No tls testing available currently. The tls tester is currently in-active.', ptLogger }]);
+      expect(handleModelTesterEventsSpy.getCall(3).args).to.equal(['testerProgress', 'tls', 'NA', 'Tester initialised.']);
+      expect(handleTesterProgressStub.getCall(3).args).to.equal([{ testerType: 'tls', sessionId: 'NA', message: 'Tester initialised.', ptLogger }]);
     });
   });
 
@@ -412,7 +455,7 @@ describe('apiDecoratingAdapter', () => {
       flags.context.testerStatuses = [
         {
           name: 'app',
-          message: 'App tests are now running.'
+          message: 'Tester initialised.'
         },
         {
           name: 'server',
@@ -420,7 +463,7 @@ describe('apiDecoratingAdapter', () => {
         },
         {
           name: 'tls',
-          message: 'No tls testing available currently. The tls tester is currently in-active.'
+          message: 'Tester initialised.'
         }
       ];
     });
@@ -428,7 +471,7 @@ describe('apiDecoratingAdapter', () => {
 
     beforeEach(async (flags) => {
       const { context } = flags;
-      const jobFileContents = await context.buildUserJobFileContent;
+      const jobFileContents = await context.jobFileContent;
       context.model = new Model(jobFileContents);
       config.set('env', 'local'); // For got hooks only.
       const rewiredApi = rewire(apiDecoratingAdapterPath);
@@ -443,7 +486,7 @@ describe('apiDecoratingAdapter', () => {
       const { context: { model, rewiredSubscribeToTesterFeedback, rewiredApi, testerStatuses } } = flags;
       const numberOfEvents = 6;
       new MockEvent({ // eslint-disable-line no-new
-        url: `${apiUrl}/${TesterFeedbackRoutePrefix}/app/lowPrivUser`,
+        url: `${apiUrl}/${TesterFeedbackRoutePrefix('sse')}/app/lowPrivUser`,
         setInterval: 1,
         responses: [
           { lastEventId: 'one', type: 'testerProgress', data: { progress: 'Initialising subscription to "app-lowPrivUser" channel for the event "testerProgress"' } },
@@ -452,7 +495,7 @@ describe('apiDecoratingAdapter', () => {
         ]
       });
       new MockEvent({ // eslint-disable-line no-new
-        url: `${apiUrl}/${TesterFeedbackRoutePrefix}/app/adminUser`,
+        url: `${apiUrl}/${TesterFeedbackRoutePrefix('sse')}/app/adminUser`,
         setInterval: 1,
         responses: [
           { lastEventId: 'four', type: 'testerProgress', data: { progress: 'Initialising subscription to "app-adminUser" channel for the event "testerProgress"' } },
@@ -549,18 +592,18 @@ describe('apiDecoratingAdapter', () => {
   });
 
 
-  describe('getBuildUserConfigFile', /* async */ () => {
+  describe('getJobFile', /* async */ () => {
     before(async (flags) => {
-      flags.context.buildUserJobFileContent = await (async () => readFileAsync(buildUserConfigFilePath, { encoding: 'utf8' }))();
+      flags.context.jobFileContent = await (async () => readFileAsync(jobFilePath, { encoding: 'utf8' }))();
     });
-    it('- should return the build user config file contents', async (flags) => {
-      const { context: { buildUserJobFileContent } } = flags;
+    it('- should return the Job file contents', async (flags) => {
+      const { context: { jobFileContent } } = flags;
       config.set('env', 'local'); // For got hooks only.
 
       flags.onCleanup = () => { config.set('env', 'test'); };
       const rewiredApi = rewire(apiDecoratingAdapterPath);
-      const buildUserJobFileContents = await rewiredApi.getBuildUserConfigFile(buildUserConfigFilePath);
-      expect(buildUserJobFileContents).to.equal(buildUserJobFileContent);
+      const jobFileContents = await rewiredApi.getJobFile(jobFilePath);
+      expect(jobFileContents).to.equal(jobFileContent);
     });
   });
 
@@ -582,7 +625,7 @@ describe('apiDecoratingAdapter', () => {
       const eventName = 'testerProgress';
       const testerType = 'app';
       const sessionId = 'lowPrivUser';
-      const message = 'App tests are now running.';
+      const message = 'Tester initialised.';
       const parameters = [{ testerType, sessionId, message, ptLogger }];
 
       flags.onCleanup = () => {
@@ -656,7 +699,7 @@ describe('apiDecoratingAdapter', () => {
   describe('handleServerSentTesterEvents', () => {
     beforeEach(async (flags) => {
       const { context } = flags;
-      const jobFileContents = await context.buildUserJobFileContent;
+      const jobFileContents = await context.jobFileContent;
       context.model = new Model(jobFileContents);
       context.modelPropagateTesterMessageStub = sinon.stub(context.model, 'propagateTesterMessage');
       config.set('env', 'local'); // For got hooks only.

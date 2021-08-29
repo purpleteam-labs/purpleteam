@@ -1,7 +1,7 @@
 {
   "data": {
     "type": "testRun",
-    "attributes": {      
+    "attributes": {
       "version": "0.1.0-alpha.1",
       "sutAuthentication": {
         "route": "/login",

@@ -8,8 +8,8 @@
     "protocol": "http",
     "host": "127.0.0.1"
   },
-  "buildUserConfig": {
-    "fileUri": "./testResources/jobs/job_0.1.0-alpha.1_local"
+  "job": {
+    "fileUri": "./testResources/jobs/job_1.0.0-alpha.3_local"
   },
   "modulePaths": {
     "blessed": "../../testResources/blessedFake"

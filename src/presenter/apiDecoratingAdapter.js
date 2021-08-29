@@ -1,26 +1,21 @@
 // Copyright (C) 2017-2021 BinaryMist Limited. All rights reserved.
 
-// This file is part of purpleteam.
+// This file is part of PurpleTeam.
 
-// purpleteam is free software: you can redistribute it and/or modify
+// PurpleTeam is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation version 3.
 
-// purpleteam is distributed in the hope that it will be useful,
+// PurpleTeam is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Affero General Public License for more details.
 
 // You should have received a copy of the GNU Affero General Public License
-// along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
+// along with this PurpleTeam project. If not, see <https://www.gnu.org/licenses/>.
 
 const config = require('../../config/config'); // eslint-disable-line import/order
-const fs = require('fs');
-const { promisify } = require('util');
-
-const readFileAsync = promisify(fs.readFile);
-const writeFileAsync = promisify(fs.writeFile);
-
+const { promises: fsPromises } = require('fs');
 const got = require('got');
 const EventSource = require('eventsource');
 const Bourne = require('@hapi/bourne');
@@ -39,13 +34,12 @@ const internals = {
   longPoll: {
     nullProgressCounter: 0,
     nullProgressMaxRetries: config.get('testerFeedbackComms.longPoll.nullProgressMaxRetries')
-  },
-  testerFeedbackCommsMedium: config.get('testerFeedbackComms.medium')
+  }
 };
 
-const getBuildUserConfigFile = async (filePath) => {
+const getJobFile = async (filePath) => {
   try {
-    const fileContents = await readFileAsync(filePath, { encoding: 'utf8' });
+    const fileContents = await fsPromises.readFile(filePath, { encoding: 'utf8' });
     return fileContents;
   } catch (err) {
     cUiLogger.error(`Could not read file: ${filePath}, the error was: ${err}.`, { tags: ['apiDecoratingAdapter'] });
@@ -91,7 +85,7 @@ const gotPt = got.extend({
   }[env],
   retry: {
     limit: 2, // Default is 2
-    methods: [/* Defaults */'GET', 'PUT', 'HEAD', 'OPTIONS', 'TRACE', /* Non-defaults */ 'POST'],
+    methods: [/* Defaults */'GET', 'PUT', 'HEAD', 'OPTIONS', 'TRACE'/* Non-defaults *//* , 'POST' */],
     statusCodes: [/* Defaults */408, 413, 429, 500, 502, 503, 504, 521, 522, 524, /* Non-defaults */ 512]
   },
   hooks: {
@@ -190,7 +184,7 @@ const requestOutcomes = async () => {
       }
     }
   }).then(async (response) => {
-    await writeFileAsync(outcomesFilePath, response)
+    await fsPromises.writeFile(outcomesFilePath, response)
       .then(() => { result = `Outcomes have been downloaded to: ${outcomesFilePath}.`; })
       .catch((error) => { result = `Error occurred while writing the outcomes file: ${outcomesFilePath}, error was: ${error}.`; });
   }).catch((error) => {
@@ -200,16 +194,67 @@ const requestOutcomes = async () => {
   return result;
 };
 
-const requestTestOrTestPlan = async (configFileContents, route) => {
+const requestTestOrTestPlan = async (jobFileContents, route) => {
   let result;
-  await gotPt.post(`${route}`, { headers: { 'Content-Type': 'application/vnd.api+json' }, json: configFileContents, responseType: 'json', resolveBodyOnly: true }).then((response) => {
+  const retrying = (() => ({
+    // The CLI needs to stop trying before the back-end fails due to containers not being up quickly enough.
+    //   If the CLI retries after the back-end (specifically the App Tester) has given up and issued it's "Tester failure:" message
+    //   Then the Test Run will be attempted to be started again, this could result in an endless loop of retries.
+    //   Currently the App Tester takes the longest to initialise due to having to spin up it's s2 containers.
+    //   The back-end (specifically App Tester) timeouts (stored in config) are:
+    //     s2Containers.serviceDiscoveryServiceInstances.timeoutToBeAvailable: currently: 120000
+    //     s2Containers.responsive.timeout: currently: 30000
+    //     Which is a total of 150000. So the CLI needs to stop retrying before that.
+
+    // 20 seconds is the longPoll timeout in the orchestrator's testerWatcher so that it's well under API Gateway's 30 seconds. The config property is testerFeedbackComms.longPoll.timeout
+    // 15 seconds is the retry timeout for the TLS Tester keepMessageChannelAlive. The config property is messageChannelHeartBeatInterval.
+    // There is also a counter in handleLongPollTesterEvents for nullProgressMaxRetries.
+
+    // The timeout.response value appears to be added to what's returned from calculateDelay.
+    // No need to timeout or retry for local, as we don't have the AWS API Gateway 30 second timeout to contend with. So we don't timeout at all.
+    cloud: {
+      timeout: { response: 10000 },
+      retry: {
+        calculateDelay: ({ attemptCount /* , retryOptions, error , computedValue */ }) => { // eslint-disable-line arrow-body-style
+          attemptCount === 1 && console.log('\n\n'); // eslint-disable-line no-console
+          attemptCount > 1 && cUiLogger.notice(`Retrying Tester initialisation. Attempt ${attemptCount} of 13.` /* , { tags: ['apiDecoratingAdapter'] } */);
+          const attemptCountInterval = {
+            1: 13000,
+            2: 5000,
+            3: 5000,
+            4: 10,
+            5: 10,
+            6: 10,
+            7: 10,
+            8: 10,
+            9: 10,
+            10: 10,
+            11: 10,
+            12: 10,
+            13: 0 // Cancel
+          };
+          return attemptCountInterval[attemptCount];
+        }
+      }
+    },
+    local: {}
+  }[env]))();
+
+  await gotPt.post(`${route}`, {
+    headers: { 'Content-Type': 'application/vnd.api+json' },
+    json: jobFileContents,
+    responseType: 'json',
+    resolveBodyOnly: true,
+    ...retrying
+  }).then((response) => {
+    // We can't return from here until the Testers are running.
     result = response;
   }).catch((error) => {
     if (error.processed) {
       cUiLogger.crit(error.message, { tags: ['apiDecoratingAdapter'] });
     } else {
       const knownErrors = [
-        // Server-side will catch invalid job against purpleteam schema and respond with ValidationError.
+        // Server-side will catch invalid job against purpleteam schema and respond with ValidationError... only if client-side validation is disabled though.
         { ValidationError: error.message }, // error.name
         // Client-side will catch invalid JSON
         { 400: `Invalid syntax in "Job" sent to the purpleteam API. Details follow:\n${error.response?.body?.message}` }, // error.response.statusCode
@@ -226,8 +271,8 @@ const requestTestOrTestPlan = async (configFileContents, route) => {
   });
   return result;
 };
-const requestTest = async (configFileContents) => requestTestOrTestPlan(configFileContents, 'test');
-const requestTestPlan = async (configFileContents) => requestTestOrTestPlan(configFileContents, 'testplan');
+const requestTest = async (jobFileContents) => requestTestOrTestPlan(jobFileContents, 'test');
+const requestTestPlan = async (jobFileContents) => requestTestOrTestPlan(jobFileContents, 'testplan');
 
 const handleServerSentTesterEvents = async (event, model, testerNameAndSession) => {
   if (event.origin === apiUrl) {
@@ -235,7 +280,7 @@ const handleServerSentTesterEvents = async (event, model, testerNameAndSession) 
     const eventDataProp = `${eventDataPropPascalCase.charAt(0).toLowerCase()}${eventDataPropPascalCase.substring(1)}`;
     let message = Bourne.parse(event.data)[eventDataProp];
     if (message != null) {
-      if (event.type === 'testerProgress' && message.startsWith('All test sessions of all testers are finished')) {
+      if (event.type === 'testerProgress' && message.startsWith('All Test Sessions of all Testers are finished')) { // Message defined in Orchestrator.
         message = message.concat(`\n${await requestOutcomes()}`);
       }
       model.propagateTesterMessage({
@@ -262,7 +307,7 @@ const subscribeToTesterFeedback = (model, testerStatuses) => {
     // Todo: KC: Add test for the following logging.
     const loggerType = `${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}`;
     const { transports, dirname } = config.get('loggers.testerProgress');
-    ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}` });
+    ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}.log` });
 
     const testerRepresentative = testerStatuses.find((element) => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
@@ -272,7 +317,7 @@ const subscribeToTesterFeedback = (model, testerStatuses) => {
         message: testerRepresentative.message
       });
       if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
-        const eventSource = new EventSource(`${apiUrl}/${TesterFeedbackRoutePrefix}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`);
+        const eventSource = new EventSource(`${apiUrl}/${TesterFeedbackRoutePrefix('sse')}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`); // sessionId is 'NA' for tls?
         const handleServerSentTesterEventsClosure = (event) => {
           handleServerSentTesterEvents(event, model, testerNameAndSession);
         };
@@ -282,8 +327,7 @@ const subscribeToTesterFeedback = (model, testerStatuses) => {
         eventSource.addEventListener('end', () => { eventSource.close(); });
         eventSource.addEventListener('error', (error) => {
           const knownErrors = [
-            { 421: 'The purpleteam API is configured to use Long Polling. Make sure you have the CLI configured to use "lp"' }, // error.status
-            { 400: `This could be due to a validation failure of the parameters supplied to /${TesterFeedbackRoutePrefix}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}` } // error.status
+            { 400: `This could be due to a validation failure of the parameters supplied to /${TesterFeedbackRoutePrefix('sse')}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}` } // error.status
             // Others?
           ];
           const knownError = knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.status))
@@ -300,7 +344,7 @@ const subscribeToTesterFeedback = (model, testerStatuses) => {
       model.propagateTesterMessage({
         testerType: testerNameAndSession.testerType,
         sessionId: testerNameAndSession.sessionId,
-        message: `"${testerNameAndSession.testerType}" tester for session with Id "${testerNameAndSession.sessionId}" doesn't currently appear to be online`
+        message: `"${testerNameAndSession.testerType}" Tester for session with Id "${testerNameAndSession.sessionId}" doesn't currently appear to be online`
       });
     }
   });
@@ -319,7 +363,7 @@ const handleLongPollTesterEvents = async (eventSet, model, testerNameAndSession)
       if (eventType === 'testerProgress' && message.startsWith('Tester finished')) {
         keepRequestingMessages = false;
       }
-      if (eventType === 'testerProgress' && message.startsWith('All test sessions of all testers are finished')) {
+      if (eventType === 'testerProgress' && message.startsWith('All Test Sessions of all Testers are finished')) { // Message defined in Orchestrator.
         message = message.concat(`\n${await requestOutcomes()}`);
         keepRequestingMessages = false;
       }
@@ -346,7 +390,7 @@ const longPollTesterFeedback = async (model, testerStatuses) => {
     // Todo: KC: Add test for the following logging.
     const loggerType = `${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}`;
     const { transports, dirname } = config.get('loggers.testerProgress');
-    ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}` });
+    ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}.log` });
 
     const testerRepresentative = testerStatuses.find((element) => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
@@ -361,7 +405,7 @@ const longPollTesterFeedback = async (model, testerStatuses) => {
         // 2. Use EventEmitter, subscribe requestPollTesterFeedback to an event, fire the event from the gotPt callback
         const requestPollTesterFeedback = async () => {
           let keepRequestingMessages;
-          await gotPt.get(`${TesterFeedbackRoutePrefix}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`, { responseType: 'json' }).then(async (response) => {
+          await gotPt.get(`${TesterFeedbackRoutePrefix('lp')}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`, { responseType: 'json' }).then(async (response) => {
             keepRequestingMessages = await handleLongPollTesterEvents(response.body, model, testerNameAndSession);
             if (keepRequestingMessages) await requestPollTesterFeedback();
           }).catch((error) => {
@@ -370,7 +414,6 @@ const longPollTesterFeedback = async (model, testerStatuses) => {
               errorMessage = error.message;
             } else {
               const knownErrors = [
-                { 421: error.response?.body?.message }, // error.response.statusCode
                 { ValidationError: `${error.response?.body?.name}: ${error.response?.body?.message}` } // error.response.body.name
                 // Others?
               ];
@@ -382,7 +425,7 @@ const longPollTesterFeedback = async (model, testerStatuses) => {
             model.propagateTesterMessage({
               testerType: testerNameAndSession.testerType,
               sessionId: testerNameAndSession.sessionId,
-              message: `Error occurred while attempting to Poll the purpleteam API for tester feedback. Error was: ${errorMessage}`
+              message: `Error occurred while attempting to Poll the purpleteam API for Tester feedback. Error was: ${errorMessage}`
             });
           });
         };
@@ -392,56 +435,41 @@ const longPollTesterFeedback = async (model, testerStatuses) => {
       model.propagateTesterMessage({
         testerType: testerNameAndSession.testerType,
         sessionId: testerNameAndSession.sessionId,
-        message: `"${testerNameAndSession.testerType}" tester for session with Id "${testerNameAndSession.sessionId}" doesn't currently appear to be online`
+        message: `"${testerNameAndSession.testerType}" Tester for session with Id "${testerNameAndSession.sessionId}" doesn't currently appear to be online`
       });
     }
   }));
 };
 
-/* eslint-disable max-classes-per-file */
-// Context.
-class TesterFeedbackComms {
-  constructor() {
-    this.testerFeedbackCommsMedium = internals[internals.testerFeedbackCommsMedium];
-    return this;
-  }
-
-  async getTesterFeedback(model, testerStatuses) {
-    await this.testerFeedbackCommsMedium.getTesterFeedback(model, testerStatuses);
-  }
-}
-// Concrete Strategy.
-internals.sse = {
-  getTesterFeedback: (model, testerStatuses) => {
+const getTesterFeedback = {
+  sse: async (model, testerStatuses) => {
     subscribeToTesterFeedback(model, testerStatuses);
-  }
-};
-// Concrete Strategy.
-internals.lp = {
-  getTesterFeedback: async (model, testerStatuses) => {
+  },
+  lp: async (model, testerStatuses) => {
     await longPollTesterFeedback(model, testerStatuses);
   }
 };
-/* eslint-enable max-classes-per-file */
 
-
-const getInitialisedModel = (configFileContents) => {
+const getInitialisedModel = (jobFileContents) => {
   let model;
   try {
-    model = new Model(configFileContents);
+    model = new Model(jobFileContents);
   } catch (error) {
-    if (error.name === 'SyntaxError') {
-      cUiLogger.crit(`Invalid syntax in "Job": ${error.message}`, { tags: ['apiDecoratingAdapter'] });
-      return undefined;
-    }
-    throw error;
+    const knownErrors = [
+      { SyntaxError: `Invalid syntax in "Job": ${error.message}` }, // error.name
+      { ValidationError: `An error occurred while validating the Job. Details follow:\nname: ${error.name}\nmessage. Errors: ${error.message}` } // error.name
+    ];
+    const knownError = knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.name))
+      ?? { default: `Unknown error. Error follows: ${error}` };
+    cUiLogger.crit(`Error occurred while instantiating the model. Details follow: ${Object.values(knownError)[0]}`, { tags: ['apiDecoratingAdapter'] });
+    return undefined;
   }
   return model;
 };
 
-const testPlans = async (configFileContents) => {
-  if (!getInitialisedModel(configFileContents)) return;
-  const resultingTestPlans = await requestTestPlan(configFileContents);
+const testPlans = async (jobFileContents) => {
+  if (!getInitialisedModel(jobFileContents)) return;
+  const resultingTestPlans = await requestTestPlan(jobFileContents);
   resultingTestPlans && view.testPlan({ testPlans: resultingTestPlans, ptLogger });
 };
 
@@ -449,10 +477,10 @@ const handleModelTesterEvents = (eventName, testerType, sessionId, message) => {
   view[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`]({ testerType, sessionId, message, ptLogger });
 };
 
-const test = async (configFileContents) => {
-  const model = getInitialisedModel(configFileContents);
+const test = async (jobFileContents) => {
+  const model = getInitialisedModel(jobFileContents);
   if (!model) return;
-  const testerStatuses = await requestTest(configFileContents);
+  const { testerStatuses, testerFeedbackCommsMedium } = await requestTest(jobFileContents);
 
   if (testerStatuses) {
     view.test(model.testerSessions());
@@ -460,7 +488,7 @@ const test = async (configFileContents) => {
       model.on(eN, (testerType, sessionId, message) => { handleModelTesterEvents(eN, testerType, sessionId, message); });
     });
 
-    await new TesterFeedbackComms().getTesterFeedback(model, testerStatuses);
+    await getTesterFeedback[testerFeedbackCommsMedium](model, testerStatuses);
 
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good
@@ -472,7 +500,7 @@ const test = async (configFileContents) => {
 const status = async () => { await requestStatus(); };
 
 module.exports = {
-  getBuildUserConfigFile,
+  getJobFile,
   testPlans,
   test,
   status

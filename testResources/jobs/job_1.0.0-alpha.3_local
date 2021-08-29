@@ -1,8 +1,8 @@
 {
   "data": {
-    "type": "testRun",
+    "type": "job",
     "attributes": {
-      "version": "0.1.0-alpha.1",
+      "version": "1.0.0-alpha.3",
       "sutAuthentication": {
         "route": "/login",
         "usernameFieldLocater": "userName",
@@ -14,23 +14,34 @@
       "sutPort": 4000,
       "sutProtocol": "http",
       "browser": "chrome",
-      "loggedInIndicator": "<p>Found. Redirecting to <a href=\"\/dashboard\">\/dashboard<\/a><\/p>",
-      "reportFormats": ["html", "json", "md"]
+      "loggedInIndicator": "<p>Found. Redirecting to <a href=\"\/dashboard\">\/dashboard<\/a><\/p>"
     },
     "relationships": {
       "data": [{
-        "type": "testSession",
+        "type": "tlsScanner",
+        "id": "NA"
+      },
+      {
+        "type": "appScanner",
         "id": "lowPrivUser"
       },
       {
-        "type": "testSession",
+        "type": "appScanner",
         "id": "adminUser"
       }]
     }
   },
   "included": [
     {
-      "type": "testSession",
+      "type": "tlsScanner",
+      "id": "NA",
+      "attributes": {
+        "tlsScannerSeverity": "LOW",
+        "alertThreshold": 3
+      }
+    },
+    {
+      "type": "appScanner",
       "id": "lowPrivUser",
       "attributes": {
         "username": "user1",
@@ -47,7 +58,7 @@
       }
     },
     {
-      "type": "testSession",
+      "type": "appScanner",
       "id": "adminUser",
       "attributes": {
         "username": "admin",

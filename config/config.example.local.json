@@ -14,10 +14,7 @@
     "protocol": "http",
     "host": "172.25.0.110"
   },
-  "testerFeedbackComms": {
-    "medium": "lp"
-  },
-  "buildUserConfig": {
+  "job": {
     "fileUri": "./testResources/jobs/<your_job_file>"
   },
   "outcomes": {

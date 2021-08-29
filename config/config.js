@@ -1,18 +1,18 @@
 // Copyright (C) 2017-2021 BinaryMist Limited. All rights reserved.
 
-// This file is part of purpleteam.
+// This file is part of PurpleTeam.
 
-// purpleteam is free software: you can redistribute it and/or modify
+// PurpleTeam is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation version 3.
 
-// purpleteam is distributed in the hope that it will be useful,
+// PurpleTeam is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Affero General Public License for more details.
 
 // You should have received a copy of the GNU Affero General Public License
-// along with purpleteam. If not, see <https://www.gnu.org/licenses/>.
+// along with this PurpleTeam project. If not, see <https://www.gnu.org/licenses/>.
 
 const convict = require('convict');
 const convictFormatWithValidator = require('convict-format-with-validator');
@@ -63,6 +63,13 @@ const schema = {
         format: String,
         default: `${process.cwd()}/logs/`
       }
+    }
+  },
+  sut: {
+    browser: {
+      doc: 'The type of browser to run tests through.',
+      format: ['chrome', 'firefox'],
+      default: 'chrome'
     }
   },
   purpleteamAuth: {
@@ -142,11 +149,6 @@ const schema = {
     }
   },
   testerFeedbackComms: {
-    medium: {
-      doc: 'The messaging medium used for tester[feedback] events. Server Sent Events or Long Polling. See the configuration docs for further details.',
-      format: ['sse', 'lp'],
-      default: 'sse'
-    },
     longPoll: {
       nullProgressMaxRetries: {
         doc: 'The number of times (sequentially receiving an event with a data object containing a property with a null value) to poll the backend when the orchestrator is not receiving feedback from the testers.',
@@ -172,11 +174,16 @@ const schema = {
       default: 'not yet set'
     }
   },
-  buildUserConfig: {
+  job: {
     fileUri: {
-      doc: 'The location of the build user config file.',
+      doc: 'The location of the Job file.',
       format: String,
-      default: './testResources/jobs/buildUserConfigFile-AKA-Job'
+      default: './testResources/jobs/Job'
+    },
+    version: {
+      doc: 'The version of the Job accepted by the PurpleTeam API.',
+      format: ['0.1.0-alpha.1', '1.0.0-alpha.3'],
+      default: '1.0.0-alpha.3'
     }
   },
   modulePaths: {
