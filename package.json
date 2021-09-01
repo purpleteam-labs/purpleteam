@@ -3,7 +3,7 @@
   "np": {
     "branch": "main"
   },
-  "version": "0.2.5-alpha.3",
+  "version": "1.0.0-alpha.3",
   "description": "CLI for driving purpleteam -- security regression testing SaaS",
   "main": "src/index.js",
   "scripts": {
