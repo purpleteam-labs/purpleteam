@@ -200,8 +200,8 @@ As mentioned under the [Clone](#clone-the-git-repository) section, another optio
 
 ## Job File
 
-The [_Job_](https://purpleteam-labs.com/doc/definitions/) file is what purpleteam uses to do the following. Most properties should be self documenting. If you are unsure of any, start a [Github discussion](https://github.com/purpleteam-labs/purpleteam/discussions) or reach out in the [#project-purpleteam channel of OWASP Slack](https://owasp.slack.com/messages/project-purpleteam).
-Examples of _Job_ files that the purpleteam-labs team uses can be found [here](https://github.com/purpleteam-labs/purpleteam/tree/main/testResources/jobs):
+The [_Job_](https://purpleteam-labs.com/doc/definitions/) file is what purpleteam uses to do the following. Most properties should be self documenting, although the official documentation is [here](https://purpleteam-labs.com/doc/job-file/). If you are unsure of any of the properties, start a [Github discussion](https://github.com/purpleteam-labs/purpleteam/discussions) or reach out in the [#project-purpleteam channel of OWASP Slack](https://owasp.slack.com/messages/project-purpleteam).
+Examples of _Job_ files that the PurpleTeam-Labs team uses can be found [here](https://github.com/purpleteam-labs/purpleteam/tree/main/testResources/jobs). You will need to define the following:
 
 * Authenticate to your [System Under Test (_SUT_)](https://purpleteam-labs.com/doc/definitions/)
 * Locate your _SUT_
