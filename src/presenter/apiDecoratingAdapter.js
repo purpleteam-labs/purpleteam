@@ -236,8 +236,8 @@ const requestTestOrTestPlan = async (jobFileContents, route) => {
           return attemptCountInterval[attemptCount];
         }
       }
-    },
-    local: {}
+    }
+    // If there was a need for local retry, do the same thing as above, we've tested this. Bear in mind it introduces complexity and possible eadge cases.
   }[env]))();
 
   await gotPt.post(`${route}`, {
@@ -301,7 +301,7 @@ const handleServerSentTesterEvents = async (event, model, testerNameAndSession) 
   }
 };
 
-const subscribeToTesterFeedback = (model, testerStatuses) => {
+const subscribeToTesterFeedback = (model, testerStatuses, subscribeToOngoingFeedback) => {
   const { testerNamesAndSessions } = model;
   testerNamesAndSessions.forEach((testerNameAndSession) => {
     // Todo: KC: Add test for the following logging.
@@ -316,7 +316,7 @@ const subscribeToTesterFeedback = (model, testerStatuses) => {
         sessionId: testerNameAndSession.sessionId,
         message: testerRepresentative.message
       });
-      if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
+      if (subscribeToOngoingFeedback && testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
         const eventSource = new EventSource(`${apiUrl}/${TesterFeedbackRoutePrefix('sse')}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`); // sessionId is 'NA' for tls?
         const handleServerSentTesterEventsClosure = (event) => {
           handleServerSentTesterEvents(event, model, testerNameAndSession);
@@ -384,7 +384,7 @@ const handleLongPollTesterEvents = async (eventSet, model, testerNameAndSession)
   return accumulation.keepRequestingMessages;
 };
 
-const longPollTesterFeedback = async (model, testerStatuses) => {
+const longPollTesterFeedback = async (model, testerStatuses, subscribeToOngoingFeedback) => {
   const { testerNamesAndSessions } = model;
   await Promise.all(testerNamesAndSessions.map(async (testerNameAndSession) => {
     // Todo: KC: Add test for the following logging.
@@ -399,7 +399,7 @@ const longPollTesterFeedback = async (model, testerStatuses) => {
         sessionId: testerNameAndSession.sessionId,
         message: testerRepresentative.message
       });
-      if (testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
+      if (subscribeToOngoingFeedback && testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
         // If Long Polling via recursion becomes a problem due to: memory usage or stack size, we could:
         // 1. Move requestPollTesterFeedback to me module scoped in this file and call it via setTimeout
         // 2. Use EventEmitter, subscribe requestPollTesterFeedback to an event, fire the event from the gotPt callback
@@ -442,11 +442,11 @@ const longPollTesterFeedback = async (model, testerStatuses) => {
 };
 
 const getTesterFeedback = {
-  sse: async (model, testerStatuses) => {
-    subscribeToTesterFeedback(model, testerStatuses);
+  sse: async (model, testerStatuses, subscribeToOngoingFeedback) => {
+    subscribeToTesterFeedback(model, testerStatuses, subscribeToOngoingFeedback);
   },
-  lp: async (model, testerStatuses) => {
-    await longPollTesterFeedback(model, testerStatuses);
+  lp: async (model, testerStatuses, subscribeToOngoingFeedback) => {
+    await longPollTesterFeedback(model, testerStatuses, subscribeToOngoingFeedback);
   }
 };
 
@@ -480,15 +480,21 @@ const handleModelTesterEvents = (eventName, testerType, sessionId, message) => {
 const test = async (jobFileContents) => {
   const model = getInitialisedModel(jobFileContents);
   if (!model) return;
-  const { testerStatuses, testerFeedbackCommsMedium } = await requestTest(jobFileContents);
 
-  if (testerStatuses) {
+  const result = await requestTest(jobFileContents);
+  let testerStatuses;
+  let testerFeedbackCommsMedium;
+
+  if (result) {
+    ({ testerStatuses, testerFeedbackCommsMedium } = result);
     view.test(model.testerSessions());
     model.eventNames.forEach((eN) => {
       model.on(eN, (testerType, sessionId, message) => { handleModelTesterEvents(eN, testerType, sessionId, message); });
     });
 
-    await getTesterFeedback[testerFeedbackCommsMedium](model, testerStatuses);
+    const subscribeToOngoingFeedback = !testerStatuses.find((e) => e.message.startsWith('Tester failure:'));
+
+    await getTesterFeedback[testerFeedbackCommsMedium](model, testerStatuses, subscribeToOngoingFeedback);
 
     // To cancel the event stream:
     //    https://github.com/mtharrison/susie#how-do-i-finish-a-sse-stream-for-good

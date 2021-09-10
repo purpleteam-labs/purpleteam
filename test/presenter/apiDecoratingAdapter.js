@@ -569,8 +569,8 @@ message. Errors: [
         };
 
         rewiredApi.__set__('handleServerSentTesterEvents', handleServerSentTesterEvents);
-
-        rewiredSubscribeToTesterFeedback(model, testerStatuses);
+        const subscribeToOngoingFeedback = true;
+        rewiredSubscribeToTesterFeedback(model, testerStatuses, subscribeToOngoingFeedback);
       });
 
       flags.onCleanup = () => {
