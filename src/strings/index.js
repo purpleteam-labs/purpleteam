@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this PurpleTeam project. If not, see <https://www.gnu.org/licenses/>.
 
-const TesterUnavailable = (tester) => `No ${tester} testing available currently. The ${tester} tester is currently in-active.`;
-const TestPlanUnavailable = (tester) => `No test plan available for the ${tester} tester. The ${tester} tester is currently in-active.`;
+const TesterUnavailable = (tester) => `No ${tester} testing available currently. The ${tester} Tester is currently in-active.`; // Should match orchestrator.
+const TestPlanUnavailable = (tester) => `No test plan available for the ${tester} Tester. The ${tester} Tester is currently in-active.`; // Should match orchestrator.
 
 const TesterFeedbackRoutePrefix = (m) => ({ sse: 'tester-feedback', lp: 'poll-tester-feedback' }[m]);
 
