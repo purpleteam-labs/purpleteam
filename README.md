@@ -21,8 +21,8 @@
     <img src='https://coveralls.io/repos/github/purpleteam-labs/purpleteam/badge.svg?branch=main' alt='test coverage'>
   </a>
   <br/><br/>
-  <a href="https://purpleteam-labs.com" title="purpleteam">
-    <img width=900px src="https://user-images.githubusercontent.com/2862029/104117134-a93b7780-5383-11eb-8270-bfc46f310a24.png" alt="purpleteam test run">
+  <a href="https://www.youtube.com/watch?v=nJNAbGLCGNY" title="purpleteam">
+    <img width=900px src="https://user-images.githubusercontent.com/2862029/134789647-515d18db-6d5c-4704-864c-2ee5bcc1d015.png" alt="Full System Run">
   </a>
 
 <br/><br/>
