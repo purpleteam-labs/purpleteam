@@ -100,8 +100,8 @@ const schema = {
       additionalProperties: false,
       properties: {
         route: { type: 'string', pattern: '^/[-\\w/]{1,200}$' },
-        usernameFieldLocater: { type: 'string', pattern: '^[a-zA-Z0-9_-]{1,100}$' }, // Possibly allow spaces for css selectors.
-        passwordFieldLocater: { type: 'string', pattern: '^[a-zA-Z0-9_-]{1,100}$' }, // Possibly allow spaces for css selectors.
+        usernameFieldLocater: { type: 'string', pattern: '^[a-zA-Z0-9_.-]{1,100}$' }, // Possibly allow spaces for css selectors.
+        passwordFieldLocater: { type: 'string', pattern: '^[a-zA-Z0-9_.-]{1,100}$' }, // Possibly allow spaces for css selectors.
         submit: { type: 'string', pattern: '^[a-zA-Z0-9_\\-\\s]{1,100}$' },
         expectedPageSourceSuccess: { type: 'string', minLength: 2, maxLength: 200 }
       },
@@ -214,7 +214,7 @@ const schema = {
       type: 'object',
       additionalProperties: false,
       properties: {
-        username: { type: 'string', pattern: '^[a-zA-Z0-9_\\-]{1,100}$' },
+        username: { type: 'string', pattern: '^([a-zA-Z0-9_-]{1,100}|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9]{2,})$' }, // https://www.py4u.net/discuss/1646374
         password: { type: 'string' },
         aScannerAttackStrength: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'INSANE'] },
         aScannerAlertThreshold: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH'] },
