@@ -81,19 +81,22 @@ const schema = {
         sutPort: { type: 'integer', minimum: 1, maximum: 65535 },
         sutProtocol: { type: 'string', enum: ['https', 'http'], default: 'https' },
         browser: { type: 'string', get enum() { return internals.config.sut.browserOptions; }, get default() { return internals.config.sut.defaultBrowser; } },
-        loggedInIndicator: { type: 'string', minLength: 1 }
+        loggedInIndicator: { type: 'string', minLength: 1 },
+        loggedOutIndicator: { type: 'string', minLength: 1 }
       },
+      oneOf: [
+        { required: ['loggedInIndicator'] },
+        { required: ['loggedOutIndicator'] }
+      ],
       required: [
         'browser',
-        'loggedInIndicator',
         'sutAuthentication',
         'sutIp',
         'sutPort',
         'sutProtocol',
         'version'
       ],
-      title: 'DataAttributes',
-      errorMessage: { properties: { loggedInIndicator: 'A loggedInIndicator is required by the App emissary in order to know if a login was successful' } }
+      title: 'DataAttributes'
     },
     SutAuthentication: {
       type: 'object',
@@ -245,8 +248,8 @@ const schema = {
       type: 'object',
       additionalProperties: false,
       properties: {
-        name: { type: 'string', pattern: '^[a-zA-Z0-9_\\-]{1,100}$' },
-        value: { type: 'string' },
+        name: { type: 'string', pattern: '^[a-zA-Z0-9._\\-]{1,100}$' },
+        value: { type: ['string', 'boolean', 'number'] },
         visible: { type: 'boolean' } // Todo: KC: Need to check whether visible should be required.
       },
       required: [
