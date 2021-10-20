@@ -17,7 +17,7 @@
 const api = require('../presenter/apiDecoratingAdapter');
 
 exports.flags = 'status';
-exports.desc = 'Check whether the purpleteam orchestrator is up.';
+exports.desc = 'Check the status of the PurpleTeam back-end.';
 exports.run = async () => {
   await api.status();
 };

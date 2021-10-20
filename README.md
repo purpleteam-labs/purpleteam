@@ -273,7 +273,7 @@ This value can be changed in one of the following ways:
 * `noUi`: Is well suited to running the _PurpleTeam_ CLI from another process (your build/CI/CD process for example).
    With the `uI` configured to use `noUi` the following putpleteam CLI commands have the associated behaviours:
     * `about`: Writes to the console using the purpleteam-logger configured with the `SignaleTransport`. The about screen is written. Exits with code: "0"
-    * `status`: Writes to the console using the purpleteam-logger configured with the `SignaleTransport`. `orchestrator is down`... or `orchestrator is up` is written. Exits with code: "0"
+    * `status`: Writes the following messages to the console using the purpleteam-logger configured with the `SignaleTransport`: 1. `orchestrator is down`... if the _orchestrator_ is unreachable, 2. `orchestrator is ready to take orders.` 3. `Test Run is in progress.`. Exits with code: "0"
     * `test`: Writes to file using purpleteam-logger configured with the `File` transport
       * If the orchestrator/API is down `orchestrator is down`... is written using the `SignaleTransport`. Exits with code: "0"
       * If the orchestrator/API is up, CLI logs will be written to the directory specified by `loggers.testerProgress.dirname` as the Test Run progresses and an outcomes zip file will be written to the directory specified by `outcomes.dir` on Test Run completion. The CLI does not terminate. If the _SUT_ is not found, it will be obvious in the CLI logs
