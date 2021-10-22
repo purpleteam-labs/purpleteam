@@ -12,7 +12,7 @@
   },
   "purpleteamApi": {
     "protocol": "https",
-    "host": "api.purpleteam-labs.com",
+    "host": "api[release-environment].purpleteam-labs.com",
     "port": 443,    
     "stage": "alpha",
     "customerId": "<your-customer-id>",
@@ -20,7 +20,7 @@
   },
   "purpleteamAuth": {
     "protocol": "https",
-    "host": "auth.purpleteam-labs.com",
+    "host": "auth[release-environment].purpleteam-labs.com",
     "appClientId": "<your-app-client-id>",
     "appClientSecret": "<your-app-client-secret>",
     "custnSubdomain": "<your-customer-subdomain>"
