@@ -29,7 +29,6 @@ const jobSchemaOpts = {
 };
 const { validateJob } = require('../schemas/job').init(jobSchemaOpts);
 
-let job;
 const events = { testerProgress: [], testerPctComplete: [], testerBugCount: [] };
 
 
@@ -37,7 +36,7 @@ class Model extends EventEmitter {
   constructor(jobFileContents) {
     super();
     const validatedJobFileContent = validateJob(jobFileContents);
-    job = Bourne.parse(validatedJobFileContent);
+    this.job = Bourne.parse(validatedJobFileContent);
     this.eventNames.forEach((e) => this.initTesterMessages(e));
   }
 
@@ -48,7 +47,7 @@ class Model extends EventEmitter {
 
   // eslint-disable-next-line class-methods-use-this
   initTesterMessages(eventName) {
-    const appScannerResourceObjectsFromJob = job.included.filter((resourceObj) => resourceObj.type === 'appScanner');
+    const appScannerResourceObjectsFromJob = this.job.included.filter((resourceObj) => resourceObj.type === 'appScanner');
     const appScannerResourceObjects = appScannerResourceObjectsFromJob.length ? appScannerResourceObjectsFromJob : [{ id: 'NA' }]; // If Build User supplied no appScanner resource object.
     events[eventName] = appScannerResourceObjects.map((aSRO) => ({ testerType: 'app', sessionId: aSRO.id, messages: [] }));
     events[eventName].push({ testerType: 'server', sessionId: 'NA', messages: [] });
@@ -78,9 +77,9 @@ class Model extends EventEmitter {
   testerSessions() {
     const testerSessions = [];
 
-    const appScannerResourceObjects = job.included.filter((resourceObj) => resourceObj.type === 'appScanner');
-    const serverScannerResourceObjects = job.included.filter((resourceObj) => resourceObj.type === 'serverScanner');
-    const tlsScannerResourceObjects = job.included.filter((resourceObj) => resourceObj.type === 'tlsScanner');
+    const appScannerResourceObjects = this.job.included.filter((resourceObj) => resourceObj.type === 'appScanner');
+    const serverScannerResourceObjects = this.job.included.filter((resourceObj) => resourceObj.type === 'serverScanner');
+    const tlsScannerResourceObjects = this.job.included.filter((resourceObj) => resourceObj.type === 'tlsScanner');
 
     testerSessions.push(...(appScannerResourceObjects.length ? appScannerResourceObjects.map((tSRO) => (
       { testerType: 'app', sessionId: tSRO.id, threshold: tSRO.attributes.alertThreshold || 0 }

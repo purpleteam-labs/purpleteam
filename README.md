@@ -268,17 +268,30 @@ This value can be changed in one of the following ways:
    With the `uI` configured to use `cUi` the following putpleteam CLI commands have the associated behaviours:  
     * `about`: Writes to the console using the [purpleteam-logger](https://www.npmjs.com/package/purpleteam-logger) configured with the `SignaleTransport`
     * `status`: Writes to the console using the purpleteam-logger configured with the `SignaleTransport`, via blessed
-    * `test`: Writes to file using purpleteam-logger configured with the `File` transport. Writes to the console using blessed. On a successful test run, an outcomes zip file will be written to the directory specified by `outcomes.dir`
+    * `test`: Writes to file using purpleteam-logger configured with the `File` transport, writes to the console using blessed. On a successful test run, an outcomes zip file will be written to the directory specified by `outcomes.dir`
     * `testplan`: Writes to the console using blessed
 * `noUi`: Is well suited to running the _PurpleTeam_ CLI from another process (your build/CI/CD process for example).
    With the `uI` configured to use `noUi` the following putpleteam CLI commands have the associated behaviours:
     * `about`: Writes to the console using the purpleteam-logger configured with the `SignaleTransport`. The about screen is written. Exits with code: "0"
-    * `status`: Writes the following messages to the console using the purpleteam-logger configured with the `SignaleTransport`: 1. `orchestrator is down`... if the _orchestrator_ is unreachable, 2. `orchestrator is ready to take orders.` 3. `Test Run is in progress.`. Exits with code: "0"
-    * `test`: Writes to file using purpleteam-logger configured with the `File` transport
-      * If the orchestrator/API is down `orchestrator is down`... is written using the `SignaleTransport`. Exits with code: "0"
-      * If the orchestrator/API is up, CLI logs will be written to the directory specified by `loggers.testerProgress.dirname` as the Test Run progresses and an outcomes zip file will be written to the directory specified by `outcomes.dir` on Test Run completion. The CLI does not terminate. If the _SUT_ is not found, it will be obvious in the CLI logs
+    * `status`: Writes the following messages to the console using the purpleteam-logger configured with the `SignaleTransport`. **These messages and their meanings apply to both `uI` modes**:
+      * `orchestrator is down, or an incorrect URL has been specified in the CLI config` if the _orchestrator_ is unreachable
+      * `orchestrator is ready to take orders.`
+      * `Test Run is in progress.`
+      
+      Exits with code: "0"
+    * `test`: Writes to file using purpleteam-logger configured with the `File` transport. **These messages and their meanings apply to both `uI` modes**
+      * If the orchestrator/API is unreachable: `orchestrator is down, or an incorrect URL has been specified in the CLI config` is written using the `SignaleTransport`. Exits with code: "0"
+      * If the orchestrator/API is reachable CLI logs will be written to the directory specified by `loggers.testerProgress.dirname` as the Test Run progresses and an outcomes zip file will be written to the directory specified by `outcomes.dir` on Test Run completion. The CLI does not terminate
+      * Retry sequence documented in [this blog post](https://binarymist.io/blog/2021/09/07/purpleteam-tls-tester-implementation/#synchronisation)
+      * If there is a _Tester_ failure `Tester failure:`... will be written using the `SignaleTransport` and to the directory specified by `loggers.testerProgress.dirname` for the specific _Tester_ that issued the `Tester failure:`... message, so you may want to keep watch on the logs for all _Testers_ if you are searching for the `Tester failure:` string. The _orchestrator_ will issue warning messages for the other _Testers_, but they may not contain the text: `Tester failure:`.  
+        This can happen for varius reasons such as:
+        * The number of _Test Sessions_ provided in the _Job_ file falls outside of the valid range:  
+          `Tester failure: The only valid number of tlsScanner resource objects is one. Please modify your Job file.`  
+          `Tester failure: The only valid number of appScanner resource objects is from 1-12 inclusive. Please modify your Job file.`
+        * `Tester failure: S2 app containers were not ready. app Tester(s) failed initialisation. Test Run aborted` - This occurres in the `cloud` environment if ECS doesn't bring the stage two containers up in time. The App Tester gives ECS 2 minutes to bring the stage two containers up, usually they come up from cold start with 40 seconds to spare, if they don't come up in 2 minutes then the App _Tester_ decides it is unable to start a _Test Run_ due to circumstances outside of it's control (ECS is not going to bring the stage two containers up) and the _orchestrator_ aborts the _Test Run_ with this message. The _orchestrator_ then issues the order to bring all stage two containers down (clean-up).  
+           As the _Build User_ you can rely on the text `Tester failure:` to mean you will need to initiate a retry. You can do this after some time, or continue to issue the CLI `status` command, after aproximatly 50 seconds the response will change from `Test Run is in progress.` to `orchestrator is ready to take orders.`, at which point you can initiate a retry (run the `test` command again)
     * `testplan`: Writes to file using purpleteam-logger configured with the `File` transport
-      * If the orchestrator/API is down `orchestrator is down`... is written using the `SignaleTransport`. Exits with code: "0"
+      * If the orchestrator/API is down `orchestrator is down, or an incorrect URL has been specified in the CLI config` is written using the `SignaleTransport`. Exits with code: "0"
       * If the orchestrator/API is up, CLI logs will be written to the directory specified by `loggers.testPlan.dirname` on completion. Exits with code: "0"
 
 <br>

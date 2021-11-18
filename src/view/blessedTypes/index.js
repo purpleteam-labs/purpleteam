@@ -75,7 +75,7 @@ const newBugsType = {
   },
   type: contrib.lcd,
   args: {
-    label: 'New Bugs',
+    label: 'New Alerts',
     segmentWidth: 0.06,
     segmentInterval: 0.1,
     strokeWidth: 0.9,

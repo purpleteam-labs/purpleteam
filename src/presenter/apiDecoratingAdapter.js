@@ -468,8 +468,9 @@ const getInitialisedModel = (jobFileContents) => {
 };
 
 const testPlans = async (jobFileContents) => {
-  if (!getInitialisedModel(jobFileContents)) return;
-  const resultingTestPlans = await requestTestPlan(jobFileContents);
+  const model = getInitialisedModel(jobFileContents);
+  if (!model) return;
+  const resultingTestPlans = await requestTestPlan(JSON.stringify(model.job, null, 2));
   resultingTestPlans && view.testPlan({ testPlans: resultingTestPlans, ptLogger });
 };
 
@@ -481,7 +482,7 @@ const test = async (jobFileContents) => {
   const model = getInitialisedModel(jobFileContents);
   if (!model) return;
 
-  const result = await requestTest(jobFileContents);
+  const result = await requestTest(JSON.stringify(model.job, null, 2));
   let testerStatuses;
   let testerFeedbackCommsMedium;
 
