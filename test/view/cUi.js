@@ -123,7 +123,7 @@ describe('cUi', () => {
       const rewiredInfoOuts = rewiredCui.__get__('internals.infoOuts');
 
       expect(rewiredInfoOuts[testerType].statTable.records[0].pctComplete).to.equal(17);
-      expect(rewiredInfoOuts[testerType].testerPctComplete.percent).to.equal(8.5);
+      expect(rewiredInfoOuts[testerType].testerPctComplete.percent).to.equal(0.085);
       expect(rewiredInfoOuts[testerType].testerPctComplete.color).to.equal('red');
 
       expect(rewiredInfoOuts.app.totalProgress.percent).to.equal(4.25);

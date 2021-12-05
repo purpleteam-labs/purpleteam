@@ -28,7 +28,7 @@
 <br/><br/>
 </div>
 
-If you are planning on running the `local` environment, once you have installed, configured and are ready to run the _PurpleTeam_ CLI, head back to the [local setup](https://purpleteam-labs.com/doc/local/set-up/) documentation and make sure all of the otther _PurpleTeam_ components are also set-up and ready to run. After that work through the [local workflow](https://purpleteam-labs.com/doc/local/workflow/) documentation.
+If you are planning on running the `local` environment, once you have installed, configured and are ready to run the _PurpleTeam_ CLI, head back to the [local setup](https://purpleteam-labs.com/doc/local/set-up/) documentation and make sure all of the other _PurpleTeam_ components are also set-up and ready to run. After that work through the [local workflow](https://purpleteam-labs.com/doc/local/workflow/) documentation.
 
 If you are planning on targeting the `cloud` environment, the _PurpleTeam_ CLI is all you need to have set-up.
 
@@ -42,8 +42,8 @@ If you have any issues with the set-up, be sure to check the [trouble shooting](
   * [NPM install locally](#npm-install-locally)
   * [NPM install globally](#npm-install-globally)
 * [Configure](#configure)
-  * [Job File](#job-file)
   * [CLI](#cli)
+  * [Job File](#job-file)
 * [Run](#run)
   * [Clone the git repository option](#clone-the-git-repository-option)
     * [Run the bin/purpleteam file via npm script](#run-the-binpurpleteam-file-via-npm-script)
@@ -71,7 +71,7 @@ There are several options.
 
 ## Clone the git repository
 
-If you are planning on running/debugging _purpleteam_ standalone, cloning is a good option.
+If you are planning on running/debugging _purpleteam_ stand-alone, cloning is a good option.
 
 From a directory that you would like the CLI cloned to run the following command:
 
@@ -198,19 +198,6 @@ As mentioned under the [Clone](#clone-the-git-repository) section, another optio
 
 # Configure
 
-## Job File
-
-The [_Job_](https://purpleteam-labs.com/doc/definitions/) file is what purpleteam uses to do the following. Most properties should be self documenting, although the official documentation is [here](https://purpleteam-labs.com/doc/job-file/). If you are unsure of any of the properties, start a [Github discussion](https://github.com/purpleteam-labs/purpleteam/discussions) or reach out in the [#project-purpleteam channel of OWASP Slack](https://owasp.slack.com/messages/project-purpleteam).
-Examples of _Job_ files that the PurpleTeam-Labs team uses can be found [here](https://github.com/purpleteam-labs/purpleteam/tree/main/testResources/jobs). You will need to define the following:
-
-* Authenticate to your [System Under Test (_SUT_)](https://purpleteam-labs.com/doc/definitions/)
-* Locate your _SUT_
-* Which browser to use to test your application in
-* Define your [_Test Session_](https://purpleteam-labs.com/doc/definitions/)(s)
-* Define `alertThreshold`s
-* Define routes to test
-* Define fields of each specific route, other fields "may" also be tested
-
 ## CLI
 
 No matter which install option you decide on the _PurpleTeam_ CLI will require configuration.
@@ -242,7 +229,7 @@ If you are planning on using the `local` environment you can stick with the defa
 
 Configure this property if you do not want to manually pass it as an argument to the CLI. This is the _Job_ file you have configured to specify your System Under Test (_SUT_) details.
 
-If you installed the _PurpleTeam_ CLI via `git clone` (You are intending to run _PurpleTeam_ CLI standalone), then a relative directory path from the root of the repository ("./testResources/jobs/your_job_file") is acceptable.  
+If you installed the _PurpleTeam_ CLI via `git clone` (You are intending to run _PurpleTeam_ CLI stand-alone), then a relative directory path from the root of the repository ("./testResources/jobs/your_job_file") is acceptable.  
 If you installed the _PurpleTeam_ CLI via `npm install` Then it's more likely that you will need this path to be absolute, as the current directory (./) is more than likely not going to be within the _PurpleTeam_ CLI project itself, but rather wherever the purpleteam binary is itself.
 
 This value can be [overridden](#run-the-purpleteam-cli-directly---with-test-options) by passing it in as an option to the commands that require it (currently `test` and `testplan`).
@@ -288,8 +275,8 @@ This value can be changed in one of the following ways:
         * The number of _Test Sessions_ provided in the _Job_ file falls outside of the valid range:  
           `Tester failure: The only valid number of tlsScanner resource objects is one. Please modify your Job file.`  
           `Tester failure: The only valid number of appScanner resource objects is from 1-12 inclusive. Please modify your Job file.`
-        * `Tester failure: S2 app containers were not ready. app Tester(s) failed initialisation. Test Run aborted` - This occurres in the `cloud` environment if ECS doesn't bring the stage two containers up in time. The App Tester gives ECS 2 minutes to bring the stage two containers up, usually they come up from cold start with 40 seconds to spare, if they don't come up in 2 minutes then the App _Tester_ decides it is unable to start a _Test Run_ due to circumstances outside of it's control (ECS is not going to bring the stage two containers up) and the _orchestrator_ aborts the _Test Run_ with this message. The _orchestrator_ then issues the order to bring all stage two containers down (clean-up).  
-           As the _Build User_ you can rely on the text `Tester failure:` to mean you will need to initiate a retry. You can do this after some time, or continue to issue the CLI `status` command, after aproximatly 50 seconds the response will change from `Test Run is in progress.` to `orchestrator is ready to take orders.`, at which point you can initiate a retry (run the `test` command again)
+        * `Tester failure: S2 app containers were not ready. app Tester(s) failed initialisation. Test Run aborted` - This occurs in the `cloud` environment if ECS doesn't bring the stage two containers up in time. The App Tester gives ECS 2 minutes to bring the stage two containers up, usually they come up from cold start with 40 seconds to spare, if they don't come up in 2 minutes then the App _Tester_ decides it is unable to start a _Test Run_ due to circumstances outside of it's control (ECS is not going to bring the stage two containers up) and the _orchestrator_ aborts the _Test Run_ with this message. The _orchestrator_ then issues the order to bring all stage two containers down (clean-up).  
+           As the _Build User_ you can rely on the text `Tester failure:` to mean you will need to initiate a retry. You can do this after some time, or continue to issue the CLI `status` command, after approximately 50 seconds the response will change from `Test Run is in progress.` to `orchestrator is ready to take orders.`, at which point you can initiate a retry (run the `test` command again)
     * `testplan`: Writes to file using purpleteam-logger configured with the `File` transport
       * If the orchestrator/API is down `orchestrator is down, or an incorrect URL has been specified in the CLI config` is written using the `SignaleTransport`. Exits with code: "0"
       * If the orchestrator/API is up, CLI logs will be written to the directory specified by `loggers.testPlan.dirname` on completion. Exits with code: "0"
@@ -298,7 +285,7 @@ This value can be changed in one of the following ways:
 
 The _PurpleTeam_ CLI uses the convict package for it's configuration.
 
-## Sensitive Values (`cloud` environment only)
+### Sensitive Values (`cloud` environment only)
 
 There are several ways you can handle the sensitive values that need to be read into the _PurpleTeam_ CLI to access your instance of the _PurpleTeam_ `cloud` service:
 
@@ -310,6 +297,21 @@ There are several ways you can handle the sensitive values that need to be read 
   ```
 
 The precedence order of where values will be read from is defined by [convict](https://github.com/mozilla/node-convict/tree/master/packages/convict#precedence-order).
+
+## Job File
+
+The [_Job_](https://purpleteam-labs.com/doc/definitions/) file is what purpleteam uses to do the following. Most properties should be self documenting, although the official documentation is [here](https://purpleteam-labs.com/doc/jobfile/). If you are unsure of any of the properties, start a [Github discussion](https://github.com/purpleteam-labs/purpleteam/discussions) or reach out in the [#project-purpleteam channel of OWASP Slack](https://owasp.slack.com/messages/project-purpleteam).
+Examples of _Job_ files that the PurpleTeam-Labs team use can be found [here](https://github.com/purpleteam-labs/purpleteam/tree/main/testResources/jobs). Once you have defined the location of your SUT, you may want to consider defining some of the following:
+
+* Defining your [_Test Session_](https://purpleteam-labs.com/doc/definitions/)(s)
+* Authentication to your [System Under Test (_SUT_)](https://purpleteam-labs.com/doc/definitions/)
+* Which browser you may want to use to test your application in (not applicable to APIs)
+* Defining `alertThreshold`s
+* Defining specific routes to test (for browser based applications), or an API definition
+* Defining fields of each specific route (for browser based applications), other fields "may" also be tested
+* Work through the _Job_ file documentation, there are many additional knobs and levers you can apply and tweak
+
+Remember to keep it simple to start with.
 
 # Run
 
@@ -357,7 +359,7 @@ You can choose to export the `NODE_ENV` environment variable before running the 
      ```
      Now open your debugging UI. If you use the chrome developer tools browse to `chrome://inspect` and click the inspect link and you will be dropped into the purpleteam CLI code-base.
 
-For further details around running and debuging review the [documentation](https://purpleteam-labs.com/doc/local/workflow/).
+For further details around running and debugging review the [documentation](https://purpleteam-labs.com/doc/local/workflow/).
 
 ### Run the bin/purpleteam file directly
 
@@ -507,7 +509,7 @@ The following commands have the associated interactions available:
 * `test`: Once testing is under way, you can:
   * [right-arrow], [left-arrow] through the terminal screens to view the testing progress of each of the [_Testers_](https://purpleteam-labs.com/doc/definitions/) in real-time courtesy of the _PurpleTeam_ API
   * [down-arrow], [up-arrow] to highlight the different Running Statistics of the _Testers_ as they are provided in real-time courtesy of the _PurpleTeam_ API
-* `testplan`: Once the test plans have been retreived, you can [right-arrow], [left-arrow] through the terminal screens to view the test plans of each specific [_Tester_](https://purpleteam-labs.com/doc/definitions/)
+* `testplan`: Once the test plans have been retrieved, you can [right-arrow], [left-arrow] through the terminal screens to view the test plans of each specific [_Tester_](https://purpleteam-labs.com/doc/definitions/)
 
 # Trouble-Shooting
 

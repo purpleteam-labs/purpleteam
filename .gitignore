@@ -27,3 +27,9 @@ testResources/jobs/*
 !testResources/jobs/job_2.0.0-alpha.3_local
 !testResources/jobs/job_2.0.0-alpha.3_local_missing_comma
 !testResources/jobs/job_2.0.0-alpha.3_local_missing_type_of_appScanner
+
+!testResources/jobs/job_3.0.0-alpha.3_cloud
+!testResources/jobs/job_3.0.0-alpha.3_cloud_single_appScanner
+!testResources/jobs/job_3.0.0-alpha.3_local
+!testResources/jobs/job_3.0.0-alpha.3_local_missing_comma
+!testResources/jobs/job_3.0.0-alpha.3_local_missing_type_of_appScanner

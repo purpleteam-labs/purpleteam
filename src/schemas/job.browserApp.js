@@ -174,7 +174,7 @@ const schema = {
       additionalProperties: false,
       properties: {
         tlsScannerSeverity: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] },
-        alertThreshold: { type: 'integer', minimum: 0, maximum: 1000 }
+        alertThreshold: { type: 'integer', minimum: 0, maximum: 9999 }
       },
       required: [],
       title: 'AttributesObjOfTopLevelResourceObjectOfTypeTlsScanner'
@@ -188,21 +188,21 @@ const schema = {
         password: { type: 'string' },
         aScannerAttackStrength: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'INSANE'] },
         aScannerAlertThreshold: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH'] },
-        alertThreshold: { type: 'integer', minimum: 0, maximum: 1000 },
+        alertThreshold: { type: 'integer', minimum: 0, maximum: 9999 },
         sitesTreePopulationStrategy: { type: 'string', enum: ['WebDriverStandard'], default: 'WebDriverStandard' },
-        spiderStrategy: { type: 'string', enum: ['BrowserAppStandard'], default: 'BrowserAppStandard' },
+        spiderStrategy: { type: 'string', enum: ['Standard'], default: 'Standard' },
         scannersStrategy: { type: 'string', enum: ['BrowserAppStandard'], default: 'BrowserAppStandard' },
-        scanningStrategy: { type: 'string', enum: ['Standard'], default: 'Standard' },
-        postScanningStrategy: { type: 'string', enum: ['Standard'], default: 'Standard' },
+        scanningStrategy: { type: 'string', enum: ['BrowserAppStandard'], default: 'BrowserAppStandard' },
+        postScanningStrategy: { type: 'string', enum: ['BrowserAppStandard'], default: 'BrowserAppStandard' },
         reportingStrategy: { type: 'string', enum: ['Standard'], default: 'Standard' },
         excludedRoutes: {
           type: 'array',
-          items: { type: 'string', pattern: '^/[-?&=.*\\w/]{1,1000}$' },
+          items: { type: 'string' },
           uniqueItems: true,
           minItems: 0
         }
       },
-      required: [],
+      required: ['username'],
       title: 'AttributesObjOfTopLevelResourceObjectOfTypeAppScanner'
     },
 

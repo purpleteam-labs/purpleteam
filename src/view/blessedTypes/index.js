@@ -79,10 +79,10 @@ const newBugsType = {
     segmentWidth: 0.06,
     segmentInterval: 0.1,
     strokeWidth: 0.9,
-    elements: 2,
-    display: '00',
-    elementSpacing: 4,
-    elementPadding: 4,
+    elements: 3,
+    display: '000',
+    elementSpacing: 3,
+    elementPadding: 3,
     color: 'blue',
     style: { fg: 'default', bg: 'default', border: { fg: 'magenta', bg: 'default' } }
   }

@@ -182,8 +182,8 @@ const schema = {
     },
     version: {
       doc: 'The version of the Job accepted by the PurpleTeam API.',
-      format: ['0.1.0-alpha.1', '1.0.0-alpha.3', '2.0.0-alpha.3'],
-      default: '2.0.0-alpha.3'
+      format: ['0.1.0-alpha.1', '1.0.0-alpha.3', '2.0.0-alpha.3', '3.0.0-alpha.3'],
+      default: '3.0.0-alpha.3'
     }
   },
   modulePaths: {
