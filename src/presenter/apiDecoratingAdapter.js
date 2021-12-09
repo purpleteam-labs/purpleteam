@@ -202,9 +202,9 @@ const requestTestOrTestPlan = async (jobFileContents, route) => {
     //   Then the Test Run will be attempted to be started again, this could result in an endless loop of retries.
     //   Currently the App Tester takes the longest to initialise due to having to spin up it's s2 containers.
     //   The back-end (specifically App Tester) timeouts (stored in config) are:
-    //     s2Containers.serviceDiscoveryServiceInstances.timeoutToBeAvailable: currently: 120000
-    //     s2Containers.responsive.timeout: currently: 30000
-    //     Which is a total of 150000. So the CLI needs to stop retrying before that.
+    //     s2Containers.serviceDiscoveryServiceInstances.timeoutToBeAvailable: currently: 200000
+    //     s2Containers.responsive.timeout: currently: 120000
+    //     Which is a total of 320000. So the CLI needs to stop retrying before that. The sum of our retries is 313000 7 seconds before back-end max.
 
     // 20 seconds is the longPoll timeout in the orchestrator's testerWatcher so that it's well under API Gateway's 30 seconds. The config property is testerFeedbackComms.longPoll.timeout
     // 15 seconds is the retry timeout for the TLS Tester keepMessageChannelAlive. The config property is messageChannelHeartBeatInterval.
@@ -217,22 +217,24 @@ const requestTestOrTestPlan = async (jobFileContents, route) => {
       retry: {
         calculateDelay: ({ attemptCount /* , retryOptions, error , computedValue */ }) => { // eslint-disable-line arrow-body-style
           attemptCount === 1 && console.log('\n\n'); // eslint-disable-line no-console
-          attemptCount > 1 && cUiLogger.notice(`Retrying Tester initialisation. Attempt ${attemptCount} of 13.` /* , { tags: ['apiDecoratingAdapter'] } */);
-          const attemptCountInterval = {
-            1: 13000,
-            2: 5000,
-            3: 5000,
-            4: 10,
-            5: 10,
-            6: 10,
-            7: 10,
-            8: 10,
-            9: 10,
-            10: 10,
-            11: 10,
-            12: 10,
-            13: 0 // Cancel
-          };
+          attemptCount > 1 && cUiLogger.notice(`Retrying Tester initialisation. Attempt ${attemptCount} of 15.` /* , { tags: ['apiDecoratingAdapter'] } */);
+          const attemptCountInterval = { /* eslint-disable no-multi-spaces */
+            1: 13000,  // 23000
+            2: 13000,  // 23000
+            3: 13000,  // 23000
+            4: 13000,  // 23000
+            5: 13000,  // 23000
+            6: 13000,  // 23000
+            7: 13000,  // 23000
+            8: 13000,  // 23000
+            9: 13000,  // 23000
+            10: 13000, // 23000
+            11: 13000, // 23000
+            12: 13000, // 23000
+            13: 13000, // 23000
+            14: 4000,  // 14000
+            15: 0      // Cancel
+          }; /* eslint-enable no-multi-spaces */
           return attemptCountInterval[attemptCount];
         }
       }

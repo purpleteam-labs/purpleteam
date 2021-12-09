@@ -72,6 +72,44 @@ const schema = {
       default: 'chrome'
     }
   },
+  testers: {
+    app: {
+      minNum: {
+        doc: 'The minimum number of supported App Testers.',
+        format: Number,
+        default: 1
+      },
+      maxNum: {
+        doc: 'The maximum number of supported App Testers.',
+        format: Number,
+        default: 12
+      }
+    },
+    server: {
+      minNum: {
+        doc: 'The minimum number of supported Server Testers.',
+        format: Number,
+        default: 1
+      },
+      maxNum: {
+        doc: 'The maximum number of supported Server Testers.',
+        format: Number,
+        default: 1
+      }
+    },
+    tls: {
+      minNum: {
+        doc: 'The minimum number of supported Tls Testers.',
+        format: Number,
+        default: 1
+      },
+      maxNum: {
+        doc: 'The maximum number of supported Tls Testers.',
+        format: Number,
+        default: 1
+      }
+    }
+  },
   purpleteamAuth: {
     protocol: {
       doc: 'The protocol of the purpleteam authorisation server.',

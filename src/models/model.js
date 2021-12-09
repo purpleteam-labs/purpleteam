@@ -48,7 +48,9 @@ class Model extends EventEmitter {
   // eslint-disable-next-line class-methods-use-this
   initTesterMessages(eventName) {
     const appScannerResourceObjectsFromJob = this.job.included.filter((resourceObj) => resourceObj.type === 'appScanner');
-    const appScannerResourceObjects = appScannerResourceObjectsFromJob.length ? appScannerResourceObjectsFromJob : [{ id: 'NA' }]; // If Build User supplied no appScanner resource object.
+    const appScannerResourceObjects = appScannerResourceObjectsFromJob.length >= config.get('testers.server.minNum') && appScannerResourceObjectsFromJob.length <= config.get('testers.app.maxNum')
+      ? appScannerResourceObjectsFromJob
+      : [{ id: 'NA' }]; // If Build User supplied an incorrect number of appScanner resource objects.
     events[eventName] = appScannerResourceObjects.map((aSRO) => ({ testerType: 'app', sessionId: aSRO.id, messages: [] }));
     events[eventName].push({ testerType: 'server', sessionId: 'NA', messages: [] });
     events[eventName].push({ testerType: 'tls', sessionId: 'NA', messages: [] });
@@ -81,15 +83,24 @@ class Model extends EventEmitter {
     const serverScannerResourceObjects = this.job.included.filter((resourceObj) => resourceObj.type === 'serverScanner');
     const tlsScannerResourceObjects = this.job.included.filter((resourceObj) => resourceObj.type === 'tlsScanner');
 
-    testerSessions.push(...(appScannerResourceObjects.length ? appScannerResourceObjects.map((tSRO) => (
-      { testerType: 'app', sessionId: tSRO.id, threshold: tSRO.attributes.alertThreshold || 0 }
-    )) : [{ testerType: 'app', sessionId: 'NA', threshold: 0 }]));
-    testerSessions.push(...(serverScannerResourceObjects.length ? serverScannerResourceObjects.map((sSRO) => (
-      { testerType: 'server', sessionId: sSRO.id, threshold: sSRO.attributes.alertThreshold || 0 }
-    )) : [{ testerType: 'server', sessionId: 'NA', threshold: 0 }]));
-    testerSessions.push(...(tlsScannerResourceObjects.length ? tlsScannerResourceObjects.map((tSRO) => (
-      { testerType: 'tls', sessionId: tSRO.id, threshold: tSRO.attributes.alertThreshold || 0 }
-    )) : [{ testerType: 'tls', sessionId: 'NA', threshold: 0 }]));
+    testerSessions.push(...(appScannerResourceObjects.length >= config.get('testers.app.minNum') && appScannerResourceObjects.length <= config.get('testers.app.maxNum')
+      ? appScannerResourceObjects.map((aSRO) => (
+        { testerType: 'app', sessionId: aSRO.id, threshold: aSRO.attributes.alertThreshold || 0 }
+      ))
+      : [{ testerType: 'app', sessionId: 'NA', threshold: 0 }]
+    ));
+    testerSessions.push(...(serverScannerResourceObjects.length >= config.get('testers.server.minNum') && serverScannerResourceObjects.length <= config.get('testers.server.maxNum')
+      ? serverScannerResourceObjects.map((sSRO) => (
+        { testerType: 'server', sessionId: sSRO.id, threshold: sSRO.attributes.alertThreshold || 0 }
+      ))
+      : [{ testerType: 'server', sessionId: 'NA', threshold: 0 }]
+    ));
+    testerSessions.push(...(tlsScannerResourceObjects.length >= config.get('testers.tls.minNum') && tlsScannerResourceObjects.length <= config.get('testers.tls.maxNum')
+      ? tlsScannerResourceObjects.map((tSRO) => (
+        { testerType: 'tls', sessionId: tSRO.id, threshold: tSRO.attributes.alertThreshold || 0 }
+      ))
+      : [{ testerType: 'tls', sessionId: 'NA', threshold: 0 }]
+    ));
 
     return testerSessions;
   }
