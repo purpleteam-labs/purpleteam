@@ -9,11 +9,11 @@ assignees: ''
 
 The enhancement may already be reported! Please search for the enhancement before creating one.
 
-### Current Behavior:
+### Current Behaviour:
 
 ...
 
-### Proposed Behavior:
+### Proposed Behaviour:
 
 ...
 
