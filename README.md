@@ -9,8 +9,8 @@
     CLI component of <a href="https://purpleteam-labs.com/" title="purpleteam"><em>PurpleTeam</em></a> - Currently in alpha
   <br/><br/>
 
-  <a href="https://www.gnu.org/licenses/agpl-3.0" title="license">
-    <img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="GNU AGPL">
+  <a href="https://purpleteam-labs.com/doc/" title="documentation">
+    <img src="https://img.shields.io/badge/-documentation-blueviolet" alt="documentation">
   </a>
 
   <a href="https://github.com/purpleteam-labs/purpleteam/commits/main" title="pipeline status">

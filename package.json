@@ -61,7 +61,7 @@
     "name": "Kim Carter",
     "email": "services@binarymist.net"
   },
-  "license": "AGPL-3.0-only",
+  "license": "BSL",
   "homepage": "https://purpleteam-labs.com",
   "bugs": {
     "url": "https://github.com/purpleteam-labs/purpleteam/issues"
