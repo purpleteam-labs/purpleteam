@@ -1,18 +1,11 @@
-// Copyright (C) 2017-2021 BinaryMist Limited. All rights reserved.
+// Copyright (C) 2017-2022 BinaryMist Limited. All rights reserved.
 
-// This file is part of PurpleTeam.
+// Use of this software is governed by the Business Source License
+// included in the file /licenses/bsl.md
 
-// PurpleTeam is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation version 3.
-
-// PurpleTeam is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-
-// You should have received a copy of the GNU Affero General Public License
-// along with this PurpleTeam project. If not, see <https://www.gnu.org/licenses/>.
+// As of the Change Date specified in that file, in accordance with
+// the Business Source License, use of this software will be governed
+// by the Apache License, Version 2.0
 
 const jsdiff = require('diff');
 const Ajv = require('ajv');
