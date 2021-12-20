@@ -5,7 +5,7 @@ PurpleTeam
 
 The software components under PurpleTeam-Labs are:
 
-> Copyright (C) 2017-2021 BinaryMist Limited
+> Copyright (C) 2017-2022 BinaryMist Limited
 
 Any new or updated code, tests or information sent to PurpleTeam-Labs is assumed free of copyrights. By sending new or updated code, tests or information to purpleteam-labs you relinquish all claims of copyright on the material, and agree that this code can be claimed under the same copyright and license as PurpleTeam.
 

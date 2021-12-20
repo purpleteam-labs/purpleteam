@@ -105,6 +105,7 @@
     "config/config.example.cloud.json",
     "config/config.example.local.json",
     "src",
-    "LEGALNOTICE.md"
+    "LEGALNOTICE.md",
+    "licenses"
   ]
 }

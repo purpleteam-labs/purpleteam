@@ -9,7 +9,7 @@ Depending on your preference, you can contribute in various ways.
 Often the best approach is to discuss what you're thinking of or planning first. You can do this by:
 
 * Starting a [Github Discussion](https://github.com/purpleteam-labs/purpleteam/discussions) in the purpleteam repository
-* Having a chat about it on one of the purpleteam-labs [Slack](https://purpleteam-labs.com/community/) channels. If you need an invite DM us on Twitter [@purpleteamlabs](https://twitter.com/purpleteamlabs), or reach out via the BinaryMist website [contact section](https://binarymist.io/#contact)
+* Having a chat about it on one of the purpleteam-labs [Slack](https://purpleteam-labs.com/community/) channels. If you need an invite DM us on Twitter [@purpleteamlabs](https://twitter.com/purpleteamlabs), or reach out via the PurpleTeam-Lambs [contact page](https://purpleteam-labs.com/contact/) or BinaryMist website [contact page](https://binarymist.io/#contact)
 
 The purpleteam-labs [Backlog/Project board](https://github.com/purpleteam-labs/purpleteam/projects/2) lists work items for all of the purpleteam-labs projects waiting for someone to start work on. These can be a good place to start.
 

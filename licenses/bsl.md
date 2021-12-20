@@ -20,7 +20,7 @@ would offer the Licensed Work as is, or in connection with a broader service
 offering to customers or subscribers of such third party’s core
 services.
 
-<u>Change Date</u>: Change date is four years from release date. Please see [GitHub releases](https://github.com/purpleteam-labs/purpleteam/releases/) for exact dates
+<u>Change Date</u>: Change date is four years from release date. Please see [GitHub releases](https://github.com/purpleteam-labs/purpleteam/releases/) for exact dates.
 
 <u>Change License</u>: [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0), as published by the Apache Foundation.
 
