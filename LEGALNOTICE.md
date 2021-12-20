@@ -19,4 +19,5 @@ For other licenses [contact us](https://purpleteam-labs.com/contact/).
 THIRD-PARTY SOFTWARE LICENSES
 -----------------------------
 
-A list of third party sources can be found [here](https://purpleteam-labs.com/doc/third-party-sources/)
+A list of third party sources can be found [here](https://purpleteam-labs.com/doc/third-party-sources/).
+

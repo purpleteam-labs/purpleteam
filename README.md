@@ -20,6 +20,10 @@
   <a href='https://coveralls.io/github/purpleteam-labs/purpleteam?branch=main'>
     <img src='https://coveralls.io/repos/github/purpleteam-labs/purpleteam/badge.svg?branch=main' alt='test coverage'>
   </a>
+
+  <a href="https://github.com/purpleteam-labs/purpleteam/releases" title="latest release">
+    <img src="https://img.shields.io/github/v/release/purpleteam-labs/purpleteam?color=%23794fb8&include_prereleases" alt="GitHub release (latest SemVer including pre-releases)">
+  </a>
   <br/><br/>
   <a href="https://www.youtube.com/watch?v=nJNAbGLCGNY" title="purpleteam">
     <img width=900px src="https://user-images.githubusercontent.com/2862029/134789647-515d18db-6d5c-4704-864c-2ee5bcc1d015.png" alt="Full System Run">
