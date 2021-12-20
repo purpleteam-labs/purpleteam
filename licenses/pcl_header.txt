@@ -1,0 +1,7 @@
+Copyright (C) 2017-2022 BinaryMist Limited. All rights reserved.
+
+Licensed as a PurpleTeam cloud file under the PurpleTeam Cloud
+License (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+
+http://purpleteam-labs.com/publication/purpleteam-cloud-license/

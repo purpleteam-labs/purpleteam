@@ -9,13 +9,11 @@ Depending on your preference, you can contribute in various ways.
 Often the best approach is to discuss what you're thinking of or planning first. You can do this by:
 
 * Starting a [Github Discussion](https://github.com/purpleteam-labs/purpleteam/discussions) in the purpleteam repository
-* Having a chat about it on the purpleteam-labs [Slack](https://purpleteam-labs.slack.com). If you need an invite DM us on Twitter [@purpleteamlabs](https://twitter.com/purpleteamlabs), or reach out via the BinaryMist website [contact section](https://binarymist.io/#contact)
+* Having a chat about it on one of the purpleteam-labs [Slack](https://purpleteam-labs.com/community/) channels. If you need an invite DM us on Twitter [@purpleteamlabs](https://twitter.com/purpleteamlabs), or reach out via the BinaryMist website [contact section](https://binarymist.io/#contact)
 
 The purpleteam-labs [Backlog/Project board](https://github.com/purpleteam-labs/purpleteam/projects/2) lists work items for all of the purpleteam-labs projects waiting for someone to start work on. These can be a good place to start.
 
 You can also [open an issue](https://github.com/purpleteam-labs/purpleteam/issues/new/choose), or send a Pull Request (PR).
-
-We also have a [Roadmap](https://github.com/purpleteam-labs/purpleteam/projects/1) for Epics a little further out.
 
 If you are OK with creating a PR that may never be accepted, then go ahead and just create the PR and use the description to provide context and motivation, as you would for an issue.
 
@@ -55,7 +53,7 @@ We use npm scripts for most build tasks.
 * Descriptive commits (subject and message). Please follow "[The seven rules of a great Git commit message](https://chris.beams.io/posts/git-commit/#seven-rules)"
 * Discussion about the changes:
   * If there is a prior issue, reference the GitHub issue number in the description of the PR
-  * Should be done in/on the PR or via the [Github Discussions](https://github.com/purpleteam-labs/purpleteam/discussions) and a link to that Discussion thread added to the PR comments. (i.e.: Shared information is important, if something happens via [Slack](https://purpleteam-labs.slack.com/) or private email please ensure a summary makes it to the PR)
+  * Should be done in/on the PR or via the [Github Discussions](https://github.com/purpleteam-labs/purpleteam/discussions) and a link to that Discussion thread added to the PR comments. (i.e.: Shared information is important, if something happens via any of our [communication channels](https://purpleteam-labs.com/community/) please ensure a summary makes it to the PR)
   * Discussion will be kept in the PR unless off topic
 * If accepted, your contribution may be heavily modified as needed prior to merging. You will likely retain author attribution for your git commits granted that the bulk of your changes remain intact. You may also be asked to rework the submission
 * If asked to make corrections, simply push the changes against the same branch, and your pull request will be updated. In other words, you do not need to create a new pull request when asked to make changes
@@ -80,5 +78,5 @@ We use npm scripts for most build tasks.
 
 ## Reference Docs
 
-The reference documentation is in the [purpleteam-doc](https://github.com/purpleteam-labs/purpleteam-doc) repository.
+The reference documentation is on the [purpleteam-labs.com](https://purpleteam-labs.com/doc/) website.
 
