@@ -180,6 +180,38 @@ const schema = {
         scanningStrategy: { type: 'string', enum: ['ApiStandard'], default: 'ApiStandard' },
         postScanningStrategy: { type: 'string', enum: ['ApiStandard'], default: 'ApiStandard' },
         reportingStrategy: { type: 'string', enum: ['Standard'], default: 'Standard' },
+        reports: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            templateThemes: {
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  name: {
+                    type: 'string',
+                    enum: [
+                      'traditionalHtml',
+                      'traditionalHtmlPlusLight',
+                      'traditionalHtmlPlusDark',
+                      'traditionalJson',
+                      'traditionalMd',
+                      'traditionalXml',
+                      'riskConfidenceHtmlDark',
+                      'modernMarketing',
+                      'highLevelReport'
+                    ]
+                  }
+                },
+                required: ['name']
+              },
+              minItems: 1
+            }
+          },
+          required: ['templateThemes']
+        },
         openApi: { $ref: '#/definitions/OpenApi' },
         soap: { $ref: '#/definitions/Soap' },
         graphQl: { $ref: '#/definitions/GraphQl' },
