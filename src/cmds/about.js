@@ -30,5 +30,17 @@ exports.run = (/* parsedArgv, context */) => {
   cUiLogger.info('This is what an info event looks like.', { tags: ['info-tag'] });
   cUiLogger.debug('This is what a debug event looks like.\n', { tags: ['debug-tag'] });
 
+  const manPage = `Usage details for the CLI can be found on the README:
+(https://github.com/purpleteam-labs/purpleteam#usage)
+
+Installation, configuration and running details for the CLI can also be
+found on the README:
+(https://github.com/purpleteam-labs/purpleteam#contents).
+
+Full documentation for the PurpleTeam SaaS can be found at:
+(https://purpleteam-labs.com/doc/)`;
+
+  console.log(`${manPage}\n`); // eslint-disable-line no-console
+
   process.exit(0);
 };

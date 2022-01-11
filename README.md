@@ -511,7 +511,9 @@ If you are running the _PurpleTeam_ CLI in the default [character user interface
 The following commands have the associated interactions available:
 
 * `test`: Once testing is under way, you can:
-  * [right-arrow], [left-arrow] through the terminal screens to view the testing progress of each of the [_Testers_](https://purpleteam-labs.com/doc/definitions/) in real-time courtesy of the _PurpleTeam_ API
+  * [right-arrow], [left-arrow] through the terminal screens to view the testing progress of each of the [_Testers_](https://purpleteam-labs.com/doc/definitions/) in real-time courtesy of the _PurpleTeam_ API.
+    Another way to follow the log file in real-time for another _Tester_ (TLS for example) is to copy the name of the CLI log file being created and run the following command in another terminal:  
+    `tail tls-NA_[date]T[time].log -f -n +1`
   * [down-arrow], [up-arrow] to highlight the different Running Statistics of the _Testers_ as they are provided in real-time courtesy of the _PurpleTeam_ API
 * `testplan`: Once the test plans have been retrieved, you can [right-arrow], [left-arrow] through the terminal screens to view the test plans of each specific [_Tester_](https://purpleteam-labs.com/doc/definitions/)
 
