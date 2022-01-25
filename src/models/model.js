@@ -7,9 +7,10 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const EventEmitter = require('events');
-const Bourne = require('@hapi/bourne');
-const config = require('../../config/config');
+import EventEmitter from 'events';
+import Bourne from '@hapi/bourne';
+import config from '../../config/config.js';
+import initJobSchema from '../schemas/job.js';
 
 const sutConfig = config.getSchema()._cvtProperties.sut; // eslint-disable-line no-underscore-dangle
 const jobSchemaOpts = {
@@ -20,7 +21,7 @@ const jobSchemaOpts = {
   },
   jobConfig: config.get('job')
 };
-const { validateJob } = require('../schemas/job').init(jobSchemaOpts);
+const { validateJob } = initJobSchema(jobSchemaOpts);
 
 const events = { testerProgress: [], testerPctComplete: [], testerBugCount: [] };
 
@@ -100,4 +101,4 @@ class Model extends EventEmitter {
 }
 
 
-module.exports = Model;
+export default Model;

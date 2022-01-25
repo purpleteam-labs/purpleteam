@@ -7,13 +7,13 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const config = require('../../config/config'); // eslint-disable-line no-unused-vars
-const api = require('../presenter/apiDecoratingAdapter');
+import config from '../../config/config.js';
+import api from '../presenter/apiDecoratingAdapter.js';
 
 
-exports.flags = 'testplan';
-exports.desc = 'Retrieve the test plan that will be executed when you run test.';
-exports.setup = (sywac) => {
+const flags = 'testplan';
+const desc = 'Retrieve the test plan that will be executed when you run test.';
+const setup = (sywac) => {
   // To override the help:
   // sywac.usage({ optionsPlaceholder: '' });
   sywac
@@ -27,7 +27,7 @@ exports.setup = (sywac) => {
       if (argv._.length) context.cliMessage(`Unknown argument${argv._.length > 1 ? 's' : ''}: ${argv._.join(', ')}`);
     });
 };
-exports.run = async (parsedArgv, context) => {
+const run = async (parsedArgv, context) => {
   if (parsedArgv.j) {
     const jobFileContents = await api.getJobFile(parsedArgv.j);
     await api.testPlans(jobFileContents);
@@ -35,3 +35,5 @@ exports.run = async (parsedArgv, context) => {
     context.cliMessage('You must provide a valid Job file that exists on the local file system.');
   }
 };
+
+export { flags, desc, setup, run };

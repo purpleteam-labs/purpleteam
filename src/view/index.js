@@ -7,9 +7,10 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-/* eslint-disable */
-const viewFileName = `./${require('../../config/config').get('uI')}`;
-const view = require(viewFileName);
-module.exports = view;
-/* eslint-enable */
+import config from '../../config/config.js';
 
+const viewFileName = `./${config.get('uI')}.js`;
+
+const { default: view } = await import(viewFileName);
+
+export default view;

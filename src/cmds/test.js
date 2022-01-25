@@ -7,13 +7,12 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const config = require('../../config/config'); // eslint-disable-line no-unused-vars
-const api = require('../presenter/apiDecoratingAdapter');
+import config from '../../config/config.js';
+import api from '../presenter/apiDecoratingAdapter.js';
 
-
-exports.flags = 'test';
-exports.description = 'Launch purpleteam to attack your specified target.';
-exports.setup = (sywac) => {
+const flags = 'test';
+const description = 'Launch purpleteam to attack your specified target.';
+const setup = (sywac) => {
   sywac
     .option('-j, --job-file <job-file path>', {
       type: 'file',
@@ -25,7 +24,7 @@ exports.setup = (sywac) => {
       if (argv._.length) context.cliMessage(`Unknown argument${argv._.length > 1 ? 's' : ''}: ${argv._.join(', ')}`);
     });
 };
-exports.run = async (parsedArgv, context) => {
+const run = async (parsedArgv, context) => {
   if (parsedArgv.j) {
     const jobFileContents = await api.getJobFile(parsedArgv.j);
     // Todo: KC: In the future we could deserialise configFileContents, and possibly validate before sending to the Orchestrator.
@@ -40,3 +39,5 @@ exports.run = async (parsedArgv, context) => {
     context.cliMessage('You must provide a valid Job file that exists on the local file system.');
   }
 };
+
+export { flags, description, setup, run };

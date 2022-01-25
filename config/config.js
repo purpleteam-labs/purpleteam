@@ -7,9 +7,10 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const convict = require('convict');
-const convictFormatWithValidator = require('convict-format-with-validator');
-const path = require('path');
+import convict from 'convict';
+import convictFormatWithValidator from 'convict-format-with-validator';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
 
 convict.addFormats(convictFormatWithValidator);
 
@@ -237,11 +238,13 @@ const config = convict(schema);
 //   simply provide the isolated file path as an array element to config.loadFile.
 // Doc: https://github.com/mozilla/node-convict/tree/master/packages/convict#configloadfilefile-or-filearray
 // config.loadFile([path.join(__dirname, `config.${process.env.NODE_ENV}.json`), '/my/locked/down/purpleteam_secrets.json']);
-config.loadFile(path.join(__dirname, `config.${process.env.NODE_ENV}.json`));
+const filename = fileURLToPath(import.meta.url);
+const directoryName = dirname(filename);
+config.loadFile(path.join(directoryName, `config.${process.env.NODE_ENV}.json`));
 config.validate();
 
 config.set('purpleteamApi.url', `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.host')}:${config.get('purpleteamApi.port')}`);
 config.set('outcomes.filePath', `${config.get('outcomes.dir')}${config.get('outcomes.fileName')}`);
 config.set('purpleteamAuth.url', `${config.get('purpleteamAuth.protocol')}://${config.get('purpleteamAuth.custnSubdomain')}.${config.get('purpleteamAuth.host')}/oauth2/token`);
 
-module.exports = config;
+export default config;

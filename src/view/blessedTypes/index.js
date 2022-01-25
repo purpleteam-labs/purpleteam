@@ -7,11 +7,11 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const contrib = require('blessed-contrib');
+import contrib from 'blessed-contrib';
 
-const app = require('./app');
-const server = require('./server');
-const tls = require('./tls');
+import app from './app.js';
+import server from './server.js';
+import tls from './tls.js';
 
 const testerViewTypes = [app, server, tls];
 
@@ -98,7 +98,7 @@ const totalProgressType = {
 };
 
 
-module.exports = {
+export {
   testerViewTypes, // [app, server, tls],
   testerPctCompleteType,
   statTableType,

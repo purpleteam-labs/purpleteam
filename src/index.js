@@ -7,12 +7,15 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const config = require('../config/config');
-const cUiLogger = require('purpleteam-logger').init(config.get('loggers.cUi')); // eslint-disable-line import/order
+import { init as initLogger } from 'purpleteam-logger';
+import config from '../config/config.js';
+import processCommands from './cli.js';
 
-const { processCommands } = require('./cli');
+const cUiLogger = initLogger(config.get('loggers.cUi'));
 
-exports.start = async (options) => {
+const start = async (options) => {
   cUiLogger.debug('Starting the CLI', { tags: ['index'] });
   await processCommands({ argv: options.argv });
 };
+
+export default start;

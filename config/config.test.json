@@ -12,7 +12,7 @@
     "fileUri": "./testResources/jobs/job_3.1.0-alpha.3_local"
   },
   "modulePaths": {
-    "blessed": "../../testResources/blessedFake"
+    "blessed": "../../testResources/blessedFake.js"
   }
 }
 

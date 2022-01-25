@@ -287,4 +287,4 @@ const schema = {
   }
 };
 
-module.exports = { init, schema };
+export { init, schema };

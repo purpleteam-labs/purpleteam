@@ -7,10 +7,12 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const api = require('../presenter/apiDecoratingAdapter');
+import api from '../presenter/apiDecoratingAdapter.js';
 
-exports.flags = 'status';
-exports.desc = 'Check the status of the PurpleTeam back-end.';
-exports.run = async () => {
+const flags = 'status';
+const desc = 'Check the status of the PurpleTeam back-end.';
+const run = async () => {
   await api.status();
 };
+
+export { flags, desc, run };

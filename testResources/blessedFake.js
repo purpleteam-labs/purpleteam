@@ -1,1 +1,1 @@
-module.exports = { screen: () => {} };
+export default { screen: () => {} };

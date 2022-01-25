@@ -7,8 +7,8 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const config = require('../../config/config');
-const { NowAsFileName } = require('../strings');
+import config from '../../config/config.js';
+import { NowAsFileName } from '../strings/index.js';
 
 const handleTesterProgress = ({ testerType, sessionId, message, ptLogger }) => {
   ptLogger.get(`${testerType}-${sessionId}`).notice(message);
@@ -39,7 +39,7 @@ const status = (cUiLogger, statusOfPurpleteamApi) => {
   cUiLogger.notice(statusOfPurpleteamApi, { tags: ['noUi'] });
 };
 
-module.exports = {
+export default {
   testPlan,
   test,
   status,

@@ -7,8 +7,8 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const blessed = require('blessed');
-const contrib = require('blessed-contrib');
+import blessed from 'blessed';
+import contrib from 'blessed-contrib';
 
 const testOpts = {
   gridCoords: {
@@ -26,7 +26,6 @@ const testOpts = {
     name: 'app'
   }
 };
-
 
 const testPlanOpts = {
   gridCoords: {
@@ -51,5 +50,5 @@ const testPlanOpts = {
   }
 };
 
+export default { testOpts, testPlanOpts };
 
-module.exports = { testOpts, testPlanOpts };

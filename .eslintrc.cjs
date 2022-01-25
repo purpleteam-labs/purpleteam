@@ -24,11 +24,14 @@ module.exports = {
     // enforce consistent line breaks inside function parentheses
     // https://eslint.org/docs/rules/function-paren-newline
     'function-paren-newline': ['error', 'multiline'],
-    'import/no-unresolved': ['error', { commonjs: true }],
+    'import/no-unresolved': ['error', { ignore: ['purpleteam-logger', 'chalk', 'got'] }],
+    // Used in order to supress the errors in the use of appending file extensions to the import statement for local modules
+    // Which is required in order to upgrade from CJS to ESM. At time of upgrade file extensions have to be provided in import statements.
+    'import/extensions': ['error', { 'js': 'ignorePackages' }],
     'no-unused-expressions': ['error', { allowShortCircuit: true, allowTernary: true }],
     'object-curly-newline': ['error', { multiline: true }],
     'no-multiple-empty-lines': ['error', { max: 2, maxBOF: 0, maxEOF: 1 }]
   },
-  env: { node: true },
-  parserOptions: { ecmaVersion: 2021 }
+  env: { node: true, 'es2021': true },
+  parserOptions: { sourceType: 'module', ecmaVersion: 'latest' }
 };

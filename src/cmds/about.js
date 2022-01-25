@@ -7,15 +7,19 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const cUiLogger = require('purpleteam-logger').get();
-const pkg = require('../../package.json');
+import { get as getLogger } from 'purpleteam-logger';
 
-exports.flags = 'about';
-exports.desc = 'About purpleteam';
-exports.setup = {};
-exports.run = (/* parsedArgv, context */) => {
-  const { name: projectName, version, description, homepage, author: { name, email } } = pkg;
+import { createRequire } from 'module';
 
+const require = createRequire(import.meta.url);
+const { name: projectName, version, description, homepage, author: { name, email } } = require('../../package');
+
+const cUiLogger = getLogger();
+
+const flags = 'about';
+const desc = 'About purpleteam';
+const setup = {};
+const run = (/* parsedArgv, context */) => {
   cUiLogger.notice(`${projectName} ${version}`, { tags: ['screen'] });
   cUiLogger.notice(description, { tags: ['screen'] });
   cUiLogger.notice(`Homepage: ${homepage}`, { tags: ['screen'] });
@@ -44,3 +48,5 @@ Full documentation for the PurpleTeam SaaS can be found at:
 
   process.exit(0);
 };
+
+export { flags, desc, setup, run };

@@ -7,12 +7,16 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const config = require('../../config/config');
+import contrib from 'blessed-contrib';
+import { createRequire } from 'module';
+import config from '../../config/config.js';
+import { testerViewTypes, testerPctCompleteType, statTableType, newBugsType, totalProgressType } from './blessedTypes/index.js';
+
+const require = createRequire(import.meta.url);
+const { name: projectName } = require('../../package');
+
 // blessed breaks tests, so fake it.
-const blessed = require(config.get('modulePaths.blessed')); // eslint-disable-line import/no-dynamic-require
-const contrib = require('blessed-contrib'); // eslint-disable-line import/order
-const { name: projectName } = require('../../package.json');
-const { testerViewTypes, testerPctCompleteType, statTableType, newBugsType, totalProgressType } = require('./blessedTypes');
+const { default: blessed } = await import(config.get('modulePaths.blessed'));
 
 const testerNames = testerViewTypes.map((tv) => tv.testOpts.args.name);
 
@@ -457,7 +461,7 @@ const status = (cUiLogger, statusOfPurpleteamApi) => {
   cUiLogger.notice(statusOfPurpleteamApi, { tags: ['cUi'] });
 };
 
-module.exports = {
+export default {
   testPlan,
   test,
   status,

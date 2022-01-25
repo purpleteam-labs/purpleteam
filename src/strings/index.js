@@ -19,7 +19,7 @@ const NowAsFileName = () => {
   return `${date.getFullYear()}-${padLeft(date.getMonth() + 1)}-${padLeft(date.getDate())}T${padLeft(date.getHours())}:${padLeft(date.getMinutes())}:${padLeft(date.getSeconds())}`;
 };
 
-module.exports = {
+export {
   TesterUnavailable,
   TestPlanUnavailable,
   TesterFeedbackRoutePrefix,

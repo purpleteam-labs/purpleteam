@@ -7,20 +7,18 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const jsdiff = require('diff');
-const Ajv = require('ajv');
-const addFormats = require('ajv-formats');
-const Bourne = require('@hapi/bourne');
+import { diffJson } from 'diff';
+import ajvErrors from 'ajv-errors';
+import addFormats from 'ajv-formats';
+import Ajv from 'ajv';
+import Bourne from '@hapi/bourne';
+import { init as initPtLogger } from 'purpleteam-logger';
+import { init as initApiSchema, schema as aPiSchema } from './job.aPi.js';
+import { init as initBrowserAppSchema, schema as browserAppSchema } from './job.browserApp.js';
 
 const ajv = new Ajv({ allErrors: true, useDefaults: true, removeAdditional: true });
 addFormats(ajv);
-
-// Todo: KC: Make error messages more meaningful.
-require('ajv-errors')(ajv);
-const purpleteamLogger = require('purpleteam-logger');
-
-const aPiSchema = require('./job.aPi');
-const browserAppSchema = require('./job.browserApp');
+ajvErrors(ajv);
 
 const internals = {
   recognisedJobTypes: ['Api', 'BrowserApp'],
@@ -35,7 +33,7 @@ const internals = {
 
 const convertJsonToObj = (value) => ((typeof value === 'string' || value instanceof String) ? Bourne.parse(value) : value);
 const deltaLogs = (initialConfig, possiblyMutatedConfig) => {
-  const deltas = jsdiff.diffJson(convertJsonToObj(initialConfig), convertJsonToObj(possiblyMutatedConfig));
+  const deltas = diffJson(convertJsonToObj(initialConfig), convertJsonToObj(possiblyMutatedConfig));
   const additionLogs = deltas.filter((d) => d.added).map((cV) => `Added -> ${cV.value}`);
   const subtractionsLogs = deltas.filter((d) => d.removed).map((cV) => `Removed -> ${cV.value}`);
   return [...additionLogs, ...subtractionsLogs];
@@ -68,15 +66,15 @@ const validateJob = (jobString) => {
 const init = ({ loggerConfig, sutConfig, jobConfig }) => {
   internals.config.sut = sutConfig;
   internals.config.job = jobConfig;
-  internals.log = purpleteamLogger.init(loggerConfig);
+  internals.log = initPtLogger(loggerConfig);
 
-  aPiSchema.init(internals.config);
-  browserAppSchema.init(internals.config);
+  initApiSchema(internals.config);
+  initBrowserAppSchema(internals.config);
 
-  internals.validateApi = ajv.compile(aPiSchema.schema);
-  internals.validateBrowserApp = ajv.compile(browserAppSchema.schema);
+  internals.validateApi = ajv.compile(aPiSchema);
+  internals.validateBrowserApp = ajv.compile(browserAppSchema);
 
   return { validateJob };
 };
 
-module.exports = { init };
+export default init;

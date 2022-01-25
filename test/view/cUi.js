@@ -7,14 +7,15 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-exports.lab = require('@hapi/lab').script();
+import { expect } from '@hapi/code';
+import * as Lab from '@hapi/lab';
+import sinon from 'sinon';
+import rewire from 'rewire';
+import ptLogger from 'purpleteam-logger';
 
-const { describe, beforeEach, it } = exports.lab;
-
-const { expect } = require('@hapi/code');
-const sinon = require('sinon');
-const rewire = require('rewire');
-const ptLogger = require('purpleteam-logger');
+const lab = Lab.script();
+const { describe, beforeEach, it } = lab;
+export { lab }; // eslint-disable-line import/prefer-default-export
 
 const cUiPath = '../../src/view/cUi';
 

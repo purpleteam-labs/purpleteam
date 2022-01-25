@@ -7,26 +7,33 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const sywac = require('sywac');
-const chalk = require('chalk');
-const figlet = require('figlet');
-const cUiLogger = require('purpleteam-logger').get();
-const pkg = require('../package.json');
+import sywac from 'sywac';
+import chalk from 'chalk';
+import figlet from 'figlet';
+import { get as getLogger } from 'purpleteam-logger';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
+
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const { name: pkgName, description: pkgDescription } = require('../package');
 
 const epilogue = `For more information, find the manual at https://doc.purpleteam-labs.com
 Copyright (C) 2017-2021 BinaryMist Limited. All rights reserved.
 Use of this source code is governed by a license that can be found in the LICENSE.md file.`;
 
 const processCommands = async (options) => { // eslint-disable-line no-unused-vars
+  const cUiLogger = getLogger();
   cUiLogger.debug('Configuring sywac\n', { tags: ['cli'] });
-  const api = sywac // eslint-disable-line no-unused-vars
-    .usage('Usage: $0 [command] [option(s)]')
-    .commandDirectory('cmds')
-    // This overrides the --help and --version and adds their aliases
-    .showHelpByDefault()
+  const api = sywac; // eslint-disable-line no-unused-vars
+  api.usage('Usage: $0 [command] [option(s)]');
+  await api.commandDirectory(path.join(dirname(fileURLToPath(import.meta.url)), 'cmds'));
+  // This overrides the --help and --version and adds their aliases
+  api.showHelpByDefault()
     .version('-v, --version', { desc: 'Show version number' })
     .help('-h, --help')
-    .preface(figlet.textSync(pkg.name, 'Chunky'), chalk.bgHex('#9961ed')(pkg.description))
+    .preface(figlet.textSync(pkgName, 'Chunky'), chalk.bgHex('#9961ed')(pkgDescription))
     .epilogue(epilogue)
     .style({
       // usagePrefix: str => chalk.hex('#9961ed').bold(str),
@@ -57,4 +64,4 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
   cliArgs.code > 0 && cUiLogger.warning(cliArgs.output) && process.exit(cliArgs.code);
 };
 
-module.exports = { processCommands };
+export default processCommands;

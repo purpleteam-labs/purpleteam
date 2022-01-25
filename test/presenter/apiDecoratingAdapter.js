@@ -1,31 +1,22 @@
-// Copyright (C) 2017-2022 BinaryMist Limited. All rights reserved.
+import { expect, fail } from '@hapi/code';
+import * as Lab from '@hapi/lab';
+import { stub, spy } from 'sinon';
+import rewire from 'rewire';
+import nock, { cleanAll } from 'nock';
+import { readFile } from 'fs/promises';
+import ptLogger, { init as initPtLogger } from 'purpleteam-logger';
+import { MockEvent, EventSource } from 'mocksse';
+import config from '../../config/config.js';
+import { TesterFeedbackRoutePrefix } from '../../src/strings';
+import Model from '../../src/models/model';
 
-// Use of this software is governed by the Business Source License
-// included in the file /licenses/bsl.md
-
-// As of the Change Date specified in that file, in accordance with
-// the Business Source License, use of this software will be governed
-// by the Apache License, Version 2.0
-
-exports.lab = require('@hapi/lab').script();
-
-const { describe, it, before, beforeEach, afterEach } = exports.lab;
-
-const { expect, fail } = require('@hapi/code');
-const sinon = require('sinon');
-const rewire = require('rewire');
-const nock = require('nock');
-const readFileAsync = require('util').promisify(require('fs').readFile);
-const config = require('../../config/config'); // eslint-disable-line import/order
-const ptLogger = require('purpleteam-logger');
-
-const cUiLogger = ptLogger.init(config.get('loggers.cUi'));
+const lab = Lab.script();
+const { describe, it, before, beforeEach, afterEach } = lab;
+export { lab }; // eslint-disable-line import/prefer-default-export
+const cUiLogger = initPtLogger(config.get('loggers.cUi'));
 
 const apiUrl = config.get('purpleteamApi.url');
 const jobFilePath = config.get('job.fileUri');
-const { MockEvent, EventSource } = require('mocksse');
-const { TesterFeedbackRoutePrefix } = require('../../src/strings');
-const Model = require('../../src/models/model');
 
 const cUiPath = '../../src/view/cUi';
 const apiDecoratingAdapterPath = '../../src/presenter/apiDecoratingAdapter';
@@ -38,7 +29,7 @@ const expectedJobMissingTypeAppScanner = '\"{\\n  \\\"data\\\": {\\n    \\\"type
 
 describe('apiDecoratingAdapter', () => {
   before(async (flags) => {
-    flags.context.jobFileContent = await (async () => readFileAsync(jobFilePath, { encoding: 'utf8' }))();
+    flags.context.jobFileContent = await (async () => readFile(jobFilePath, { encoding: 'utf8' }))();
   });
   describe('testPlans', () => {
     it('- should provide the cUi with the test plan to display', async (flags) => {
@@ -113,7 +104,7 @@ describe('apiDecoratingAdapter', () => {
 
       nock(apiUrl).post('/testplan', expectedJob).reply(200, expectedArgPasssedToTestPlan);
 
-      const testPlanStub = sinon.stub(cUi, 'testPlan');
+      const testPlanStub = stub(cUi, 'testPlan');
       cUi.testPlan = testPlanStub;
       const revertRewiredApiCui = rewiredApi.__set__('view', cUi);
 
@@ -121,7 +112,7 @@ describe('apiDecoratingAdapter', () => {
         cUi.testPlan.restore();
         revertRewiredApiCui();
         config.set('env', 'test');
-        nock.cleanAll();
+        cleanAll();
       };
 
       await rewiredApi.testPlans(jobFileContents);
@@ -138,7 +129,7 @@ describe('apiDecoratingAdapter', () => {
       context.rewiredApi = rewire(apiDecoratingAdapterPath);
 
       context.log = cUiLogger;
-      context.critStub = sinon.stub(context.log, 'crit');
+      context.critStub = stub(context.log, 'crit');
       context.log.crit = context.critStub;
 
       context.revertRewiredApiLog = context.rewiredApi.__set__('cUiLogger', context.log);
@@ -165,7 +156,7 @@ describe('apiDecoratingAdapter', () => {
 
     it('- on - invalid JSON syntax - should print useful error message', async (flags) => {
       const { context: { rewiredApi, critStub } } = flags;
-      const jobFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_3.1.0-alpha.3_local_missing_comma`, { encoding: 'utf8' }))();
+      const jobFileContents = await (async () => readFile(`${process.cwd()}/testResources/jobs/job_3.1.0-alpha.3_local_missing_comma`, { encoding: 'utf8' }))();
 
       const expectedPrintedErrorMessage = 'Error occurred while instantiating the model. Details follow: Invalid syntax in "Job": Unexpected string in JSON at position 1142';
 
@@ -180,7 +171,7 @@ describe('apiDecoratingAdapter', () => {
     it('- on - invalid job based on purpleteam schema - should print useful error message', async (flags) => {
       // Lots of checking around the validation on the server side will be required.
       const { context: { rewiredApi, critStub } } = flags;
-      const jobFileContents = await (async () => readFileAsync(`${process.cwd()}/testResources/jobs/job_3.1.0-alpha.3_local_missing_type_of_appScanner`, { encoding: 'utf8' }))();
+      const jobFileContents = await (async () => readFile(`${process.cwd()}/testResources/jobs/job_3.1.0-alpha.3_local_missing_type_of_appScanner`, { encoding: 'utf8' }))();
 
       const expectedResponseBodyMessage = '';// Doesn't matter what this is, we don't check it.
       /* eslint-disable no-useless-escape */
@@ -260,7 +251,7 @@ message. Errors: [
       context.revertRewiredApiLog();
       context.log.crit.restore();
       config.set('env', 'test'); // For got hooks only.
-      nock.cleanAll();
+      cleanAll();
     });
   });
 
@@ -311,14 +302,14 @@ message. Errors: [
 
       nock(apiUrl).post('/test', expectedJob).reply(200, apiResponse);
 
-      const testStub = sinon.stub(cUi, 'test');
+      const testStub = stub(cUi, 'test');
       cUi.test = testStub;
 
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
-      const handleModelTesterEventsSpy = sinon.spy(rewiredHandleModelTesterEvents);
+      const handleModelTesterEventsSpy = spy(rewiredHandleModelTesterEvents);
       const revertRewiredApiHandleModelTesterEvents = rewiredApi.__set__('handleModelTesterEvents', handleModelTesterEventsSpy);
 
-      const handleTesterProgressStub = sinon.stub(cUi, 'handleTesterProgress');
+      const handleTesterProgressStub = stub(cUi, 'handleTesterProgress');
       cUi.handleTesterProgress = handleTesterProgressStub;
 
       /* const revertRewiredApiView = */ rewiredApi.__set__('view', cUi);
@@ -331,7 +322,7 @@ message. Errors: [
         // revertRewiredApiCui();
         revertRewiredApiApiUrl();
         config.set('env', 'test'); // For got hooks only.
-        nock.cleanAll();
+        cleanAll();
       };
 
       await rewiredApi.test(jobFileContents);
@@ -389,14 +380,14 @@ message. Errors: [
 
       nock(apiUrl).post('/test', expectedJob).reply(200, apiResponse);
 
-      const testStub = sinon.stub(cUi, 'test');
+      const testStub = stub(cUi, 'test');
       cUi.test = testStub;
 
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
-      const handleModelTesterEventsSpy = sinon.spy(rewiredHandleModelTesterEvents);
+      const handleModelTesterEventsSpy = spy(rewiredHandleModelTesterEvents);
       const revertRewiredApiHandleModelTesterEvents = rewiredApi.__set__('handleModelTesterEvents', handleModelTesterEventsSpy);
 
-      const handleTesterProgressStub = sinon.stub(cUi, 'handleTesterProgress');
+      const handleTesterProgressStub = stub(cUi, 'handleTesterProgress');
       cUi.handleTesterProgress = handleTesterProgressStub;
 
       /* const revertRewiredApiView = */ rewiredApi.__set__('view', cUi);
@@ -409,7 +400,7 @@ message. Errors: [
         // revertRewiredApiCui();
         revertRewiredApiApiUrl();
         config.set('env', 'test'); // For got hooks only.
-        nock.cleanAll();
+        cleanAll();
       };
 
       await rewiredApi.test(jobFileContents);
@@ -586,7 +577,7 @@ message. Errors: [
 
   describe('getJobFile', /* async */ () => {
     before(async (flags) => {
-      flags.context.jobFileContent = await (async () => readFileAsync(jobFilePath, { encoding: 'utf8' }))();
+      flags.context.jobFileContent = await (async () => readFile(jobFilePath, { encoding: 'utf8' }))();
     });
     it('- should return the Job file contents', async (flags) => {
       const { context: { jobFileContent } } = flags;
@@ -609,7 +600,7 @@ message. Errors: [
     it('- given event `testerProgress` handleTesterProgress of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
       const cUi = rewire(cUiPath);
-      const handleTesterProgressStub = sinon.stub(cUi, 'handleTesterProgress');
+      const handleTesterProgressStub = stub(cUi, 'handleTesterProgress');
       cUi.handleTesterProgress = handleTesterProgressStub;
       const revertRewiredApiCui = rewiredApi.__set__('view', cUi);
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
@@ -636,7 +627,7 @@ message. Errors: [
     it('- given event `testerPctComplete` handleTesterPctComplete of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
       const cUi = rewire(cUiPath);
-      const handleTesterPctCompleteStub = sinon.stub(cUi, 'handleTesterPctComplete');
+      const handleTesterPctCompleteStub = stub(cUi, 'handleTesterPctComplete');
       cUi.handleTesterPctComplete = handleTesterPctCompleteStub;
       const revertRewiredApiCui = rewiredApi.__set__('view', cUi);
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
@@ -663,7 +654,7 @@ message. Errors: [
     it('- given event `testerBugCount` handleTesterBugCount of the view should be called with correct arguments', async (flags) => {
       const { context: { rewiredApi } } = flags;
       const cUi = rewire(cUiPath);
-      const handleTesterBugCountStub = sinon.stub(cUi, 'handleTesterBugCount');
+      const handleTesterBugCountStub = stub(cUi, 'handleTesterBugCount');
       cUi.handleTesterBugCount = handleTesterBugCountStub;
       const revertRewiredApiCui = rewiredApi.__set__('view', cUi);
       const rewiredHandleModelTesterEvents = rewiredApi.__get__('handleModelTesterEvents');
@@ -693,7 +684,7 @@ message. Errors: [
       const { context } = flags;
       const jobFileContents = await context.jobFileContent;
       context.model = new Model(jobFileContents);
-      context.modelPropagateTesterMessageStub = sinon.stub(context.model, 'propagateTesterMessage');
+      context.modelPropagateTesterMessageStub = stub(context.model, 'propagateTesterMessage');
       config.set('env', 'local'); // For got hooks only.
       context.rewiredApi = rewire(apiDecoratingAdapterPath);
       context.rewiredHandleServerSentTesterEvents = context.rewiredApi.__get__('handleServerSentTesterEvents');
@@ -770,7 +761,7 @@ message. Errors: [
 
     it('- given `testerProgress` event with falsy message - should log.warning with appropriate message', (flags) => {
       const { context: { model, modelPropagateTesterMessageStub, rewiredHandleServerSentTesterEvents, rewiredApi } } = flags;
-      const warningStub = sinon.stub(cUiLogger, 'warning');
+      const warningStub = stub(cUiLogger, 'warning');
       cUiLogger.warning = warningStub;
       const revertRewiredApiLog = rewiredApi.__set__('cUiLogger', cUiLogger);
 

@@ -7,22 +7,18 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-exports.lab = require('@hapi/lab').script();
+import { expect, fail } from '@hapi/code';
+import * as Lab from '@hapi/lab';
+import { readFile } from 'fs/promises';
+import config from '../../config/config';
+import Model from '../../src/models/model';
 
-const { describe, it } = exports.lab;
-
-const { expect, fail } = require('@hapi/code');
-// const sinon = require('sinon');
-// const rewire = require('rewire');
-
-const readFileAsync = require('util').promisify(require('fs').readFile);
-
-const config = require('../../config/config');
-const Model = require('../../src/models/model');
-
+const lab = Lab.script();
+const { describe, it } = lab;
+export { lab }; // eslint-disable-line import/prefer-default-export
 
 const newModel = async () => {
-  const jobFileContents = await readFileAsync(config.get('job.fileUri'), { encoding: 'utf8' });
+  const jobFileContents = await readFile(config.get('job.fileUri'), { encoding: 'utf8' });
   const model = new Model(jobFileContents);
   return model;
 };

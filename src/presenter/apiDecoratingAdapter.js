@@ -7,19 +7,21 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-const config = require('../../config/config'); // eslint-disable-line import/order
-const { promises: fsPromises } = require('fs');
-const got = require('got');
-const EventSource = require('eventsource');
-const Bourne = require('@hapi/bourne');
+import { promises as fsPromises } from 'fs';
+import got from 'got';
+import EventSource from 'eventsource';
+import Bourne from '@hapi/bourne';
+import ptLogger, { init as initPtLogger, add as addPtLogger } from 'purpleteam-logger';
+import { createRequire } from 'module';
+import Model from '../models/model.js';
+import view from '../view/index.js';
+import { TesterUnavailable, TesterFeedbackRoutePrefix, NowAsFileName } from '../strings/index.js';
+import config from '../../config/config.js';
 
-const ptLogger = require('purpleteam-logger');
-const Model = require('../models/model');
-const view = require('../view');
-const pkg = require('../../package.json');
-const { TesterUnavailable, TesterFeedbackRoutePrefix, NowAsFileName } = require('../strings');
+const require = createRequire(import.meta.url);
+const { name: pkgName, version: pkgVersion, description: pkgDescription, homepage: pkgHomepage } = require('../../package');
 
-const cUiLogger = ptLogger.init(config.get('loggers.cUi'));
+const cUiLogger = initPtLogger(config.get('loggers.cUi'));
 const apiUrl = config.get('purpleteamApi.url');
 const env = config.get('env');
 
@@ -46,7 +48,7 @@ const gotCloudAuth = got.extend({
   responseType: 'json',
   resolveBodyOnly: true,
   headers: {
-    'user-agent': `${pkg.name}/${pkg.version} ${pkg.description} ${pkg.homepage}`,
+    'user-agent': `${pkgName}/${pkgVersion} ${pkgDescription} ${pkgHomepage}`,
     'Content-type': 'application/x-www-form-urlencoded',
     Authorization: `Basic ${(() => Buffer.from(`${config.get('purpleteamAuth.appClientId')}:${config.get('purpleteamAuth.appClientSecret')}`).toString('base64'))()}`
   }
@@ -73,8 +75,8 @@ const getAccessToken = async () => {
 const gotPt = got.extend({
   prefixUrl: { local: `${apiUrl}/`, cloud: `${apiUrl}/${config.get('purpleteamApi.stage')}/${config.get('purpleteamApi.customerId')}/` }[env],
   headers: {
-    local: { 'user-agent': `${pkg.name}/${pkg.version} ${pkg.description} ${pkg.homepage}` },
-    cloud: { 'user-agent': `${pkg.name}/${pkg.version} ${pkg.description} ${pkg.homepage}`, 'x-api-key': config.get('purpleteamApi.apiKey') }
+    local: { 'user-agent': `${pkgName}/${pkgVersion} ${pkgDescription} ${pkgHomepage}` },
+    cloud: { 'user-agent': `${pkgName}/${pkgVersion} ${pkgDescription} ${pkgHomepage}`, 'x-api-key': config.get('purpleteamApi.apiKey') }
   }[env],
   retry: {
     limit: 2, // Default is 2
@@ -104,7 +106,7 @@ const gotPt = got.extend({
           if (response.statusCode === 401 || response.statusCode === 403) { // Unauthorised or Forbidden
             const optionAugmentations = { headers: { authorization: `Bearer ${await getAccessToken()}` } };
             // Save for further requests.
-            gotPt.defaults.options = got.mergeOptions(gotPt.defaults.options, optionAugmentations);
+            gotPt.defaults.options.merge(optionAugmentations);
             // Make a new retry
             return retryWithMergedOptions(optionAugmentations);
           }
@@ -302,7 +304,7 @@ const subscribeToTesterFeedback = (model, testerStatuses, subscribeToOngoingFeed
     // Todo: KC: Add test for the following logging.
     const loggerType = `${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}`;
     const { transports, dirname } = config.get('loggers.testerProgress');
-    ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}.log` });
+    addPtLogger(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}.log` });
 
     const testerRepresentative = testerStatuses.find((element) => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
@@ -385,7 +387,7 @@ const longPollTesterFeedback = async (model, testerStatuses, subscribeToOngoingF
     // Todo: KC: Add test for the following logging.
     const loggerType = `${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}`;
     const { transports, dirname } = config.get('loggers.testerProgress');
-    ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}.log` });
+    addPtLogger(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}.log` });
 
     const testerRepresentative = testerStatuses.find((element) => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
@@ -501,7 +503,7 @@ const test = async (jobFileContents) => {
 
 const status = async () => { await requestStatus(); };
 
-module.exports = {
+export default {
   getJobFile,
   testPlans,
   test,

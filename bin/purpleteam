@@ -1,9 +1,0 @@
-#!/usr/bin/env node
-
-const root = require('..');
-
-async function main() {
-  await root.start({ argv: process.argv });
-}
-
-main();
