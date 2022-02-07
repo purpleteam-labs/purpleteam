@@ -269,7 +269,7 @@ test.serial('subscribeToTesterFeedback SSE and handlers - given a mock event for
 
 // Happy day test
 /* eslint-disable */
-// test.serial('longPollTesterFeedback LP and handlers - given a mock event for each of the available testers sessions - given invocation of all the tester events - relevant handler instances should be run', async (t) => {
+// test.serial.only('longPollTesterFeedback LP and handlers - given a mock event for each of the available testers sessions - given invocation of all the tester events - relevant handler instances should be run', async (t) => {
 //   const { context: { jobFileContent } } = t;
 //   nock.cleanAll();
 //   const apiResponse = {
@@ -287,11 +287,11 @@ test.serial('subscribeToTesterFeedback SSE and handlers - given a mock event for
 //         message: 'Tester initialised.'
 //       }
 //     ],
-//     testerFeedbackCommsMedium: 'sse'
+//     testerFeedbackCommsMedium: 'lp'
 //   };
 
 //   // allowUnmocked: true for the SSE route: /tester-feedback ......................................................
-//   nock(apiUrl, { allowUnmocked: true }).post('/test', expectedJob).reply(200, apiResponse);
+//   nock(apiUrl /* , { allowUnmocked: true } */ ).post('/test', expectedJob).reply(200, apiResponse);
 //   //const { default: Model } = await import(modelPath);
 //   const { default: view } = await import(viewPath);
 //   const { default: ptLogger, init: initPtLogger } = await import('purpleteam-logger');
