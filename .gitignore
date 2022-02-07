@@ -2,7 +2,7 @@ node_modules/
 config.*.json
 !config.example.local.json
 !config.example.cloud.json
-!config.test.json
+!config.localtest.json
 
 .vscode
 *.code-workspace

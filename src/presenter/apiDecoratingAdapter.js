@@ -9,27 +9,49 @@
 
 import { promises as fsPromises } from 'fs';
 import got from 'got';
-import EventSource from 'eventsource';
+import importedPtLogger, { init as importedInitPtLogger } from 'purpleteam-logger';
+import importedEventSource from 'eventsource';
 import Bourne from '@hapi/bourne';
-import ptLogger, { init as initPtLogger, add as addPtLogger } from 'purpleteam-logger';
 import { createRequire } from 'module';
-import Model from '../models/model.js';
-import view from '../view/index.js';
+import ImportedModel from '../models/model.js';
+import importedView from '../view/index.js';
 import { TesterUnavailable, TesterFeedbackRoutePrefix, NowAsFileName } from '../strings/index.js';
 import config from '../../config/config.js';
 
 const require = createRequire(import.meta.url);
 const { name: pkgName, version: pkgVersion, description: pkgDescription, homepage: pkgHomepage } = require('../../package');
 
-const cUiLogger = initPtLogger(config.get('loggers.cUi'));
 const apiUrl = config.get('purpleteamApi.url');
-const env = config.get('env');
+
+const env = ((e) => {
+  const supportedEnvs = ['cloud', 'local'];
+  return supportedEnvs.find((sE) => e.startsWith(sE));
+})(config.get('env'));
 
 const internals = {
+  Model: undefined,
+  view: undefined,
+  ptLogger: undefined,
+  cUiLogger: undefined,
+  EventSource: undefined,
   longPoll: {
     nullProgressCounter: 0,
     nullProgressMaxRetries: config.get('testerFeedbackComms.longPoll.nullProgressMaxRetries')
   }
+};
+
+const inject = ({
+  Model = ImportedModel,
+  view = importedView,
+  ptLogger = importedPtLogger,
+  cUiLogger = importedInitPtLogger(config.get('loggers.cUi')),
+  EventSource = importedEventSource
+}) => {
+  internals.Model = Model;
+  internals.view = view;
+  internals.ptLogger = ptLogger;
+  internals.cUiLogger = cUiLogger;
+  internals.EventSource = EventSource;
 };
 
 const getJobFile = async (filePath) => {
@@ -37,7 +59,7 @@ const getJobFile = async (filePath) => {
     const fileContents = await fsPromises.readFile(filePath, { encoding: 'utf8' });
     return fileContents;
   } catch (err) {
-    cUiLogger.error(`Could not read file: ${filePath}, the error was: ${err}.`, { tags: ['apiDecoratingAdapter'] });
+    internals.cUiLogger.error(`Could not read file: ${filePath}, the error was: ${err}.`, { tags: ['apiDecoratingAdapter'] });
     throw err;
   }
 };
@@ -66,7 +88,7 @@ const getAccessToken = async () => {
     const knownError = knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.code))
       ?? knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.message))
       ?? { default: `An unknown error occurred while attempting to get the access token. Error follows: ${error}` };
-    cUiLogger.crit(Object.values(knownError)[0], { tags: ['apiDecoratingAdapter'] });
+    internals.cUiLogger.crit(Object.values(knownError)[0], { tags: ['apiDecoratingAdapter'] });
   });
   return accessToken;
 };
@@ -155,6 +177,7 @@ const gotPt = got.extend({
 /* eslint-enable no-param-reassign */
 
 const requestStatus = async () => {
+  const { view, cUiLogger } = internals;
   await gotPt.get('status').then((response) => {
     view.status(cUiLogger, response.body);
   }).catch((error) => {
@@ -190,6 +213,7 @@ const requestOutcomes = async () => {
 };
 
 const requestTestOrTestPlan = async (jobFileContents, route) => {
+  const { cUiLogger } = internals;
   let result;
   const retrying = (() => ({
     // The CLI needs to stop trying before the back-end fails due to containers not being up quickly enough.
@@ -237,7 +261,7 @@ const requestTestOrTestPlan = async (jobFileContents, route) => {
     // If there was a need for local retry, do the same thing as above, we've tested this. Bear in mind it introduces complexity and possible eadge cases.
   }[env]))();
 
-  await gotPt.post(`${route}`, {
+  await gotPt.post(route, {
     headers: { 'Content-Type': 'application/vnd.api+json' },
     json: jobFileContents,
     responseType: 'json',
@@ -272,29 +296,22 @@ const requestTest = async (jobFileContents) => requestTestOrTestPlan(jobFileCont
 const requestTestPlan = async (jobFileContents) => requestTestOrTestPlan(jobFileContents, 'testplan');
 
 const handleServerSentTesterEvents = async (event, model, testerNameAndSession) => {
-  if (event.origin === apiUrl) {
-    const eventDataPropPascalCase = event.type.replace('tester', '');
-    const eventDataProp = `${eventDataPropPascalCase.charAt(0).toLowerCase()}${eventDataPropPascalCase.substring(1)}`;
-    let message = Bourne.parse(event.data)[eventDataProp];
-    if (message != null) {
-      if (event.type === 'testerProgress' && message.startsWith('All Test Sessions of all Testers are finished')) { // Message defined in Orchestrator.
-        message = message.concat(`\n${await requestOutcomes()}`);
-      }
-      model.propagateTesterMessage({
-        testerType: testerNameAndSession.testerType,
-        sessionId: testerNameAndSession.sessionId,
-        message,
-        event: event.type
-      });
-    } else {
-      cUiLogger.warning(`A falsy ${event.type} event message was received from the orchestrator`, { tags: ['apiDecoratingAdapter'] });
+  // If event.origin is incorrect, eventSource drops the message and this handler is not called.
+  const eventDataPropPascalCase = event.type.replace('tester', '');
+  const eventDataProp = `${eventDataPropPascalCase.charAt(0).toLowerCase()}${eventDataPropPascalCase.substring(1)}`;
+  let message = Bourne.parse(event.data)[eventDataProp];
+  if (message != null) {
+    if (event.type === 'testerProgress' && message.startsWith('All Test Sessions of all Testers are finished')) { // Message defined in Orchestrator.
+      message = message.concat(`\n${await requestOutcomes()}`);
     }
-  } else {
     model.propagateTesterMessage({
       testerType: testerNameAndSession.testerType,
       sessionId: testerNameAndSession.sessionId,
-      message: `Origin of event was incorrect. Actual: "${event.origin}", Expected: "${apiUrl}"`
+      message,
+      event: event.type
     });
+  } else {
+    internals.cUiLogger.warning(`A falsy ${event.type} event message was received from the orchestrator`, { tags: ['apiDecoratingAdapter'] });
   }
 };
 
@@ -304,7 +321,7 @@ const subscribeToTesterFeedback = (model, testerStatuses, subscribeToOngoingFeed
     // Todo: KC: Add test for the following logging.
     const loggerType = `${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}`;
     const { transports, dirname } = config.get('loggers.testerProgress');
-    addPtLogger(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}.log` });
+    internals.ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}.log` });
 
     const testerRepresentative = testerStatuses.find((element) => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
@@ -314,7 +331,7 @@ const subscribeToTesterFeedback = (model, testerStatuses, subscribeToOngoingFeed
         message: testerRepresentative.message
       });
       if (subscribeToOngoingFeedback && testerRepresentative.message !== TesterUnavailable(testerNameAndSession.testerType)) {
-        const eventSource = new EventSource(`${apiUrl}/${TesterFeedbackRoutePrefix('sse')}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`); // sessionId is 'NA' for tls?
+        const eventSource = new internals.EventSource(`${apiUrl}/${TesterFeedbackRoutePrefix('sse')}/${testerNameAndSession.testerType}/${testerNameAndSession.sessionId}`); // sessionId is 'NA' for tls?
         const handleServerSentTesterEventsClosure = (event) => {
           handleServerSentTesterEvents(event, model, testerNameAndSession);
         };
@@ -387,7 +404,7 @@ const longPollTesterFeedback = async (model, testerStatuses, subscribeToOngoingF
     // Todo: KC: Add test for the following logging.
     const loggerType = `${testerNameAndSession.testerType}-${testerNameAndSession.sessionId}`;
     const { transports, dirname } = config.get('loggers.testerProgress');
-    addPtLogger(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}.log` });
+    internals.ptLogger.add(loggerType, { transports, filename: `${dirname}${loggerType}_${NowAsFileName()}.log` });
 
     const testerRepresentative = testerStatuses.find((element) => element.name === testerNameAndSession.testerType);
     if (testerRepresentative) {
@@ -450,7 +467,7 @@ const getTesterFeedback = {
 const getInitialisedModel = (jobFileContents) => {
   let model;
   try {
-    model = new Model(jobFileContents);
+    model = new internals.Model(jobFileContents);
   } catch (error) {
     const knownErrors = [
       { SyntaxError: `Invalid syntax in "Job": ${error.message}` }, // error.name
@@ -458,7 +475,7 @@ const getInitialisedModel = (jobFileContents) => {
     ];
     const knownError = knownErrors.find((e) => Object.prototype.hasOwnProperty.call(e, error.name))
       ?? { default: `Unknown error. Error follows: ${error}` };
-    cUiLogger.crit(`Error occurred while instantiating the model. Details follow: ${Object.values(knownError)[0]}`, { tags: ['apiDecoratingAdapter'] });
+    internals.cUiLogger.crit(`Error occurred while instantiating the model. Details follow: ${Object.values(knownError)[0]}`, { tags: ['apiDecoratingAdapter'] });
     return undefined;
   }
   return model;
@@ -467,25 +484,25 @@ const getInitialisedModel = (jobFileContents) => {
 const testPlans = async (jobFileContents) => {
   const model = getInitialisedModel(jobFileContents);
   if (!model) return;
-  const resultingTestPlans = await requestTestPlan(JSON.stringify(model.job, null, 2));
-  resultingTestPlans && view.testPlan({ testPlans: resultingTestPlans, ptLogger });
+  const resultingTestPlans = await requestTestPlan(model.job);
+  resultingTestPlans && internals.view.testPlan({ testPlans: resultingTestPlans, ptLogger: internals.ptLogger });
 };
 
 const handleModelTesterEvents = (eventName, testerType, sessionId, message) => {
-  view[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`]({ testerType, sessionId, message, ptLogger });
+  internals.view[`handle${eventName.charAt(0).toUpperCase()}${eventName.substring(1)}`]({ testerType, sessionId, message, ptLogger: internals.ptLogger });
 };
 
 const test = async (jobFileContents) => {
   const model = getInitialisedModel(jobFileContents);
   if (!model) return;
 
-  const result = await requestTest(JSON.stringify(model.job, null, 2));
+  const result = await requestTest(model.job);
   let testerStatuses;
   let testerFeedbackCommsMedium;
 
   if (result) {
     ({ testerStatuses, testerFeedbackCommsMedium } = result);
-    view.test(model.testerSessions());
+    internals.view.test(model.testerSessions());
     model.eventNames.forEach((eN) => {
       model.on(eN, (testerType, sessionId, message) => { handleModelTesterEvents(eN, testerType, sessionId, message); });
     });
@@ -504,6 +521,7 @@ const test = async (jobFileContents) => {
 const status = async () => { await requestStatus(); };
 
 export default {
+  inject,
   getJobFile,
   testPlans,
   test,

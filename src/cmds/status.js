@@ -12,6 +12,7 @@ import api from '../presenter/apiDecoratingAdapter.js';
 const flags = 'status';
 const desc = 'Check the status of the PurpleTeam back-end.';
 const run = async () => {
+  api.inject({});
   await api.status();
 };
 

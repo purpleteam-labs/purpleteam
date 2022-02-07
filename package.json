@@ -1,4 +1,13 @@
 {
+  "ava": {
+    "files": [
+      "test/**/*",
+      "!test/double"
+    ],
+    "environmentVariables": {
+      "NODE_ENV": "localtest"
+    }
+  },
   "name": "purpleteam",
   "np": {
     "branch": "main"
@@ -10,10 +19,11 @@
     "lint": "eslint .",
     "deps": "npm-check",
     "update:deps": "npm-check -u",
-    "test": "lab --assert @hapi/code --coverage",
-    "test:coveralls": "lab --assert @hapi/code --reporter lcov -o ./coverage/lcov.info",
-    "test:nolint": "lab --assert @hapi/code --coverage",
-    "test:debug": "node --inspect-brk=localhost:9230 ./node_modules/.bin/lab --assert @hapi/code --timeout 0",
+    "test": "c8 --reporter=lcov --reporter=text-summary ava",
+    "test:nolint": "c8 --reporter=lcov --reporter=text-summary ava",
+    "test:coveralls": "c8 --reporter lcov -o ./coverage/lcov.info ava",
+    "test:debug": "ava debug --break ./test/presenter/apiDecoratingAdapter_sSe_falsyMessageAndIncorrectOrigin.js",
+    "test:nockDebug": "DEBUG=nock.* ava debug --break ./test/presenter/apiDecoratingAdapter.js",
     "pretest": "npm run lint",
     "debug": "node --inspect-brk=localhost:9230 ./bin/purpleteam.js",
     "start": "node ./bin/purpleteam.js",
@@ -86,15 +96,17 @@
   "devDependencies": {
     "@hapi/code": "^8.0.6",
     "@hapi/lab": "^24.5.1",
+    "ava": "^4.0.1",
+    "c8": "^7.11.0",
     "eslint": "^8.7.0",
     "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-ava": "^13.2.0",
     "eslint-plugin-import": "^2.25.4",
+    "husky": "^7.0.4",
     "mocksse": "^1.0.3",
     "nock": "^13.2.2",
     "npm-check": "^5.9.2",
-    "rewire": "^6.0.0",
-    "sinon": "^12.0.1",
-    "husky": "^7.0.4"
+    "sinon": "^12.0.1"
   },
   "bin": {
     "purpleteam": "./bin/purpleteam.js"

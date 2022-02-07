@@ -26,6 +26,7 @@ const setup = (sywac) => {
 };
 const run = async (parsedArgv, context) => {
   if (parsedArgv.j) {
+    api.inject({});
     const jobFileContents = await api.getJobFile(parsedArgv.j);
     // Todo: KC: In the future we could deserialise configFileContents, and possibly validate before sending to the Orchestrator.
     //    https://github.com/danivek/json-api-serializer looks to be well maintained.

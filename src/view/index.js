@@ -9,7 +9,7 @@
 
 import config from '../../config/config.js';
 
-const viewFileName = `./${config.get('uI')}.js`;
+const viewFileName = config.get(`uI.path.${config.get('uI.type')}`);
 
 const { default: view } = await import(viewFileName);
 

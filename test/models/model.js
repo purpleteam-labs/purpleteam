@@ -7,210 +7,179 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
-import { expect, fail } from '@hapi/code';
-import * as Lab from '@hapi/lab';
 import { readFile } from 'fs/promises';
-import config from '../../config/config';
-import Model from '../../src/models/model';
+import test from 'ava';
 
-const lab = Lab.script();
-const { describe, it } = lab;
-export { lab }; // eslint-disable-line import/prefer-default-export
+import config from '../../config/config.js';
+import Model from '../../src/models/model.js';
 
-const newModel = async () => {
-  const jobFileContents = await readFile(config.get('job.fileUri'), { encoding: 'utf8' });
-  const model = new Model(jobFileContents);
-  return model;
-};
+const jobFilePath = config.get('job.fileUri');
+const jobFileContents = await readFile(jobFilePath, { encoding: 'utf8' });
 
+test.beforeEach((t) => {
+  t.context.model = new Model(jobFileContents); // eslint-disable-line no-param-reassign
+});
 
-describe('model', /* async */ () => {
-  // The only way to verify initTesterMessages is by the result of propagateTesterMessage
+test('eventNames - should return valid event names', (t) => {
+  const { model } = t.context;
+  const { eventNames } = model;
 
+  t.deepEqual(eventNames, ['testerProgress', 'testerPctComplete', 'testerBugCount']);
+});
 
-  it('- eventNames - should return valid event names', async () => {
-    const model = await newModel();
-    const { eventNames } = model;
+test('testerSessions - should return valid testerSessions', (t) => {
+  const { model } = t.context;
+  // expectedTesterSessions also used in the presenter tests
+  const expectedTesterSessions = [
+    { testerType: 'app', sessionId: 'lowPrivUser', threshold: 12 },
+    { testerType: 'app', sessionId: 'adminUser', threshold: 0 },
+    { testerType: 'server', sessionId: 'NA', threshold: 0 },
+    { testerType: 'tls', sessionId: 'NA', threshold: 3 }
+  ];
 
-    expect(eventNames).to.equal(['testerProgress', 'testerPctComplete', 'testerBugCount']);
+  const testerSessions = model.testerSessions();
+  t.deepEqual(testerSessions, expectedTesterSessions);
+});
+
+test('testerNamesAndSessions - should return valid testerNamesAndSessions', (t) => {
+  const { model: { testerNamesAndSessions } } = t.context;
+
+  const expectedTesterNamesAndSessions = [
+    { testerType: 'app', sessionId: 'lowPrivUser' },
+    { testerType: 'app', sessionId: 'adminUser' },
+    { testerType: 'server', sessionId: 'NA' },
+    { testerType: 'tls', sessionId: 'NA' }
+  ];
+
+  t.deepEqual(testerNamesAndSessions, expectedTesterNamesAndSessions);
+});
+
+test('propagateTesterMessage - with testerType app, sessionId lowPrivUser - should fire testerProgress event, if event not specified, once only', (t) => {
+  const { model } = t.context;
+  let eventHandlerInvocationCount = 0;
+  const appTesterLowPrivUserSessionIdMessage = {
+    testerType: 'app',
+    sessionId: 'lowPrivUser',
+    message: 'App tests are now running.'
+  };
+
+  model.on('testerProgress', (testerType, sessionId, message) => {
+    t.deepEqual(testerType, appTesterLowPrivUserSessionIdMessage.testerType);
+    t.deepEqual(sessionId, appTesterLowPrivUserSessionIdMessage.sessionId);
+    t.deepEqual(message, appTesterLowPrivUserSessionIdMessage.message);
+    eventHandlerInvocationCount += 1;
+  });
+  model.on('testerPctComplete', () => {
+    t.fail('testerPctComplete handler should not be invoked');
+  });
+  model.on('testerBugCount', () => {
+    t.fail('testerBugCount handler should not be invoked');
   });
 
+  model.propagateTesterMessage(appTesterLowPrivUserSessionIdMessage);
 
-  describe('testerSessions', /* async */ () => {
-    it('- should return valid testerSessions', async () => {
-      const model = await newModel();
-      // expectedTesterSessions also used in the presenter tests
-      const expectedTesterSessions = [
-        { testerType: 'app', sessionId: 'lowPrivUser', threshold: 12 },
-        { testerType: 'app', sessionId: 'adminUser', threshold: 0 },
-        { testerType: 'server', sessionId: 'NA', threshold: 0 },
-        { testerType: 'tls', sessionId: 'NA', threshold: 3 }
-      ];
+  t.is(eventHandlerInvocationCount, 1);
+});
 
-      const testerSessions = model.testerSessions();
+test('propagateTesterMessage - with testerType app, sessionId lowPrivUser - should fire testerProgress event, if event specified, once only', (t) => {
+  const { model } = t.context;
+  let eventHandlerInvocationCount = 0;
+  const appTesterLowPrivUserSessionIdMessage = {
+    testerType: 'app',
+    sessionId: 'lowPrivUser',
+    message: 'App tests are now running.',
+    event: 'testerProgress'
+  };
 
-      expect(testerSessions).to.once.include(expectedTesterSessions);
-    });
+  model.on('testerProgress', (testerType, sessionId, message) => {
+    t.deepEqual(testerType, appTesterLowPrivUserSessionIdMessage.testerType);
+    t.deepEqual(sessionId, appTesterLowPrivUserSessionIdMessage.sessionId);
+    t.deepEqual(message, appTesterLowPrivUserSessionIdMessage.message);
+    eventHandlerInvocationCount += 1;
+  });
+  model.on('testerPctComplete', () => {
+    t.fail('testerPctComplete handler should not be invoked');
+  });
+  model.on('testerBugCount', () => {
+    t.fail('testerBugCount handler should not be invoked');
   });
 
+  model.propagateTesterMessage(appTesterLowPrivUserSessionIdMessage);
 
-  describe('testerNamesAndSessions', /* async */ () => {
-    it('- should return valid testerNamesAndSessions', async () => {
-      const model = await newModel();
-      const expectedTesterNamesAndSessions = [
-        { testerType: 'app', sessionId: 'lowPrivUser' },
-        { testerType: 'app', sessionId: 'adminUser' },
-        { testerType: 'server', sessionId: 'NA' },
-        { testerType: 'tls', sessionId: 'NA' }
-      ];
+  t.is(eventHandlerInvocationCount, 1);
+});
 
-      const testerNamesAndSessions = model.testerNamesAndSessions; // eslint-disable-line
+test('propagateTesterMessage - with testerType app, sessionId lowPrivUser - should fire testerPctComplete event, once only', (t) => {
+  const { model } = t.context;
+  let eventHandlerInvocationCount = 0;
+  const appTesterLowPrivUserSessionIdMessage = {
+    testerType: 'app',
+    sessionId: 'lowPrivUser',
+    message: 20,
+    event: 'testerPctComplete'
+  };
 
-      expect(testerNamesAndSessions).to.equal(expectedTesterNamesAndSessions);
-    });
+  model.on('testerProgress', () => {
+    t.fail('testerProgress handler should not be invoked');
+  });
+  model.on('testerPctComplete', (testerType, sessionId, message) => {
+    t.deepEqual(testerType, appTesterLowPrivUserSessionIdMessage.testerType);
+    t.deepEqual(sessionId, appTesterLowPrivUserSessionIdMessage.sessionId);
+    t.deepEqual(message, appTesterLowPrivUserSessionIdMessage.message);
+    eventHandlerInvocationCount += 1;
+  });
+  model.on('testerBugCount', () => {
+    t.fail('testerBugCount handler should not be invoked');
   });
 
+  model.propagateTesterMessage(appTesterLowPrivUserSessionIdMessage);
 
-  describe('propagateTesterMessage', /* async */ () => {
-    const invokedOnce = 1;
-    it('- with testerType app, sessionId lowPrivUser - should fire testerProgress event, if event not specified, once only', async () => {
-      const model = await newModel();
-      let eventHandlerInvocationCount = 0;
-      const appTesterLowPrivUserSessionIdMessage = {
-        testerType: 'app',
-        sessionId: 'lowPrivUser',
-        message: 'App tests are now running.'
-      };
+  t.is(eventHandlerInvocationCount, 1);
+});
 
-      model.on('testerProgress', (testerType, sessionId, message) => {
-        expect(testerType).to.equal(appTesterLowPrivUserSessionIdMessage.testerType);
-        expect(sessionId).to.equal(appTesterLowPrivUserSessionIdMessage.sessionId);
-        expect(message).to.equal(appTesterLowPrivUserSessionIdMessage.message);
-        eventHandlerInvocationCount += 1;
-      });
-      model.on('testerPctComplete', () => {
-        fail('testerPctComplete handler should not be invoked');
-      });
-      model.on('testerBugCount', () => {
-        fail('testerBugCount handler should not be invoked');
-      });
+test('propagateTesterMessage - with testerType app, sessionId lowPrivUser - should fire testerBugCount event, once only', (t) => {
+  const { model } = t.context;
+  let eventHandlerInvocationCount = 0;
+  const appTesterLowPrivUserSessionIdMessage = {
+    testerType: 'app',
+    sessionId: 'lowPrivUser',
+    message: 4,
+    event: 'testerBugCount'
+  };
 
-      model.propagateTesterMessage(appTesterLowPrivUserSessionIdMessage);
-
-      expect(eventHandlerInvocationCount).to.equal(invokedOnce);
-    });
-
-
-    it('- with testerType app, sessionId lowPrivUser - should fire testerProgress event, if event specified, once only', async () => {
-      const model = await newModel();
-      let eventHandlerInvocationCount = 0;
-      const appTesterLowPrivUserSessionIdMessage = {
-        testerType: 'app',
-        sessionId: 'lowPrivUser',
-        message: 'Initialising subscription to "app-lowPrivUser" channel for the event "testerProgress"',
-        event: 'testerProgress'
-      };
-
-      model.on('testerProgress', (testerType, sessionId, message) => {
-        expect(testerType).to.equal(appTesterLowPrivUserSessionIdMessage.testerType);
-        expect(sessionId).to.equal(appTesterLowPrivUserSessionIdMessage.sessionId);
-        expect(message).to.equal(appTesterLowPrivUserSessionIdMessage.message);
-        eventHandlerInvocationCount += 1;
-      });
-      model.on('testerPctComplete', () => {
-        fail('testerPctComplete handler should not be invoked');
-      });
-      model.on('testerBugCount', () => {
-        fail('testerBugCount handler should not be invoked');
-      });
-
-      model.propagateTesterMessage(appTesterLowPrivUserSessionIdMessage);
-
-      expect(eventHandlerInvocationCount).to.equal(invokedOnce);
-    });
-
-
-    it('- with testerType app, sessionId lowPrivUser - should fire testerPctComplete event, once only', async () => {
-      const model = await newModel();
-      let eventHandlerInvocationCount = 0;
-      const appTesterLowPrivUserSessionIdMessage = {
-        testerType: 'app',
-        sessionId: 'lowPrivUser',
-        message: 20,
-        event: 'testerPctComplete'
-      };
-
-      model.on('testerProgress', () => {
-        fail('testerProgress handler should not be invoked');
-      });
-      model.on('testerPctComplete', (testerType, sessionId, message) => {
-        expect(testerType).to.equal(appTesterLowPrivUserSessionIdMessage.testerType);
-        expect(sessionId).to.equal(appTesterLowPrivUserSessionIdMessage.sessionId);
-        expect(message).to.equal(appTesterLowPrivUserSessionIdMessage.message);
-        eventHandlerInvocationCount += 1;
-      });
-      model.on('testerBugCount', () => {
-        fail('testerBugCount handler should not be invoked');
-      });
-
-      model.propagateTesterMessage(appTesterLowPrivUserSessionIdMessage);
-
-      expect(eventHandlerInvocationCount).to.equal(invokedOnce);
-    });
-
-
-    it('- with testerType app, sessionId lowPrivUser - should fire testerBugCount event, once only', async () => {
-      const model = await newModel();
-      let eventHandlerInvocationCount = 0;
-      const appTesterLowPrivUserSessionIdMessage = {
-        testerType: 'app',
-        sessionId: 'lowPrivUser',
-        message: 4,
-        event: 'testerBugCount'
-      };
-
-      model.on('testerProgress', () => {
-        fail('testerProgress handler should not be invoked');
-      });
-      model.on('testerPctComplete', () => {
-        fail('testerPctComplete handler should not be invoked');
-      });
-      model.on('testerBugCount', (testerType, sessionId, message) => {
-        expect(testerType).to.equal(appTesterLowPrivUserSessionIdMessage.testerType);
-        expect(sessionId).to.equal(appTesterLowPrivUserSessionIdMessage.sessionId);
-        expect(message).to.equal(appTesterLowPrivUserSessionIdMessage.message);
-        eventHandlerInvocationCount += 1;
-      });
-
-      model.propagateTesterMessage(appTesterLowPrivUserSessionIdMessage);
-
-      expect(eventHandlerInvocationCount).to.equal(invokedOnce);
-    });
-
-
-    it('- with testerType app, sessionId lowPrivUser - with unknown event - should not fire any event', async () => {
-      const model = await newModel();
-      let errorCount = 0;
-      const expectedErrorCount = 1;
-      const expectedError = `Invalid event of type "unknownEvent" was received. The known events are [${model.eventNames}]`;
-      const appTesterLowPrivUserSessionIdMessage = {
-        testerType: 'app',
-        sessionId: 'lowPrivUser',
-        message: 4,
-        event: 'unknownEvent'
-      };
-
-      model.on('testerProgress', () => { fail('testerProgress handler should not be invoked'); });
-      model.on('testerPctComplete', () => { fail('testerPctComplete handler should not be invoked'); });
-      model.on('testerBugCount', () => { fail('testerBugCount handler should not be invoked'); });
-
-      try {
-        model.propagateTesterMessage(appTesterLowPrivUserSessionIdMessage);
-      } catch (e) {
-        expect(e).to.be.an.error(Error, expectedError);
-        errorCount += 1;
-      }
-      expect(errorCount).to.equal(expectedErrorCount);
-    });
+  model.on('testerProgress', () => {
+    t.fail('testerProgress handler should not be invoked');
   });
+  model.on('testerPctComplete', () => {
+    t.fail('testerPctComplete handler should not be invoked');
+  });
+  model.on('testerBugCount', (testerType, sessionId, message) => {
+    t.deepEqual(testerType, appTesterLowPrivUserSessionIdMessage.testerType);
+    t.deepEqual(sessionId, appTesterLowPrivUserSessionIdMessage.sessionId);
+    t.deepEqual(message, appTesterLowPrivUserSessionIdMessage.message);
+    eventHandlerInvocationCount += 1;
+  });
+
+  model.propagateTesterMessage(appTesterLowPrivUserSessionIdMessage);
+
+  t.is(eventHandlerInvocationCount, 1);
+});
+
+test('propagateTesterMessage - with testerType app, sessionId lowPrivUser - with unknown event - should not fire any event', (t) => {
+  const { model } = t.context;
+  const expectedError = `Invalid event of type "unknownEvent" was received. The known events are [${model.eventNames}]`;
+  const appTesterLowPrivUserSessionIdMessage = {
+    testerType: 'app',
+    sessionId: 'lowPrivUser',
+    message: 4,
+    event: 'unknownEvent'
+  };
+
+  model.on('testerProgress', () => { t.fail('testerProgress handler should not be invoked'); });
+  model.on('testerPctComplete', () => { t.fail('testerPctComplete handler should not be invoked'); });
+  model.on('testerBugCount', () => { t.fail('testerBugCount handler should not be invoked'); });
+
+  t.throws(() => {
+    model.propagateTesterMessage(appTesterLowPrivUserSessionIdMessage);
+  }, { instanceOf: Error, message: expectedError });
 });

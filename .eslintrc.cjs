@@ -24,7 +24,8 @@ module.exports = {
     // enforce consistent line breaks inside function parentheses
     // https://eslint.org/docs/rules/function-paren-newline
     'function-paren-newline': ['error', 'multiline'],
-    'import/no-unresolved': ['error', { ignore: ['purpleteam-logger', 'chalk', 'got'] }],
+    // Eslint can't deal with ESM modules currently.
+    'import/no-unresolved': ['error', { ignore: ['ava', 'chalk', 'got', 'purpleteam-logger'] }],
     // Used in order to supress the errors in the use of appending file extensions to the import statement for local modules
     // Which is required in order to upgrade from CJS to ESM. At time of upgrade file extensions have to be provided in import statements.
     'import/extensions': ['error', { 'js': 'ignorePackages' }],

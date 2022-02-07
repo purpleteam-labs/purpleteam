@@ -17,7 +17,7 @@ convict.addFormats(convictFormatWithValidator);
 const schema = {
   env: {
     doc: 'The application environment.',
-    format: ['cloud', 'local', 'test'],
+    format: ['cloud', 'local', 'cloudtest', 'localtest'],
     default: 'cloud',
     env: 'NODE_ENV'
   },
@@ -193,7 +193,7 @@ const schema = {
     dir: {
       doc: 'The location of the results.',
       format: String,
-      default: `${process.cwd()}/outcomes/`
+      default: path.join(process.cwd(), '/outcomes/')
     },
     fileName: {
       doc: 'The name of the archive file containing all of the Tester outcomes (results, reports).',
@@ -226,10 +226,16 @@ const schema = {
     }
   },
   uI: {
-    doc: 'The user interface used. cUi is usually the best option for running the purpleteam CLI standalone, noUi is usually the best option for running the purpleteam CLI from within another process',
-    format: ['cUi', 'noUi'],
-    default: 'cUi',
-    env: 'PURPLETEAM_UI'
+    type: {
+      doc: 'The user interface used. cUi is usually the best option for running the purpleteam CLI standalone, noUi is usually the best option for running the purpleteam CLI from within another process',
+      format: ['cUi', 'noUi'],
+      default: 'cUi',
+      env: 'PURPLETEAM_UI'
+    },
+    path: {
+      cUi: path.join(process.cwd(), '/src/view/cUi.js'),
+      noUi: path.join(process.cwd(), '/src/view/noUi.js')
+    }
   }
 };
 
@@ -239,8 +245,8 @@ const config = convict(schema);
 // Doc: https://github.com/mozilla/node-convict/tree/master/packages/convict#configloadfilefile-or-filearray
 // config.loadFile([path.join(__dirname, `config.${process.env.NODE_ENV}.json`), '/my/locked/down/purpleteam_secrets.json']);
 const filename = fileURLToPath(import.meta.url);
-const directoryName = dirname(filename);
-config.loadFile(path.join(directoryName, `config.${process.env.NODE_ENV}.json`));
+const currentDirName = dirname(filename);
+config.loadFile(path.join(currentDirName, `config.${process.env.NODE_ENV}.json`));
 config.validate();
 
 config.set('purpleteamApi.url', `${config.get('purpleteamApi.protocol')}://${config.get('purpleteamApi.host')}:${config.get('purpleteamApi.port')}`);

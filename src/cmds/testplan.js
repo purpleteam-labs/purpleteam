@@ -10,7 +10,6 @@
 import config from '../../config/config.js';
 import api from '../presenter/apiDecoratingAdapter.js';
 
-
 const flags = 'testplan';
 const desc = 'Retrieve the test plan that will be executed when you run test.';
 const setup = (sywac) => {
@@ -29,6 +28,7 @@ const setup = (sywac) => {
 };
 const run = async (parsedArgv, context) => {
   if (parsedArgv.j) {
+    api.inject({});
     const jobFileContents = await api.getJobFile(parsedArgv.j);
     await api.testPlans(jobFileContents);
   } else {
