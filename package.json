@@ -21,7 +21,7 @@
     "test": "c8 --reporter=lcov --reporter=text-summary ava",
     "test:nolint": "c8 --reporter=lcov --reporter=text-summary ava",
     "test:coveralls": "c8 --reporter lcov -o ./coverage/lcov.info ava",
-    "test:debug": "ava debug --break ./test/presenter/apiDecoratingAdapter_sSe_falsyMessageAndIncorrectOrigin.js",
+    "test:debug": "ava debug --break ./test/presenter/apiDecoratingAdapter_sSeAndLp.js",
     "test:nockDebug": "DEBUG=nock.* ava debug --break ./test/presenter/apiDecoratingAdapter.js",
     "pretest": "npm run lint",
     "debug": "node --inspect-brk=localhost:9230 ./bin/purpleteam.js",
