@@ -39,7 +39,7 @@ const processCommands = async (options) => { // eslint-disable-line no-unused-va
       // usagePrefix: str => chalk.hex('#9961ed').bold(str),
       flags: (str) => chalk.bold(str),
       group: (str) => chalk.hex('#9961ed').bold(str),
-      messages: (str) => chalk.keyword('orange').bold(str)
+      messages: (str) => chalk.hex('#FFA500').bold(str)
     });
 
   // Introduced this function due to https://github.com/sywac/sywac/issues/25
