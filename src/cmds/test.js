@@ -7,6 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the Apache License, Version 2.0
 
+import { statSync } from 'fs';
 import config from '../../config/config.js';
 import api from '../presenter/apiDecoratingAdapter.js';
 
@@ -18,7 +19,11 @@ const setup = (sywac) => {
       type: 'file',
       desc: 'Build user supplied Job file. Must be a file conforming to the Job schema.',
       mustExist: true,
-      defaultValue: config.get('job.fileUri')
+      defaultValue: (() => {
+        const jobFileUri = config.get('job.fileUri');
+        const isFile = statSync(jobFileUri, { throwIfNoEntry: false })?.isFile();
+        return isFile ? jobFileUri : ''; // Only an empty string will cause proper error handling.
+      })()
     })
     .check((argv, context) => {
       if (argv._.length) context.cliMessage(`Unknown argument${argv._.length > 1 ? 's' : ''}: ${argv._.join(', ')}`);
