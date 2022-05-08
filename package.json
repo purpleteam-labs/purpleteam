@@ -90,7 +90,7 @@
     "figlet": "^1.5.2",
     "got": "^12.0.1",
     "purpleteam-logger": "^2.0.0",
-    "sywac": "binarymist/sywac.git#binarymist/esm"
+    "sywac": "git+https://git@github.com:binarymist/sywac.git#binarymist/esm"
   },
   "devDependencies": {
     "ava": "^4.0.1",
