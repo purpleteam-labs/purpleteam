@@ -9,7 +9,7 @@
     "host": "127.0.0.1"
   },
   "job": {
-    "fileUri": "./testResources/jobs/job_3.1.0-alpha.3_local"
+    "fileUri": "./testResources/jobs/job_4.0.0-alpha.3_local"
   },
   "modulePaths": {
     "blessed": "../../testResources/blessedFake.js"

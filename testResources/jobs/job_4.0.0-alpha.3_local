@@ -2,7 +2,7 @@
   "data": {
     "type": "BrowserApp",
     "attributes": {
-      "version": "3.1.0-alpha.3",
+      "version": "4.0.0-alpha.3",
       "sutAuthentication": {
         "sitesTreeSutAuthenticationPopulationStrategy": "FormStandard",
         "emissaryAuthenticationStrategy": "FormStandard",
@@ -12,16 +12,20 @@
         "submit": "btn btn-danger",
         "expectedPageSourceSuccess": "Log Out"
       },
-      "sutIp": "nodegoat.sut.purpleteam-labs.com",
-      "sutPort": 443,
-      "sutProtocol": "https",
-      "browser": "firefox",
+      "sutIp": "pt-sut-cont",
+      "sutPort": 4000,
+      "sutProtocol": "http",
+      "browser": "chrome",
       "loggedInIndicator": "<p>Found. Redirecting to <a href=\"\/dashboard\">\/dashboard<\/a><\/p>"
     },
     "relationships": {
       "data": [{
         "type": "tlsScanner",
         "id": "NA"
+      },
+      {
+        "type": "appScanner",
+        "id": "lowPrivUser"
       },
       {
         "type": "appScanner",
@@ -36,6 +40,36 @@
       "attributes": {
         "tlsScannerSeverity": "LOW",
         "alertThreshold": 3
+      }
+    },
+    {
+      "type": "appScanner",
+      "id": "lowPrivUser",
+      "attributes": {
+        "sitesTreePopulationStrategy": "WebDriverStandard",
+        "spiderStrategy": "Standard",
+        "scannersStrategy": "BrowserAppStandard",
+        "scanningStrategy": "BrowserAppStandard",
+        "postScanningStrategy": "BrowserAppStandard",
+        "reportingStrategy": "Standard",
+        "reports": {
+          "templateThemes": [{
+            "name": "traditionalHtml"
+          }, {
+            "name": "traditionalHtmlPlusLight"
+          }]
+        },
+        "username": "user1",
+        "password": "User1_123",
+        "aScannerAttackStrength": "HIGH",
+        "aScannerAlertThreshold": "LOW",
+        "alertThreshold": 12
+      },
+      "relationships": {
+        "data": [{
+          "type": "route",
+          "id": "/profile"
+        }]
       }
     },
     {

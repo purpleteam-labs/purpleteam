@@ -2,7 +2,7 @@
   "data": {
     "type": "BrowserApp",
     "attributes": {
-      "version": "3.1.0-alpha.3",
+      "version": "4.0.0-alpha.3",
       "sutAuthentication": {
         "sitesTreeSutAuthenticationPopulationStrategy": "FormStandard",
         "emissaryAuthenticationStrategy": "FormStandard",
@@ -12,10 +12,10 @@
         "submit": "btn btn-danger",
         "expectedPageSourceSuccess": "Log Out"
       },
-      "sutIp": "pt-sut-cont",
-      "sutPort": 4000,
-      "sutProtocol": "http",
-      "browser": "chrome",
+      "sutIp": "nodegoat.sut.purpleteam-labs.com",
+      "sutPort": 443,
+      "sutProtocol": "https",
+      "browser": "firefox",
       "loggedInIndicator": "<p>Found. Redirecting to <a href=\"\/dashboard\">\/dashboard<\/a><\/p>"
     },
     "relationships": {
