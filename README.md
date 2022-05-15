@@ -137,7 +137,7 @@ Using the above mentioned example build project files, and for the sake of this 
 [**index.js**](https://github.com/purpleteam-labs/purpleteam-build-test-cli/blob/main/index.js)
 
 ```javascript
-const { spawn } = require('child_process');
+import { spawn } from 'child_process';
 
 // You will need to define two debuggers in what ever tool you're using.
 // localhost:9230 and localhost:9231
@@ -146,7 +146,7 @@ const childProcessInspectPort = 9231;
 // You can run any of the purpleteam commands [about|status|test|testplan], `test` is just one example.
 const purpleteamArgs = ['purpleteam', 'test'];
 
-startPurpleteam = () => {
+const startPurpleteam = () => {
   const purpleteam = spawn('node', [
     ...(process.env.DEBUG_PURPLETEAM
     ? [`${execArgvDebugString}:${childProcessInspectPort}`]
@@ -180,6 +180,11 @@ From within your NodeJS build project run the following command to install the _
 ```shell
 npm install
 ```
+
+If running the _PurpleTeam_ CLI as a sub process or from another nodejs program as we do in the above example:
+
+* It will need to know where it's config.local or config.cloud file is if it's not in the usual location, which is in the config directory relative to the _PurpleTeam_ CLI root directory
+* config.js may also need to have it's `uI.path.cUi` and/or `uI.path.noUi` (depending on which you are using) property values updated due to the fact that the _PurpleTeam_ CLI is now running as a node_module dependency and the paths may not be correct based on where purpleteam is running from
 
 ## NPM install globally
 
@@ -371,24 +376,24 @@ For further details around running and debugging review the [documentation](http
 2. Run one of the following commands
    * To start the CLI:  
      ```shell
-     bin/purpleteam
+     bin/purpleteam.js
      # Should print out the PurpleTeam top level help
      ```
    * To start the CLI and pass commands (`status` for example):  
      ```shell
-     bin/purpleteam status
+     bin/purpleteam.js status
      # Should print the following message if the orchestrator is not running:
      # ☰  notice     [cUi] orchestrator is down, or an incorrect URL has been specified in the CLI config.
      ```
    * To start the CLI and pass commands (`test` for example):  
      ```shell
-     bin/purpleteam test
+     bin/purpleteam.js test
      # Should print the following message if the orchestrator is not running:
      # ✖  critical   [apiDecoratingAdapter] orchestrator is down, or an incorrect URL has been specified in the CLI config.
      ```
    * To start the CLI and pass commands (`test` for example) with options:  
      ```shell
-     bin/purpleteam test --help
+     bin/purpleteam.js test --help
      # Should print the available options for the test command:
      ```
 
